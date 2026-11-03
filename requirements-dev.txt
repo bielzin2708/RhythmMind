@@ -1,0 +1,3 @@
+-r requirements.txt
+# TestClient do Starlette; unittest já faz parte do Python.
+httpx2==2.16.0

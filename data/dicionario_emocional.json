@@ -1,0 +1,154 @@
+{
+    "feliz": [
+        "feliz",
+        "felicidade",
+        "alegria",
+        "alegre",
+        "contente",
+        "satisfeito",
+        "radiante"
+    ],
+    "animado": [
+        "animado",
+        "animadão",
+        "energia",
+        "energizado",
+        "empolgado",
+        "empolgante",
+        "agitado",
+        "animacao",
+        "animação"
+    ],
+    "foco": [
+        "foco",
+        "focado",
+        "concentração",
+        "concentracao",
+        "concentrado",
+        "clareza",
+        "atento"
+    ],
+    "calmo": [
+        "calmo",
+        "calma",
+        "tranquilo",
+        "tranquilidade",
+        "relaxado",
+        "relaxamento",
+        "sossegado",
+        "sereno",
+        "serenidade",
+        "leveza",
+        "leve"
+    ],
+    "disposto": [
+        "disposto",
+        "disposição",
+        "disposicao",
+        "motivado",
+        "motivação",
+        "motivacao",
+        "produtivo",
+        "ativo"
+    ],
+    "reflexivo": [
+        "reflexivo",
+        "reflexão",
+        "reflexao",
+        "pensativo",
+        "introspectivo",
+        "introspecção",
+        "introspeccao",
+        "meditativo",
+        "contemplativo",
+        "entendimento"
+    ],
+    "triste": [
+        "triste",
+        "tristinho",
+        "tristeza",
+        "melancólico",
+        "melancolico",
+        "melancolia",
+        "deprimido",
+        "depressivo",
+        "abatido",
+        "desanimado",
+        "chateado",
+        "magoado"
+    ],
+    "cansado": [
+        "cansado",
+        "cansadinha",
+        "cansaço",
+        "cansaco",
+        "drenado",
+        "esgotado",
+        "exausto",
+        "exaustão",
+        "exaustao",
+        "fatigado",
+        "sem energia",
+        "sem disposição"
+    ],
+    "sofrendo": [
+        "sofrendo",
+        "sofrimento",
+        "machucado",
+        "dolorido",
+        "sofrida",
+        "sofrido",
+        "angustiado",
+        "angústia",
+        "angustia"
+    ],
+    "ansioso": [
+        "ansioso",
+        "ansiosa",
+        "ansiedade",
+        "nervoso",
+        "aflito",
+        "agitado",
+        "preocupado",
+        "tenso",
+        "tensão",
+        "tensao",
+        "inquieto"
+    ],
+    "raiva": [
+        "raiva",
+        "irritado",
+        "furioso",
+        "puto",
+        "bravo",
+        "indignado",
+        "revoltado"
+    ],
+    "explosivo": [
+        "explosivo",
+        "descontrolado",
+        "transbordando",
+        "fora de controle",
+        "no limite"
+    ],
+    "amor": [
+        "amor",
+        "paixao",
+        "paixão",
+        "apaixonado",
+        "amando",
+        "saudade",
+        "apego",
+        "carinho"
+    ],
+    "normal": [
+        "normal",
+        "neutro",
+        "ok",
+        "tranquilo",
+        "bem",
+        "estável",
+        "estavel",
+        "equilibrado"
+    ]
+}

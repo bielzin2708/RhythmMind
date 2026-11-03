@@ -1,0 +1,28 @@
+[
+    {
+        "id": "faixa_ficticia_a",
+        "nome": "Faixa Inventada A",
+        "artista": "Artista Ficticio",
+        "duracao": "3:00",
+        "sentimentos_associados": [
+            "calmo",
+            "cansado"
+        ],
+        "estrategias": [
+            "descompressao",
+            "espelhamento"
+        ]
+    },
+    {
+        "id": "faixa_ficticia_b",
+        "nome": "Faixa Inventada B",
+        "artista": "Artista Ficticio",
+        "duracao": "2:30",
+        "sentimentos_associados": [
+            "animado"
+        ],
+        "estrategias": [
+            "ativacao"
+        ]
+    }
+]

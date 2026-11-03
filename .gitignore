@@ -1,0 +1,66 @@
+# Ambientes Python e ferramentas locais
+.venv*/
+venv/
+env/
+ENV/
+.tools/
+
+# Caches, cobertura e distribuicoes
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage*
+htmlcov/
+coverage.xml
+build/
+dist/
+*.egg-info/
+
+# Segredos e configuracao local
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+credentials.*.json
+secrets.json
+secrets.*
+.ssh/
+
+# Dados pessoais e arquivos gerados; referencias publicaveis explicitas
+/data/*
+!/data/dicionario_emocional.json
+!/data/musicas_base.json
+!/data/musicas_exemplo.json
+historico*.json
+historico*.json.*
+musicas_usuario*.json
+*history*
+*.log
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+*.swp
+*.swo
+*~
+backups/
+backup/
+tmp/
+temp/
+
+# Sistema e estado pessoal do editor
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
