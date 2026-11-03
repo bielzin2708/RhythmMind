@@ -233,7 +233,10 @@ def _avancar_sessao_api(identificador, registro, emocoes_confirmadas, texto_dese
         if texto_desejado is not None and texto_desejado != registro.get("texto_desejado"):
             raise HTTPException(status_code=409, detail="O estado desejado desta sessão já foi informado.")
     else:
-        texto = texto_desejado if texto_desejado is not None else registro.get("texto_desejado")
+        texto_salvo = registro.get("texto_desejado")
+        if texto_salvo is not None and texto_desejado is not None and texto_desejado != texto_salvo:
+            raise HTTPException(status_code=409, detail="O texto do estado desejado desta sessão já foi salvo.")
+        texto = texto_salvo if texto_salvo is not None else texto_desejado
         if texto is not None:
             registro = _salvar_etapa_api(identificador, texto_desejado=texto)
             analise = dict(registro["analise"])

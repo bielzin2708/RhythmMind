@@ -5,16 +5,19 @@ a escolha e a confirmação de escuta das faixas por sessão. Novas sessões
 recebem UUID estável, separado da data/hora, e preservam o relato antes
 da análise, com salvamento progressivo e retomada pelo identificador.
 O analisador emocional, os cadastros e os arquivos originais de dados foram preservados.
+Consulte [versionamento](docs/versionamento.md) para preparar um clone com catálogo
+fictício e [validação do salvamento](docs/salvamento_progressivo.md) para os ajustes desta etapa.
 
 ## Ambiente e testes (PowerShell)
 
-Execute dentro de `LogPose`. Ambiente verificado: Python 3.14.2 no Windows.
+Execute dentro de `LogPose`. Ambiente verificado nesta máquina: Python 3.12.6 no Windows.
+Use `.venv-local` para preservar o ambiente virtual copiado da outra máquina.
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
-.\.venv\Scripts\python.exe -m pip check
-.\.venv\Scripts\python.exe -B -m unittest discover -s tests -v
+python -m venv .venv-local
+.\.venv-local\Scripts\python.exe -m pip install -r requirements-dev.txt
+.\.venv-local\Scripts\python.exe -m pip check
+.\.venv-local\Scripts\python.exe -B -m unittest discover -s tests -v
 ```
 
 Não é necessário ativar o ambiente. Os testes usam `unittest`, da biblioteca padrão,
@@ -25,7 +28,7 @@ https://starlette.dev/testclient/
 ## API local com dados fictícios
 
 ```powershell
-.\.venv\Scripts\python.exe -B -m api.desenvolvimento
+.\.venv-local\Scripts\python.exe -B -m api.desenvolvimento
 ```
 
 Abra http://127.0.0.1:8000/docs. Use exclusivamente relatos fictícios.
@@ -45,7 +48,7 @@ autorização de cada registro e isolamento entre contas precisam ser
 implementados e verificados antes de qualquer uso real. O armazenamento
 relativo e compartilhado atual ainda não suporta esse destino.
 
-A CLI continua disponível com `.\.venv\Scripts\python.exe main.py` e mantém
+A CLI continua disponível com `.\.venv-local\Scripts\python.exe main.py` e mantém
 o armazenamento existente. Os testes da CLI substituem os caminhos por
 arquivos temporários fictícios.
 
@@ -109,10 +112,12 @@ ou enviado pela API, sem esse marcador, mantém sua compatibilidade.
 A avaliação explícita conta nas estatísticas mesmo se seus detalhes
 opcionais ainda estiverem pendentes.
 
-As opções **8** e **9** continuam permitindo alterações explícitas de
-escolha/escuta e feedback. Retomar conserva respostas já registradas;
-alterar explicitamente a escolha continua substituindo a lista conforme
-o contrato documentado adiante.
+As opções **8** e **9** permitem editar escolha/escuta e feedback. Cada
+resposta explícita atualiza somente a informação respondida; Enter mantém
+valores anteriores, quando disponíveis. Interromper a edição conserva os
+detalhes ainda não substituídos. A seleção explícita substitui a lista de
+faixas, preservando a escuta das faixas que continuam selecionadas até uma
+nova resposta sim/não. A opção **10** continua pedindo apenas dados pendentes.
 
 ### Evolução da API
 
@@ -147,7 +152,9 @@ Os dois campos de etapa são opcionais. O endpoint também aceita a chave
 legada pelas referências já documentadas. Ele nunca cria UUID, altera o
 relato original ou reinicia etapas concluídas. Alterações incompatíveis
 com categorias/desejo/recomendações já salvos retornam 409. Identificador
-inexistente retorna 404. Consultas e registros antigos não são migrados.
+inexistente retorna 404. O texto do estado desejado já persistido também é
+preservado se sua análise falhar: uma retomada pode omiti-lo ou reenviar o
+mesmo texto; outro valor retorna 409. Consultas e registros antigos não são migrados.
 
 `POST /api/escuta` mantém seu contrato. Em `POST /api/feedback`, motivo e
 melhoria omitidos preservam os valores anteriores; valores vazios explícitos
@@ -320,9 +327,11 @@ informar depois. Para cada escolhida, responda sim/não/Enter à pergunta
 de escuta. A opção **8** permite registrar ou corrigir esses dados de uma
 sessão existente; **7** continua encerrando o programa. Enter na pergunta
 de quais faixas foram escolhidas cancela a atualização sem gravar. Ao
-informar as faixas, Enter na pergunta de escuta de uma delas registra
-`ouvida=null` nessa nova substituição completa, inclusive se antes havia
-sim/não; ele não preserva a confirmação anterior daquela faixa.
+informar as faixas, a seleção substitui a lista anterior. A escuta das faixas
+mantidas é conservada; Enter mantém seu sim/não anterior. Faixas novas começam
+com `ouvida=null`, e Enter conserva essa pendência. Uma nova resposta sim/não
+substitui apenas a escuta daquela faixa. Esse comportamento da opção **8**
+difere do envio HTTP completo documentado abaixo.
 
 A nova rota `POST /api/escuta` recebe:
 

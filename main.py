@@ -378,12 +378,19 @@ def opcao_ver_musicas():
 # ============================================================
 # BLOCO F - HISTÓRICO E PADRÕES (OPÇÕES 4 E 6)
 # ============================================================
-def coletar_escuta(recomendacoes, ao_atualizar=None, anterior=None):
-    """Salva a escolha antes de perguntar escuta; callbacks são opcionais."""
+def coletar_escuta(recomendacoes, ao_atualizar=None, anterior=None, editar=False):
+    """Salva cada resposta; editar permite corrigir sem apagar respostas pendentes."""
     print("\n--- Escolha e escuta das faixas ---")
-    if anterior is not None:
+    if anterior is not None and not editar:
         escuta = preparar_escuta(recomendacoes, anterior["faixas"])
     else:
+        conhecidas = {}
+        if anterior is not None:
+            validada = preparar_escuta(recomendacoes, anterior["faixas"])
+            conhecidas = {
+                faixa["indice_recomendacao"]: faixa["ouvida"]
+                for faixa in validada["faixas"]
+            }
         while True:
             resposta = input(
                 "Quais sugestões você escolheu? Digite os números separados por vírgula (ex: 1,3).\n"
@@ -395,9 +402,10 @@ def coletar_escuta(recomendacoes, ao_atualizar=None, anterior=None):
                 indices = [] if resposta == "nenhuma" else [
                     int(item.strip()) for item in resposta.split(",")
                 ]
-                escuta = preparar_escuta(
-                    recomendacoes, [{"indice_recomendacao": indice} for indice in indices]
-                )
+                escuta = preparar_escuta(recomendacoes, [
+                    {"indice_recomendacao": indice, "ouvida": conhecidas.get(indice)}
+                    for indice in indices
+                ])
             except ValueError as erro:
                 print(f"Escolha inválida: {erro}")
                 continue
@@ -406,13 +414,14 @@ def coletar_escuta(recomendacoes, ao_atualizar=None, anterior=None):
             ao_atualizar(escuta)
 
     for faixa in escuta["faixas"]:
-        if faixa["ouvida"] is not None:
+        if faixa["ouvida"] is not None and not editar:
             continue
         musica = recomendacoes[faixa["indice_recomendacao"] - 1]
+        manter = "Enter para manter a resposta anterior" if faixa["ouvida"] is not None else "Enter para informar depois"
         while True:
             resposta = input(
                 f"Você ouviu '{musica['nome']}' ({musica['artista']})?\n"
-                "Sim / não / Enter para informar depois.\n> "
+                f"Sim / não / {manter}.\n> "
             ).strip().lower()
             if not resposta:
                 break
@@ -421,7 +430,7 @@ def coletar_escuta(recomendacoes, ao_atualizar=None, anterior=None):
                 if ao_atualizar is not None:
                     ao_atualizar(escuta)
                 break
-            print("Responda 'sim', 'não' ou pressione Enter para informar depois.")
+            print("Responda 'sim', 'não' ou pressione Enter para manter a informação atual.")
     return escuta
 
 
@@ -480,11 +489,12 @@ def opcao_registrar_escuta():
         print(f"{indice}. {musica['nome']} - {musica['artista']}")
     exibir_escuta_da_sessao(registro)
     if registro.get("escuta") is not None:
-        print("A nova informação substituirá a escolha e a escuta anteriores desta sessão.")
+        print("A nova seleção substituirá a lista anterior; Enter conserva a escuta já registrada.")
     try:
         escuta = coletar_escuta(
             recomendacoes,
             ao_atualizar=lambda valor: _gravar_etapa_cli(chave, escuta=valor),
+            anterior=registro.get("escuta"), editar=True,
         )
     except (KeyboardInterrupt, EOFError):
         print("Fluxo interrompido; as etapas já salvas foram preservadas.")
@@ -509,7 +519,8 @@ def opcao_registrar_feedback():
         return
     try:
         coletar_feedback(
-            ao_atualizar=lambda valor: _gravar_etapa_cli(chave, feedback=valor)
+            ao_atualizar=lambda valor: _gravar_etapa_cli(chave, feedback=valor),
+            anterior=historico[chave].get("feedback"), editar=True,
         )
     except (KeyboardInterrupt, EOFError):
         print("Fluxo interrompido; as etapas já salvas foram preservadas.")
@@ -747,9 +758,9 @@ def construir_mensagem_transicao(estado_desejado):
         f"fizeram sentido para você."
     )
 
-def coletar_feedback(ao_atualizar=None, anterior=None):
-    """Salva cada resposta explícita e retoma somente os detalhes pendentes."""
-    anterior = anterior or {}
+def coletar_feedback(ao_atualizar=None, anterior=None, editar=False):
+    """Retoma pendências ou edita cada resposta sem apagar as demais."""
+    anterior = dict(anterior) if isinstance(anterior, dict) else {}
     ajudou = anterior.get("ajudou")
     motivo = anterior.get("motivo", "")
     existe_melhoria = anterior.get("existe_melhoria")
@@ -758,14 +769,21 @@ def coletar_feedback(ao_atualizar=None, anterior=None):
     def salvar_parcial(concluida=False):
         if ao_atualizar is not None:
             ao_atualizar({
+                **anterior,
                 "ajudou": ajudou, "motivo": motivo,
                 "existe_melhoria": existe_melhoria, "melhoria": melhoria,
                 "coleta_concluida": concluida,
             })
 
-    if type(ajudou) is not bool:
+    if editar or type(ajudou) is not bool:
+        manter = " Enter para manter a resposta anterior." if type(ajudou) is bool else ""
         while True:
-            resposta = input("Essas recomendações fizeram sentido para você?\nSim ou não?\n> ").strip().lower()
+            resposta = input(
+                "Essas recomendações fizeram sentido para você?\n"
+                f"Sim ou não?{manter}\n> "
+            ).strip().lower()
+            if editar and not resposta and type(ajudou) is bool:
+                break
             if resposta in {"sim", "s", "não", "nao", "n"}:
                 ajudou = resposta in {"sim", "s"}
                 break
@@ -773,27 +791,40 @@ def coletar_feedback(ao_atualizar=None, anterior=None):
         salvar_parcial()
 
     pergunta = "O que fez sentido nessas recomendações?" if ajudou else "O que não fez sentido nessas recomendações?"
-    if not motivo:
+    if editar or not motivo:
+        manter = " Enter para manter o motivo anterior." if motivo else ""
         while True:
-            motivo = input(f"Por quê? {pergunta}\n> ").strip()
-            if motivo:
+            resposta = input(f"Por quê? {pergunta}{manter}\n> ").strip()
+            if editar and not resposta and motivo:
+                break
+            if resposta:
+                motivo = resposta
                 break
             print("Por favor, escreva pelo menos uma palavra.")
         salvar_parcial()
 
-    if type(existe_melhoria) is not bool:
+    if editar or type(existe_melhoria) is not bool:
+        manter = " Enter para manter a resposta anterior." if type(existe_melhoria) is bool else ""
         while True:
-            resposta = input("Existe algo que pode melhorar?\nSim ou não?\n> ").strip().lower()
+            resposta = input(f"Existe algo que pode melhorar?\nSim ou não?{manter}\n> ").strip().lower()
+            if editar and not resposta and type(existe_melhoria) is bool:
+                break
             if resposta in {"sim", "s", "não", "nao", "n"}:
                 existe_melhoria = resposta in {"sim", "s"}
+                if not existe_melhoria:
+                    melhoria = ""
                 break
             print("Por favor, responda 'sim' ou 'não'.")
         salvar_parcial()
 
-    if existe_melhoria and not melhoria:
+    if existe_melhoria and (editar or not melhoria):
+        manter = " Enter para manter o detalhe anterior." if melhoria else ""
         while True:
-            melhoria = input("Descreva o que poderia melhorar:\n> ").strip()
-            if melhoria:
+            resposta = input(f"Descreva o que poderia melhorar:{manter}\n> ").strip()
+            if editar and not resposta and melhoria:
+                break
+            if resposta:
+                melhoria = resposta
                 break
             print("Por favor, descreva ao menos brevemente o que poderia melhorar.")
     salvar_parcial(concluida=True)
