@@ -20,6 +20,16 @@ e os exemplos fictícios em [musicas_exemplo.json](data/musicas_exemplo.json).
 A leitura de catálogos antigos não migra os arquivos; novos cadastros e
 importações registram a procedência desconhecida quando não documentada.
 
+## Piloto offline de anotações musicais
+
+Há um [piloto DEAM com 24 registros](avaliacao/dados/deam_piloto_v1.json),
+separado do catálogo. Ele preserva médias de valência/ativação na escala
+original e a procedência do arquivo usado. Não contém áudio nem alimenta
+as recomendações. Os exemplos do aplicativo continuam fictícios.
+
+Veja [origem, termos de uso, limitações e reprodução](docs/avaliacao_musical.md).
+O preparador usa somente a biblioteca padrão e não faz downloads.
+
 ## Ambiente e testes (PowerShell)
 
 Execute dentro de `LogPose`. Ambiente verificado nesta máquina: Python 3.12.6 no Windows.

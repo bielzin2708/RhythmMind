@@ -1,0 +1,1150 @@
+{
+  "versao_conjunto": 1,
+  "finalidade": "piloto_de_ingestao_e_planejamento_de_avaliacao",
+  "fonte": {
+    "dataset": "DEAM",
+    "pagina_original": "https://cvml.unige.ch/databases/DEAM/",
+    "manual_original": "https://cvml.unige.ch/databases/DEAM/manual.pdf",
+    "artigo": {
+      "autores": [
+        "Anna Aljanaki",
+        "Yi-Hsuan Yang",
+        "Mohammad Soleymani"
+      ],
+      "titulo": "Developing a benchmark for emotional analysis of music",
+      "ano": 2017,
+      "doi": "https://doi.org/10.1371/journal.pone.0173392"
+    },
+    "espelho": "https://zenodo.org/records/11400122",
+    "download": "https://zenodo.org/api/records/11400122/files/DEAM_Annotations.zip/content",
+    "bytes_zip": 4718003,
+    "md5_publicado_espelho": "31731747c2a52a3332c17f9dc9a4b1e8",
+    "sha256_zip": "8aef028d6b3d8592b755ae6aefc61c0f9962dce8af9c6bd231d4dc59d59670fd",
+    "membro_csv": "annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+    "sha256_csv": "b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94",
+    "equivalencia_com_original_por_checksum": "nao_verificada_servidor_original_http_503",
+    "licenca": {
+      "declaracao_manual_original": "Creative Commons BY-NC",
+      "versao_declarada_manual": null,
+      "declaracao_api_espelho": "CC BY 4.0",
+      "divergencia_documentada": true,
+      "restricao_adotada_no_piloto": "pesquisa_nao_comercial_com_atribuicao",
+      "acesso_manual": "secao_3_recuperada_em_indice_de_busca_download_http_503"
+    }
+  },
+  "selecao": {
+    "metodo": "menores_hashes_sha256_da_semente_e_song_id",
+    "semente": "rhythmmind-deam-piloto-v1",
+    "elegiveis": 1744,
+    "selecionados": 24,
+    "ordenacao_apresentacao": "song_id_crescente",
+    "usa_notas_na_selecao": false,
+    "normaliza_escalas": false
+  },
+  "registros": [
+    {
+      "id": "deam:22",
+      "id_fonte": 22,
+      "colunas_originais": {
+        "song_id": "22",
+        "valence_mean": "4",
+        "valence_std": "1.34",
+        "arousal_mean": "4.8",
+        "arousal_std": "1.47"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.34,
+        "ativacao_desvio_padrao": 1.47
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 4.0,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 4.8,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:198",
+      "id_fonte": 198,
+      "colunas_originais": {
+        "song_id": "198",
+        "valence_mean": "1.9",
+        "valence_std": "0.7",
+        "arousal_mean": "3.3",
+        "arousal_std": "1.79"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 0.7,
+        "ativacao_desvio_padrao": 1.79
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 1.9,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 3.3,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:218",
+      "id_fonte": 218,
+      "colunas_originais": {
+        "song_id": "218",
+        "valence_mean": "2.9",
+        "valence_std": "1.37",
+        "arousal_mean": "4",
+        "arousal_std": "1.48"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.37,
+        "ativacao_desvio_padrao": 1.48
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 2.9,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 4.0,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:222",
+      "id_fonte": 222,
+      "colunas_originais": {
+        "song_id": "222",
+        "valence_mean": "3.8",
+        "valence_std": "1.33",
+        "arousal_mean": "4.3",
+        "arousal_std": "2.37"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.33,
+        "ativacao_desvio_padrao": 2.37
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 3.8,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 4.3,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:632",
+      "id_fonte": 632,
+      "colunas_originais": {
+        "song_id": "632",
+        "valence_mean": "4.2",
+        "valence_std": "2.09",
+        "arousal_mean": "5.4",
+        "arousal_std": "1.8"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 2.09,
+        "ativacao_desvio_padrao": 1.8
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 4.2,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 5.4,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:638",
+      "id_fonte": 638,
+      "colunas_originais": {
+        "song_id": "638",
+        "valence_mean": "3.2",
+        "valence_std": "1.47",
+        "arousal_mean": "4.4",
+        "arousal_std": "1.62"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.47,
+        "ativacao_desvio_padrao": 1.62
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 3.2,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 4.4,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:876",
+      "id_fonte": 876,
+      "colunas_originais": {
+        "song_id": "876",
+        "valence_mean": "6.3",
+        "valence_std": "2.19",
+        "arousal_mean": "6.7",
+        "arousal_std": "1.68"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 2.19,
+        "ativacao_desvio_padrao": 1.68
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 6.3,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 6.7,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1072",
+      "id_fonte": 1072,
+      "colunas_originais": {
+        "song_id": "1072",
+        "valence_mean": "6.3",
+        "valence_std": "1.1",
+        "arousal_mean": "5.5",
+        "arousal_std": "1.2"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.1,
+        "ativacao_desvio_padrao": 1.2
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 6.3,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 5.5,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1087",
+      "id_fonte": 1087,
+      "colunas_originais": {
+        "song_id": "1087",
+        "valence_mean": "6",
+        "valence_std": "1.73",
+        "arousal_mean": "6.4",
+        "arousal_std": "1.5"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.73,
+        "ativacao_desvio_padrao": 1.5
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 6.0,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 6.4,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1121",
+      "id_fonte": 1121,
+      "colunas_originais": {
+        "song_id": "1121",
+        "valence_mean": "3.9",
+        "valence_std": "1.76",
+        "arousal_mean": "2.3",
+        "arousal_std": "1.1"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.76,
+        "ativacao_desvio_padrao": 1.1
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 3.9,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 2.3,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1240",
+      "id_fonte": 1240,
+      "colunas_originais": {
+        "song_id": "1240",
+        "valence_mean": "2.7",
+        "valence_std": "1.19",
+        "arousal_mean": "2.6",
+        "arousal_std": "0.8"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.19,
+        "ativacao_desvio_padrao": 0.8
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 2.7,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 2.6,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1256",
+      "id_fonte": 1256,
+      "colunas_originais": {
+        "song_id": "1256",
+        "valence_mean": "5.7",
+        "valence_std": "1.27",
+        "arousal_mean": "5.5",
+        "arousal_std": "1.69"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.27,
+        "ativacao_desvio_padrao": 1.69
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 5.7,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 5.5,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1284",
+      "id_fonte": 1284,
+      "colunas_originais": {
+        "song_id": "1284",
+        "valence_mean": "6.3",
+        "valence_std": "1.42",
+        "arousal_mean": "6.6",
+        "arousal_std": "1.28"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.42,
+        "ativacao_desvio_padrao": 1.28
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 6.3,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 6.6,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1429",
+      "id_fonte": 1429,
+      "colunas_originais": {
+        "song_id": "1429",
+        "valence_mean": "3",
+        "valence_std": "1.26",
+        "arousal_mean": "2.3",
+        "arousal_std": "0.9"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.26,
+        "ativacao_desvio_padrao": 0.9
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 3.0,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 2.3,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1472",
+      "id_fonte": 1472,
+      "colunas_originais": {
+        "song_id": "1472",
+        "valence_mean": "5",
+        "valence_std": "1.48",
+        "arousal_mean": "5.2",
+        "arousal_std": "1.08"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.48,
+        "ativacao_desvio_padrao": 1.08
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 5.0,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 5.2,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1491",
+      "id_fonte": 1491,
+      "colunas_originais": {
+        "song_id": "1491",
+        "valence_mean": "4.8",
+        "valence_std": "1.33",
+        "arousal_mean": "5.2",
+        "arousal_std": "1.83"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.33,
+        "ativacao_desvio_padrao": 1.83
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 4.8,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 5.2,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1514",
+      "id_fonte": 1514,
+      "colunas_originais": {
+        "song_id": "1514",
+        "valence_mean": "4.6",
+        "valence_std": "1.96",
+        "arousal_mean": "5.4",
+        "arousal_std": "1.36"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.96,
+        "ativacao_desvio_padrao": 1.36
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 4.6,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 5.4,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1549",
+      "id_fonte": 1549,
+      "colunas_originais": {
+        "song_id": "1549",
+        "valence_mean": "4.9",
+        "valence_std": "1.81",
+        "arousal_mean": "5.2",
+        "arousal_std": "1.72"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.81,
+        "ativacao_desvio_padrao": 1.72
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 4.9,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 5.2,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1627",
+      "id_fonte": 1627,
+      "colunas_originais": {
+        "song_id": "1627",
+        "valence_mean": "4.4",
+        "valence_std": "1.56",
+        "arousal_mean": "3.9",
+        "arousal_std": "1.64"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.56,
+        "ativacao_desvio_padrao": 1.64
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 4.4,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 3.9,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1647",
+      "id_fonte": 1647,
+      "colunas_originais": {
+        "song_id": "1647",
+        "valence_mean": "7.1",
+        "valence_std": "0.83",
+        "arousal_mean": "5.8",
+        "arousal_std": "1.54"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 0.83,
+        "ativacao_desvio_padrao": 1.54
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 7.1,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 5.8,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1801",
+      "id_fonte": 1801,
+      "colunas_originais": {
+        "song_id": "1801",
+        "valence_mean": "3.4",
+        "valence_std": "1.5",
+        "arousal_mean": "2.8",
+        "arousal_std": "1.6"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.5,
+        "ativacao_desvio_padrao": 1.6
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 3.4,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 2.8,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1809",
+      "id_fonte": 1809,
+      "colunas_originais": {
+        "song_id": "1809",
+        "valence_mean": "4",
+        "valence_std": "1.34",
+        "arousal_mean": "4.1",
+        "arousal_std": "1.22"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.34,
+        "ativacao_desvio_padrao": 1.22
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 4.0,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 4.1,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1867",
+      "id_fonte": 1867,
+      "colunas_originais": {
+        "song_id": "1867",
+        "valence_mean": "4.2",
+        "valence_std": "1.54",
+        "arousal_mean": "4",
+        "arousal_std": "1.73"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.54,
+        "ativacao_desvio_padrao": 1.73
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 4.2,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 4.0,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    },
+    {
+      "id": "deam:1874",
+      "id_fonte": 1874,
+      "colunas_originais": {
+        "song_id": "1874",
+        "valence_mean": "5",
+        "valence_std": "1.67",
+        "arousal_mean": "6.3",
+        "arousal_std": "1.49"
+      },
+      "dispersao_publicada": {
+        "valencia_desvio_padrao": 1.67,
+        "ativacao_desvio_padrao": 1.49
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [],
+        "anotacoes_emocionais": [
+          {
+            "atributo": "valencia",
+            "valor": 5.0,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          },
+          {
+            "atributo": "ativacao",
+            "valor": 6.3,
+            "escala": {
+              "minimo": 1,
+              "maximo": 9,
+              "descricao": "Média da anotação global DEAM em nove pontos, sem normalização."
+            },
+            "fonte": "DEAM / annotations/annotations averaged per song/song_level/static_annotations_averaged_songs_1_2000.csv",
+            "metodo": "media_estatica_publicada_de_anotacoes",
+            "versao": "sha256:b07312724c1add58c09849eeee90c5b53cc54b5e4a97ff3e4f9505d5aa2a1b94"
+          }
+        ],
+        "estimativas_sistema": []
+      }
+    }
+  ]
+}

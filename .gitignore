@@ -57,6 +57,7 @@ backups/
 backup/
 tmp/
 temp/
+/avaliacao/cache/
 
 # Sistema e estado pessoal do editor
 .DS_Store
