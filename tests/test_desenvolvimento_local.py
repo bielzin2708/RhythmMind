@@ -1,3 +1,5 @@
+from tests.apoio_autenticacao import dados_autenticados
+from core.storage import resolver_caminho
 """Proteções operacionais da API local; não equivalem a autenticação."""
 
 import os
@@ -5,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from fastapi.testclient import TestClient
+from tests.apoio_autenticacao import ClienteAutenticado as TestClient
 
 from api import desenvolvimento
 from api.main import app
@@ -27,7 +29,7 @@ class DesenvolvimentoLocalTests(unittest.TestCase):
             )
 
     def test_bloqueia_cliente_e_host_externos_mesmo_com_cabecalho_encaminhado(self):
-        with desenvolvimento.dados_ficticios_temporarios():
+        with dados_autenticados():
             self.assertEqual(self.cliente().get("/api/historico").status_code, 200)
             self.assertEqual(
                 self.cliente(peer="203.0.113.10").get(
@@ -41,7 +43,7 @@ class DesenvolvimentoLocalTests(unittest.TestCase):
             )
 
     def test_bloqueia_se_diretorio_de_trabalho_mudar(self):
-        with desenvolvimento.dados_ficticios_temporarios() as temporario:
+        with dados_autenticados() as temporario:
             subdiretorio = temporario / "outro"
             subdiretorio.mkdir()
             os.chdir(subdiretorio)
@@ -61,7 +63,7 @@ class DesenvolvimentoLocalTests(unittest.TestCase):
         anterior = Path.cwd()
         autorizado_anterior = getattr(app.state, "diretorio_desenvolvimento", None)
         with self.assertRaisesRegex(RuntimeError, "falha fictícia"):
-            with desenvolvimento.dados_ficticios_temporarios() as temporario:
+            with dados_autenticados() as temporario:
                 self.assertNotEqual(Path.cwd(), anterior)
                 self.assertEqual(carregar_json(ARQ_HISTORICO), {})
                 salvar_json(ARQ_HISTORICO, {"sessao-ficticia": {"feedback": None}})

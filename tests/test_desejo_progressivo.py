@@ -1,20 +1,22 @@
+from pathlib import Path
+from core.storage import resolver_caminho
 """Retomada do desejo salvo antes de uma falha de analise, com dados ficticios."""
 
 import copy
 import unittest
 from unittest.mock import patch
 
-from fastapi.testclient import TestClient
+from tests.apoio_autenticacao import ClienteAutenticado as TestClient
 
 from api import main as api
-from api.desenvolvimento import dados_ficticios_temporarios
+from tests.apoio_autenticacao import dados_autenticados as dados_ficticios_temporarios
 from core import storage
 
 
 class DesejoProgressivoTests(unittest.TestCase):
     def setUp(self):
         self.raiz = self.enterContext(dados_ficticios_temporarios())
-        self.arquivo = self.raiz / storage.ARQ_HISTORICO
+        self.arquivo = Path(resolver_caminho(storage.ARQ_HISTORICO)).resolve()
         self.client = self.enterContext(TestClient(
             api.app, base_url="http://127.0.0.1", client=("127.0.0.1", 50000),
         ))

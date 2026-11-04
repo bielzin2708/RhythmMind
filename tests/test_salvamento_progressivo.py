@@ -1,3 +1,4 @@
+from core.storage import resolver_caminho
 """Salvamento progressivo: exemplos fictícios e arquivo temporário compartilhado."""
 
 import copy
@@ -11,11 +12,11 @@ from pathlib import Path
 from unittest.mock import patch
 from uuid import UUID, uuid4
 
-from fastapi.testclient import TestClient
+from tests.apoio_autenticacao import ClienteAutenticado as TestClient
 
 import main as cli
 from api import main as api
-from api.desenvolvimento import dados_ficticios_temporarios
+from tests.apoio_autenticacao import dados_autenticados as dados_ficticios_temporarios
 from core import sessoes, storage
 
 
@@ -25,7 +26,7 @@ TEXTO = "  Relato fictício: estou cansado.\n"
 class SalvamentoProgressivoTests(unittest.TestCase):
     def setUp(self):
         self.raiz = self.enterContext(dados_ficticios_temporarios())
-        self.arquivo = Path(api.ARQ_HISTORICO).resolve()
+        self.arquivo = Path(resolver_caminho(api.ARQ_HISTORICO)).resolve()
         self.client = self.enterContext(TestClient(
             api.app, base_url="http://127.0.0.1", client=("127.0.0.1", 50000)
         ))

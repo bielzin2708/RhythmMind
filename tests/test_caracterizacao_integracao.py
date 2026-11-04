@@ -1,3 +1,4 @@
+from core.storage import resolver_caminho
 """Integracao da caracterizacao opcional, sempre com catalogos ficticios temporarios."""
 
 import copy
@@ -8,12 +9,12 @@ from contextlib import redirect_stdout
 from pathlib import Path
 import unittest
 
-from fastapi.testclient import TestClient
+from tests.apoio_autenticacao import ClienteAutenticado as TestClient
 
 import cadastrar_em_lote as csv_importador
 import importar_lote_classificado as json_importador
 from api import main as api
-from api.desenvolvimento import dados_ficticios_temporarios
+from tests.apoio_autenticacao import dados_autenticados as dados_ficticios_temporarios
 from core import storage
 from core.caracterizacao import obter_caracterizacao, preparar_musica, validar_musica
 
@@ -49,7 +50,7 @@ def musica_ficticia():
 class IntegracaoCaracterizacaoTests(unittest.TestCase):
     def setUp(self):
         self.raiz = self.enterContext(dados_ficticios_temporarios())
-        self.catalogo = self.raiz / storage.ARQ_MUSICAS
+        self.catalogo = Path(resolver_caminho(storage.ARQ_MUSICAS)).resolve()
         self.client = self.enterContext(TestClient(
             api.app, base_url="http://127.0.0.1", client=("127.0.0.1", 50000),
         ))
@@ -229,7 +230,7 @@ class IntegracaoCaracterizacaoTests(unittest.TestCase):
                              {k: v for k, v in musica.items() if k != "caracterizacao"})
 
     def test_api_numeros_nao_finitos_no_json_bruto_retornam_422(self):
-        from fastapi.testclient import TestClient
+        from tests.apoio_autenticacao import ClienteAutenticado as TestClient
         invalidos = [
             '{"versao_estrutura":1,"estimativas_sistema":[{"atributo":"bpm","valor":'
             + literal + ',"unidade":"bpm"}]}'

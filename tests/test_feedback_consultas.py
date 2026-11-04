@@ -1,3 +1,5 @@
+from tests.apoio_autenticacao import autenticacao_ficticia
+from core.storage import resolver_caminho
 """Regressões de consultas: somente sessões e faixas fictícias em diretório temporário."""
 
 import io
@@ -9,7 +11,7 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
-from fastapi.testclient import TestClient
+from tests.apoio_autenticacao import ClienteAutenticado as TestClient
 
 import main as cli
 from api import main as api
@@ -66,6 +68,8 @@ class ConsultasFeedbackTests(unittest.TestCase):
         )
         ambiente.start()
         self.addCleanup(ambiente.stop)
+        self.enterContext(autenticacao_ficticia(self.raiz))
+        self.historico = Path(resolver_caminho(storage.ARQ_HISTORICO)).resolve()
         self.client = TestClient(
             api.app, base_url="http://127.0.0.1", client=("127.0.0.1", 50000)
         )

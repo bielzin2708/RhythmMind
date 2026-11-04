@@ -1,3 +1,4 @@
+from core.storage import resolver_caminho
 """Escolha/escuta por sessão: somente exemplos fictícios e armazenamento temporário."""
 
 import copy
@@ -7,11 +8,11 @@ from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
-from fastapi.testclient import TestClient
+from tests.apoio_autenticacao import ClienteAutenticado as TestClient
 
 import main as cli
 from api import main as api
-from api.desenvolvimento import dados_ficticios_temporarios
+from tests.apoio_autenticacao import dados_autenticados as dados_ficticios_temporarios
 from core.escuta import preparar_escuta
 from core.storage import carregar_json, salvar_json
 
@@ -74,7 +75,7 @@ class PrepararEscutaTests(unittest.TestCase):
 class HistoricoTemporarioTests(unittest.TestCase):
     def setUp(self):
         self.raiz = self.enterContext(dados_ficticios_temporarios())
-        self.arquivo = Path(api.ARQ_HISTORICO).resolve()
+        self.arquivo = Path(resolver_caminho(api.ARQ_HISTORICO)).resolve()
         self.chave = "01/01/2000 10:00:00"
         self.registro = sessao_ficticia()
         self.gravar({self.chave: self.registro})

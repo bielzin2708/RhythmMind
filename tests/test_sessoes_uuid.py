@@ -1,3 +1,4 @@
+from core.storage import resolver_caminho
 """UUIDs estáveis: exemplos fictícios, relógio congelado e arquivos temporários."""
 
 import copy
@@ -9,11 +10,11 @@ from pathlib import Path
 from unittest.mock import patch
 from uuid import UUID, uuid4
 
-from fastapi.testclient import TestClient
+from tests.apoio_autenticacao import ClienteAutenticado as TestClient
 
 import main as cli
 from api import main as api
-from api.desenvolvimento import dados_ficticios_temporarios
+from tests.apoio_autenticacao import dados_autenticados as dados_ficticios_temporarios
 from core import sessoes
 from core.storage import carregar_json, salvar_json
 
@@ -37,7 +38,7 @@ def legado_ficticio():
 class SessoesUuidTests(unittest.TestCase):
     def setUp(self):
         self.raiz = self.enterContext(dados_ficticios_temporarios())
-        self.arquivo = Path(api.ARQ_HISTORICO).resolve()
+        self.arquivo = Path(resolver_caminho(api.ARQ_HISTORICO)).resolve()
         self.client = self.enterContext(TestClient(
             api.app, base_url="http://127.0.0.1", client=("127.0.0.1", 50000)
         ))

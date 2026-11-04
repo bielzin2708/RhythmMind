@@ -1,0 +1,37 @@
+# Próximas rodadas
+
+Esta entrega é somente a primeira etapa: contas, autenticação e isolamento
+no backend. O fluxo aprovado permanece:
+
+**Relato e finalidade → Revisar interpretação → Escolha musical → Retorno após a escuta → Histórico.**
+
+A ordem das melhorias posteriores é:
+
+1. Melhorar a interpretação do relato, incluindo negação.
+2. Permitir revisão com a opção de seguir sem categoria.
+3. Completar finalidade, contexto e filtros do histórico.
+4. Ampliar a escolha musical e explicar o motivo das sugestões.
+5. Implementar a decisão explícita “sem avaliação”.
+6. Completar correção, exportação e exclusão dos registros.
+7. Avaliar personalização com evidências.
+
+Nenhuma dessas mudanças é implementada pela autenticação desta rodada.
+
+## Ampliação via Spotify em rodada separada
+
+Quando essa atividade começar, conferir quais ferramentas do plugin e
+campos estão realmente disponíveis no ambiente em uso. A presença do
+plugin em uma conversa não implica disponibilidade no VS Code.
+
+Preservar identificadores, links e procedência quando fornecidos.
+Não inventar BPM, valência, ativação ou outros atributos ausentes; não
+deduzir sentimentos pelo título, artista ou BPM. Sem fonte documentada,
+as anotações emocionais permanecem pendentes.
+
+Candidatos sem classificação devem ficar separados das músicas prontas
+para recomendar. Não encaminhar conteúdo do Spotify a modelos de IA nem
+usá-lo para treinamento. Esta entrega apenas registra essa atividade;
+não consulta o plugin, não obtém faixas e não altera o catálogo por ele.
+
+Autenticação, autorização e isolamento continuam sendo condições
+obrigatórias, com dados fictícios durante o desenvolvimento.

@@ -20,8 +20,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+
+from api.autenticacao import router as router_autenticacao, usuario_autenticado
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
 
@@ -57,6 +60,20 @@ app = FastAPI(
     version="1.0.0",
 )
 
+router = APIRouter(dependencies=[Depends(usuario_autenticado)])
+
+
+@app.exception_handler(RequestValidationError)
+async def erro_de_validacao_sem_segredos(request: Request, erro: RequestValidationError):
+    # Nunca devolve o corpo recebido, que pode conter uma senha.
+    return JSONResponse(status_code=422, content={
+        "detail": [
+            {"loc": item["loc"], "msg": item["msg"], "type": item["type"]}
+            for item in erro.errors()
+        ],
+    })
+
+
 # Libera o Next.js (rodando em outra porta, ex: localhost:3000) a chamar esta API
 app.add_middleware(
     CORSMiddleware,
@@ -84,13 +101,19 @@ async def restringir_desenvolvimento_local(request: Request, call_next):
             status_code=503,
             content={"detail": "Use python -m api.desenvolvimento com dados fictícios temporários."},
         )
-    return await call_next(request)
+    resposta = await call_next(request)
+    if request.url.path.startswith("/api/"):
+        resposta.headers["Cache-Control"] = "no-store"
+        resposta.headers["Pragma"] = "no-cache"
+    return resposta
 
 
 # ============================================================
 # SCHEMAS (equivalentes aos inputs que antes vinham de input())
 # ============================================================
 class EstadoEmocionalRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     texto_atual: str
     emocoes_confirmadas: Optional[List[str]] = None   # se o usuário corrigir a detecção
     texto_desejado: Optional[str] = None  # ausente: pendente; "" explícito: seguir sem definir
@@ -103,6 +126,8 @@ class EstadoEmocionalRequest(BaseModel):
 
 
 class ReferenciaSessaoRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     sessao_id: Optional[str] = None
     data_hora: Optional[str] = Field(
         default=None, json_schema_extra={"deprecated": True},
@@ -150,6 +175,8 @@ class EscutaRequest(ReferenciaSessaoRequest):
 
 
 class NovaMusicaRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     nome: str
     artista: str
     duracao: str             # formato m:ss ou mm:ss
@@ -173,7 +200,7 @@ class NovaMusicaRequest(BaseModel):
 # ============================================================
 # 1) DETECTAR EMOÇÕES NO TEXTO (passo intermediário do front-end)
 # ============================================================
-@app.post("/api/detectar-emocoes")
+@router.post("/api/detectar-emocoes")
 def detectar_emocoes(texto: str):
     """Usado pelo front-end para mostrar 'Acho que você está se sentindo: X, Y.
     Correto?' antes de pedir confirmação, como na CLI."""
@@ -291,7 +318,7 @@ def _executar_avanco_api(identificador, registro, emocoes, desejo):
         }) from erro
 
 
-@app.post("/api/registrar-estado")
+@router.post("/api/registrar-estado")
 def registrar_estado(req: EstadoEmocionalRequest):
     registro = criar_sessao(
         data_hora=datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
@@ -309,7 +336,7 @@ def registrar_estado(req: EstadoEmocionalRequest):
     )
 
 
-@app.post("/api/retomar-sessao")
+@router.post("/api/retomar-sessao")
 def retomar_sessao(req: RetomarSessaoRequest):
     historico = carregar_json(ARQ_HISTORICO, {})
     identificador = req.identificador
@@ -324,7 +351,7 @@ def retomar_sessao(req: RetomarSessaoRequest):
 # ============================================================
 # 3) FEEDBACK SOBRE A RECOMENDAÇÃO
 # ============================================================
-@app.post("/api/feedback")
+@router.post("/api/feedback")
 def enviar_feedback(req: FeedbackRequest):
     historico = carregar_json(ARQ_HISTORICO, {})
     chave = req.identificador
@@ -344,7 +371,7 @@ def enviar_feedback(req: FeedbackRequest):
 # ============================================================
 # 3b) ESCOLHA E ESCUTA — independentes do feedback da sessão
 # ============================================================
-@app.post("/api/escuta")
+@router.post("/api/escuta")
 def registrar_escuta(req: EscutaRequest):
     """Substitui apenas escolha/escuta; não altera avaliação ou sugestões."""
     historico = carregar_json(ARQ_HISTORICO, {})
@@ -367,7 +394,7 @@ def registrar_escuta(req: EscutaRequest):
 # ============================================================
 # 4) MÚSICAS — listar / filtrar (Opção 2 da CLI)
 # ============================================================
-@app.get("/api/musicas")
+@router.get("/api/musicas")
 def listar_musicas(sentimento: Optional[str] = None, busca: Optional[str] = None):
     todas = carregar_todas_musicas()
 
@@ -388,7 +415,7 @@ def listar_musicas(sentimento: Optional[str] = None, busca: Optional[str] = None
 # ============================================================
 # 5) ADICIONAR MÚSICA (Opção 3 da CLI)
 # ============================================================
-@app.post("/api/musicas")
+@router.post("/api/musicas")
 def adicionar_musica(req: NovaMusicaRequest):
     if not validar_duracao(req.duracao):
         raise HTTPException(status_code=422, detail="Duração inválida. Use m:ss ou mm:ss.")
@@ -430,7 +457,7 @@ def adicionar_musica(req: NovaMusicaRequest):
 # ============================================================
 # 6) HISTÓRICO (Opção 4 da CLI)
 # ============================================================
-@app.get("/api/historico")
+@router.get("/api/historico")
 def ver_historico():
     historico = carregar_json(ARQ_HISTORICO, {})
     return {
@@ -442,7 +469,7 @@ def ver_historico():
     }
 
 
-@app.get("/api/historico/sessao")
+@router.get("/api/historico/sessao")
 def consultar_sessao(sessao_id: str):
     """Consulta por UUID ou chave legada exata, sem migrar ou alterar o registro."""
     historico = carregar_json(ARQ_HISTORICO, {})
@@ -454,7 +481,7 @@ def consultar_sessao(sessao_id: str):
 # ============================================================
 # 7) PADRÕES / RELATÓRIO REFLEXIVO (Opção 6 da CLI)
 # ============================================================
-@app.get("/api/padroes")
+@router.get("/api/padroes")
 def ver_padroes():
     from collections import Counter
 
@@ -503,7 +530,7 @@ def ver_padroes():
     }
 
 
-@app.get("/api/proposta")
+@router.get("/api/proposta")
 def ver_proposta():
     return {
         "titulo": "RhythmMind",
@@ -514,3 +541,7 @@ def ver_proposta():
             "emocional, músicas ouvidas e bem-estar."
         ),
     }
+
+
+app.include_router(router_autenticacao)
+app.include_router(router)

@@ -3,6 +3,7 @@ import os
 import tempfile
 
 from core.caracterizacao import preparar_musica
+from core.contexto import resolver_caminho
 
 # Definição das constantes
 ARQ_MUSICAS = 'data/musicas_usuario.json'
@@ -12,6 +13,7 @@ ARQ_DICIONARIO = 'data/dicionario_emocional.json'  # <-- estava faltando (causa 
 def carregar_json(caminho, default=None, *, estrito=False):
     """Lê um arquivo JSON e retorna seu conteúdo.
     'default' permite chamadas como carregar_json(ARQ_HISTORICO, {})."""
+    caminho = resolver_caminho(os.fspath(caminho))
     if not os.path.exists(caminho):
         if default is not None:
             return default
@@ -29,6 +31,7 @@ def carregar_json(caminho, default=None, *, estrito=False):
 
 def salvar_json(caminho, dados):
     """Conclui a escrita em temporário antes de substituir o arquivo anterior."""
+    caminho = resolver_caminho(os.fspath(caminho))
     pasta = os.path.dirname(os.path.abspath(caminho))
     os.makedirs(pasta, exist_ok=True)
     temporario = None

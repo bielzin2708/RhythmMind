@@ -8,6 +8,14 @@ O analisador emocional, os cadastros e os arquivos originais de dados foram pres
 Consulte [versionamento](docs/versionamento.md) para preparar um clone com catálogo
 fictício e [validação do salvamento](docs/salvamento_progressivo.md) para os ajustes desta etapa.
 
+## Contas e acesso local
+
+A API agora tem cadastro, entrada, identificação e encerramento de acesso.
+Senhas usam Argon2id; credenciais expiram e podem ser revogadas no servidor.
+Históricos e músicas pessoais ficam separados pelo UUID da conta autenticada,
+sem atribuição automática de arquivos legados. Consulte [execução, decisões e
+limites](docs/autenticacao_isolamento.md) e a [ordem das próximas rodadas](docs/proximas_etapas.md).
+
 ## Caracterização musical opcional
 
 O bloco opcional `caracterizacao` separa características acústicas, anotações
@@ -54,8 +62,10 @@ https://starlette.dev/testclient/
 ```
 
 Abra http://127.0.0.1:8000/docs. Use exclusivamente relatos fictícios.
-O inicializador cria histórico vazio, duas faixas inventadas e um dicionário
-mínimo em diretório temporário. As alterações feitas na API são descartadas
+O inicializador cria uma base fictícia em diretório temporário. Contas novas
+começam com histórico e catálogo pessoal vazios; cadastre suas próprias faixas
+fictícias pela API. Os arquivos globais fictícios do inicializador ficam separados
+como legado, sem atribuição a contas. As alterações feitas na API são descartadas
 ao encerrar normalmente com Ctrl+C. Nenhum JSON da pasta `data/` do projeto é usado.
 O diretório temporário pode permanecer após encerramento forçado do processo.
 
@@ -65,14 +75,16 @@ explicitamente autorizado. A antiga inicialização direta com
 `uvicorn api.main:app` fica bloqueada nas requisições. Não use reload,
 workers, proxy ou publicação na rede nesta fase.
 
-Essa proteção operacional não é autenticação. Contas, autenticação,
-autorização de cada registro e isolamento entre contas precisam ser
-implementados e verificados antes de qualquer uso real. O armazenamento
-relativo e compartilhado atual ainda não suporta esse destino.
+Além da restrição local, as rotas pessoais exigem uma credencial Bearer obtida
+em `/api/auth/entrar`, após cadastro em `/api/auth/registrar`. Use Authorize no
+Swagger. `/api/auth/eu` identifica a conta e `/api/auth/sair` encerra esse acesso.
+Os testes verificam autenticação e isolamento; endurecimento e revisão de
+segurança continuam necessários antes de qualquer uso real.
 
-A CLI continua disponível com `.\.venv-local\Scripts\python.exe main.py` e mantém
-o armazenamento existente. Os testes da CLI substituem os caminhos por
-arquivos temporários fictícios.
+Para a CLI fictícia temporária, execute
+`.\.venv-local\Scripts\python.exe -B desenvolvimento_terminal.py`.
+Ela é uma ferramenta de desenvolvimento e não autentica nem seleciona perfis.
+O comando antigo `main.py` continua atendendo os arquivos legados locais.
 
 ## Salvamento progressivo e retomada
 
@@ -422,6 +434,7 @@ atualização pelo terminal e pela API, independência do feedback e proteção 
 A criação com UUID e o acesso por identificação legada foram implementados
 sem migrar os arquivos existentes ou modificar a caracterização musical.
 
-Permanecem fora desta rodada: autenticação, autorização, isolamento entre
-contas, migração de armazenamento, concorrência de escrita, validação completa
-de registros antigos e revisão do analisador emocional.
+A base de autenticação e isolamento está descrita em
+[contas e acesso](docs/autenticacao_isolamento.md). Migração automática de legados,
+concorrência de escrita no mesmo JSON, validação completa de registros antigos
+e revisão do analisador emocional permanecem fora desta entrega.

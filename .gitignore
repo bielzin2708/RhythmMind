@@ -65,3 +65,11 @@ Thumbs.db
 Desktop.ini
 .vscode/
 .idea/
+
+# Contas e credenciais de acesso locais
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*

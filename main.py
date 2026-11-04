@@ -947,6 +947,7 @@ def opcao_registar_estado():
     continuar_sessao(identificador)
 
 def main():
+    print("CLI de desenvolvimento: nao autentica usuarios. Contas pessoais usam a API autenticada.")
     while True:
         opcao = ler_opcao_menu()
 
