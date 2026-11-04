@@ -1,7 +1,7 @@
 """
 api/main.py
 ------------
-Camada web do RhythmMind 2.0 (LogPose).
+Camada web do RhythmMind.
 
 IMPORTANTE: as consultas compartilham a interpretação de feedback do núcleo. Este arquivo só
 expõe via HTTP as mesmas funções de core/analisador_texto.py,
@@ -52,7 +52,7 @@ from main import (
 )
 
 app = FastAPI(
-    title="RhythmMind 2.0 (LogPose) API",
+    title="RhythmMind API",
     description="Desenvolvimento local com dados fictícios. Diário musical emocional — apoio reflexivo, não clínico.",
     version="1.0.0",
 )
@@ -506,7 +506,7 @@ def ver_padroes():
 @app.get("/api/proposta")
 def ver_proposta():
     return {
-        "titulo": "RhythmMind 2.0 (algoai)",
+        "titulo": "RhythmMind",
         "descricao": (
             "Funciona como um diário musical emocional e uma ferramenta de apoio reflexivo. "
             "IMPORTANTE: este sistema NÃO é uma ferramenta clínica, médica ou de diagnóstico. "

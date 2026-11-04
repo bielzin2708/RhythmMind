@@ -32,7 +32,7 @@ O preparador usa somente a biblioteca padrão e não faz downloads.
 
 ## Ambiente e testes (PowerShell)
 
-Execute dentro de `LogPose`. Ambiente verificado nesta máquina: Python 3.12.6 no Windows.
+Execute na raiz do projeto, na pasta que contém `main.py`. Ambiente verificado nesta máquina: Python 3.12.6 no Windows.
 Use `.venv-local` para preservar o ambiente virtual copiado da outra máquina.
 
 ```powershell
@@ -56,7 +56,7 @@ https://starlette.dev/testclient/
 Abra http://127.0.0.1:8000/docs. Use exclusivamente relatos fictícios.
 O inicializador cria histórico vazio, duas faixas inventadas e um dicionário
 mínimo em diretório temporário. As alterações feitas na API são descartadas
-ao encerrar normalmente com Ctrl+C. Nenhum JSON de `LogPose/data` é usado.
+ao encerrar normalmente com Ctrl+C. Nenhum JSON da pasta `data/` do projeto é usado.
 O diretório temporário pode permanecer após encerramento forçado do processo.
 
 O servidor escuta em 127.0.0.1, sem confiar em cabeçalhos de proxy. A API

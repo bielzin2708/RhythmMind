@@ -1,6 +1,6 @@
 """API exclusivamente local, com dados fictícios descartados ao encerrar.
 
-Execute de LogPose: python -m api.desenvolvimento
+Execute da raiz do RhythmMind: python -m api.desenvolvimento
 Não habilitar reload/workers: o diretório de trabalho é temporário e do processo.
 """
 

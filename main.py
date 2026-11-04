@@ -665,14 +665,14 @@ def opcao_ver_padroes():
 def exibir_proposta():
     print("\n=== Proposta do Sistema ===")
     print()
-    print("O LogPose é um diário musical emocional e uma ferramenta de apoio reflexivo.")
+    print("O RhythmMind é um diário musical emocional e uma ferramenta de apoio reflexivo.")
     print()
     print("Com base no que você relata sentir, o sistema busca músicas que possam")
     print("apoiar o seu momento — seja para acolher, para energizar, para focar")
     print("ou simplesmente para acompanhar o que você está vivendo.")
     print()
     print("IMPORTANTE:")
-    print("O LogPose NÃO é uma ferramenta clínica, médica ou de diagnóstico.")
+    print("O RhythmMind NÃO é uma ferramenta clínica, médica ou de diagnóstico.")
     print("Não substitui acompanhamento profissional de nenhum tipo.")
     print("Toda recomendação é experimental e subjetiva — baseada apenas")
     print("no que você descreve, sem qualquer análise psicológica real.")
@@ -682,7 +682,7 @@ def exibir_proposta():
 
 def ler_opcao_menu():
     while True:
-        print("\n=== LogPose ===")
+        print("\n=== RhythmMind ===")
         print("1 - Registrar estado atual e receber recomendação")
         print("2 - Ver músicas cadastradas")
         print("3 - Adicionar música")
@@ -970,7 +970,7 @@ def main():
         elif opcao == '10':
             opcao_retomar_sessao()
         elif opcao == '7':
-            print("\nA encerrar o LogPose... Até logo e fica bem!")
+            print("\nA encerrar o RhythmMind... Até logo e fica bem!")
             break
 
 if __name__ == "__main__":
