@@ -1,13 +1,15 @@
 # Próximas rodadas
 
-Esta entrega é somente a primeira etapa: contas, autenticação e isolamento
-no backend. O fluxo aprovado permanece:
+A base de contas, autenticação e isolamento está preservada. A rodada atual
+entrega [negação e expressões compostas por regras locais](negacao_expressoes.md),
+com limitações documentadas. A próxima mudança separada é permitir revisão
+com a opção de seguir sem categoria. O fluxo aprovado permanece:
 
 **Relato e finalidade → Revisar interpretação → Escolha musical → Retorno após a escuta → Histórico.**
 
 A ordem das melhorias posteriores é:
 
-1. Melhorar a interpretação do relato, incluindo negação.
+1. Melhorar a interpretação do relato, incluindo negação: base lexical local entregue; limitações documentadas.
 2. Permitir revisão com a opção de seguir sem categoria.
 3. Completar finalidade, contexto e filtros do histórico.
 4. Ampliar a escolha musical e explicar o motivo das sugestões.
@@ -15,7 +17,7 @@ A ordem das melhorias posteriores é:
 6. Completar correção, exportação e exclusão dos registros.
 7. Avaliar personalização com evidências.
 
-Nenhuma dessas mudanças é implementada pela autenticação desta rodada.
+As etapas 2 a 7 continuam separadas; não foram implementadas nesta rodada.
 
 ## Ampliação via Spotify em rodada separada
 

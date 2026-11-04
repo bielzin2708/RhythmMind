@@ -18,20 +18,65 @@ def extrair_palavras(texto):
     texto_limpo = re.sub(r'[^\w\s]', ' ', texto_limpo)
     return texto_limpo.split()
 
-def detectar_emocoes_no_texto(texto):
-    """Cruza as palavras do texto do utilizador com o dicionário emocional."""
-    dicionario = carregar_json(ARQ_DICIONARIO, {})
-    palavras_usuario = extrair_palavras(texto)
-    
-    emocoes_encontradas = []
-    
-    for emocao_principal, sinonimos in dicionario.items():
+# Regras lexicais locais; alcance e limitacoes em docs/negacao_expressoes.md.
+_NEGADORES = frozenset({"nao", "nem", "nunca", "jamais", "sem"})
+_FRONTEIRAS_PALAVRA = frozenset({"mas", "porem", "contudo", "todavia", "entretanto"})
+_FRONTEIRAS_PONTUACAO = frozenset(",;:.!?\n\r\u2026\u2013\u2014")
+_TOKENS_COM_FRONTEIRAS = re.compile(r"\w+|[,;:.!?\n\r\u2026\u2013\u2014]")
+
+
+def _unidades_por_inicio(dicionario):
+    """Une sinonimos iguais e prioriza o mais longo em cada posicao do texto."""
+    unidades = {}
+    for categoria, sinonimos in dicionario.items():
         for sinonimo in sinonimos:
-            sinonimo_limpo = remover_acentos(sinonimo)
-            # Se o sinónimo (ex: "tristinho") estiver na frase do utilizador
-            if sinonimo_limpo in palavras_usuario:
-                # Adiciona a emoção principal (ex: "triste") se ainda não estiver na lista
-                if emocao_principal not in emocoes_encontradas:
-                    emocoes_encontradas.append(emocao_principal)
-    
-    return emocoes_encontradas
+            palavras = tuple(extrair_palavras(sinonimo))
+            if not palavras or any(palavra in _FRONTEIRAS_PALAVRA for palavra in palavras):
+                continue
+            categorias = unidades.setdefault(palavras, [])
+            if categoria not in categorias:
+                categorias.append(categoria)
+
+    por_inicio = {}
+    for palavras, categorias in sorted(unidades.items(), key=lambda item: -len(item[0])):
+        por_inicio.setdefault(palavras[0], []).append((palavras, categorias))
+    return por_inicio
+
+
+def detectar_emocoes_no_texto(texto):
+    """Retorna categorias deduplicadas na ordem do dicionario, sem inferir opostos.
+
+    Expressao mais longa na posicao atual vence palavras internas. Negacao
+    externa suprime a unidade ate pontuacao/adversativa documentada. O texto
+    recebido e os dados persistidos nao sao modificados por esta consulta.
+    """
+    dicionario = carregar_json(ARQ_DICIONARIO, {})
+    por_inicio = _unidades_por_inicio(dicionario)
+    tokens = _TOKENS_COM_FRONTEIRAS.findall(remover_acentos(texto))
+    encontradas = set()
+    negado = False
+    indice = 0
+
+    while indice < len(tokens):
+        token = tokens[indice]
+        if token in _FRONTEIRAS_PONTUACAO or token in _FRONTEIRAS_PALAVRA:
+            negado = False
+            indice += 1
+            continue
+
+        for palavras, categorias in por_inicio.get(token, []):
+            # Negadores internos de compostos (ex.: sem energia) pertencem
+            # a unidade do dicionario, antes da regra de negacao isolada.
+            if token in _NEGADORES and len(palavras) == 1:
+                continue
+            if tuple(tokens[indice:indice + len(palavras)]) == palavras:
+                if not negado:
+                    encontradas.update(categorias)
+                indice += len(palavras)
+                break
+        else:
+            if token in _NEGADORES:
+                negado = True
+            indice += 1
+
+    return [categoria for categoria in dicionario if categoria in encontradas]

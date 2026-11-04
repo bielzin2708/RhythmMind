@@ -4,7 +4,7 @@ O núcleo trata feedback ausente no histórico e nos padrões e registra
 a escolha e a confirmação de escuta das faixas por sessão. Novas sessões
 recebem UUID estável, separado da data/hora, e preservam o relato antes
 da análise, com salvamento progressivo e retomada pelo identificador.
-O analisador emocional, os cadastros e os arquivos originais de dados foram preservados.
+Os contratos do analisador e dos cadastros e os arquivos pessoais foram preservados.
 Consulte [versionamento](docs/versionamento.md) para preparar um clone com catálogo
 fictício e [validação do salvamento](docs/salvamento_progressivo.md) para os ajustes desta etapa.
 
@@ -15,6 +15,17 @@ Senhas usam Argon2id; credenciais expiram e podem ser revogadas no servidor.
 Históricos e músicas pessoais ficam separados pelo UUID da conta autenticada,
 sem atribuição automática de arquivos legados. Consulte [execução, decisões e
 limites](docs/autenticacao_isolamento.md) e a [ordem das próximas rodadas](docs/proximas_etapas.md).
+
+## Negação e expressões compostas
+
+O analisador usa regras locais para negação e reconhece os compostos já
+documentados no dicionário. “Não estou triste” não atribui tristeza nem
+felicidade; “sem energia” reconhece cansaço. O relato original e a revisão
+antes das recomendações continuam preservados.
+
+Veja [alcance, exemplos antes/depois e limitações](docs/negacao_expressoes.md).
+As regras não representam compreensão completa da linguagem. A opção
+de seguir sem categoria permanece uma próxima etapa separada.
 
 ## Caracterização musical opcional
 
@@ -66,7 +77,8 @@ O inicializador cria uma base fictícia em diretório temporário. Contas novas
 começam com histórico e catálogo pessoal vazios; cadastre suas próprias faixas
 fictícias pela API. Os arquivos globais fictícios do inicializador ficam separados
 como legado, sem atribuição a contas. As alterações feitas na API são descartadas
-ao encerrar normalmente com Ctrl+C. Nenhum JSON da pasta `data/` do projeto é usado.
+ao encerrar normalmente com Ctrl+C. Nenhum histórico ou catálogo pessoal do
+projeto é usado. O dicionário de referência rastreado é copiado para o temporário.
 O diretório temporário pode permanecer após encerramento forçado do processo.
 
 O servidor escuta em 127.0.0.1, sem confiar em cabeçalhos de proxy. A API
