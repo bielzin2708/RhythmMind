@@ -22,7 +22,9 @@ as observações novas e não modifica essas regras nesta etapa.
 
 O recomendador continua usando `estrategias` e `sentimentos_associados`;
 `nome`/`artista` identificam o ajuste já existente. Empates preservam a ordem
-do catálogo e o resultado continua limitado a três faixas.
+do catálogo e o limite padrão continua sendo três faixas. A
+[quantidade opcional e os motivos por faixa](escolha_musical_explicada.md)
+foram acrescentados em uma rodada posterior, sem mudar essa pontuação.
 `core/recomendador.py` não foi alterado.
 
 ## Formato

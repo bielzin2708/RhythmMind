@@ -78,8 +78,9 @@ retornam 409. A edição dessas etapas é uma melhoria separada.
 Sem categorias atuais, o recomendador pode usar as regras já existentes
 para o desejo: `calmo`/`relaxar` usam descompressão, `foco` usa foco cognitivo,
 `animado`/`disposto` usam ativação. A explicação informa que as sugestões
-usam apenas o estado desejado. Pontuação, ordenação e limite de três faixas
-dessas estratégias são preservados.
+usam apenas o estado desejado. Pontuação, ordenação e limite padrão de três
+faixas dessas estratégias são preservados. Uma rodada posterior acrescentou
+a [quantidade opcional de 1 a 10 e motivos por faixa](escolha_musical_explicada.md).
 
 Sem desejo reconhecido ou com desejo sem estratégia aplicável (como `feliz`
 nas regras atuais), não há fallback de espelhamento: `estrategia` fica

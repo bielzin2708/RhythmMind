@@ -29,7 +29,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
 
 from core.analisador_texto import detectar_emocoes_no_texto, remover_acentos
-from core.recomendador import recomendar_musicas
+from core.recomendador import recomendar_musicas, explicar_recomendacoes, validar_limite_recomendacoes
 from core.escuta import preparar_escuta
 from core.caracterizacao import validar_caracterizacao
 from core.sessoes import (
@@ -138,6 +138,10 @@ class EstadoEmocionalRequest(MetadadosSessaoRequest):
         description="Ausente/null: revisão pendente. []: seguir sem categoria por escolha explícita.",
     )
     texto_desejado: Optional[str] = None  # ausente: pendente; "" explícito: seguir sem definir
+    limite_recomendacoes: StrictInt = Field(
+        default=3, ge=1, le=10,
+        description="Quantidade máxima de sugestões para esta sessão, de 1 a 10.",
+    )
 
     @model_validator(mode="after")
     def validar_relato(self):
@@ -177,6 +181,10 @@ class RetomarSessaoRequest(ReferenciaSessaoRequest):
         description="Ausente/null: manter a revisão atual. []: seguir sem categoria por escolha explícita.",
     )
     texto_desejado: Optional[str] = None
+    limite_recomendacoes: Optional[StrictInt] = Field(
+        default=None, ge=1, le=10,
+        description="Ausente/null preserva. Só pode mudar antes das recomendações serem salvas.",
+    )
 
 
 class ContextoSessaoRequest(ReferenciaSessaoRequest, MetadadosSessaoRequest):
@@ -258,6 +266,8 @@ def _resposta_estado(registro, detectadas=None):
         "estrategia": registro.get("estrategia"),
         "explicacao": registro.get("explicacao", ""),
         "recomendacoes": registro.get("recomendacoes", []),
+        "limite_recomendacoes": registro.get("limite_recomendacoes"),
+        "motivos_recomendacoes": registro.get("motivos_recomendacoes"),
         "escuta": registro.get("escuta"),
         "progresso": progresso,
         "pendencias": [chave for chave, concluida in (progresso or {}).items() if not concluida],
@@ -274,7 +284,8 @@ def _salvar_etapa_api(identificador, **campos):
         }) from erro
 
 
-def _avancar_sessao_api(identificador, registro, emocoes_confirmadas, texto_desejado):
+def _avancar_sessao_api(identificador, registro, emocoes_confirmadas, texto_desejado,
+                       limite_recomendacoes=None):
     analise = registro.get("analise", {})
     if recomendacoes_registradas(registro):
         # A lista salva ancora os índices de escolha/escuta; não é recalculada.
@@ -282,6 +293,9 @@ def _avancar_sessao_api(identificador, registro, emocoes_confirmadas, texto_dese
             emocoes_confirmadas is not None and emocoes_confirmadas != analise.get("emocoes", [])
         ) or (
             texto_desejado is not None and texto_desejado != registro.get("texto_desejado")
+        ) or (
+            limite_recomendacoes is not None
+            and limite_recomendacoes != registro.get("limite_recomendacoes")
         ):
             raise HTTPException(status_code=409, detail="As recomendações desta sessão já estão registradas.")
         resposta = _resposta_estado(registro)
@@ -297,12 +311,6 @@ def _avancar_sessao_api(identificador, registro, emocoes_confirmadas, texto_dese
             })
         if progresso["emocoes_confirmadas"] and emocoes_confirmadas != analise["emocoes"]:
             raise HTTPException(status_code=409, detail="As categorias desta sessão já foram confirmadas.")
-        if not progresso["emocoes_confirmadas"]:
-            analise = dict(analise)
-            analise["emocoes"] = emocoes_confirmadas
-            progresso["emocoes_confirmadas"] = True
-            registro = _salvar_etapa_api(identificador, analise=analise, progresso=progresso)
-
     if progresso["estado_desejado_informado"]:
         if texto_desejado is not None and texto_desejado != registro.get("texto_desejado"):
             raise HTTPException(status_code=409, detail="O estado desejado desta sessão já foi informado.")
@@ -310,6 +318,18 @@ def _avancar_sessao_api(identificador, registro, emocoes_confirmadas, texto_dese
         texto_salvo = registro.get("texto_desejado")
         if texto_salvo is not None and texto_desejado is not None and texto_desejado != texto_salvo:
             raise HTTPException(status_code=409, detail="O texto do estado desejado desta sessão já foi salvo.")
+
+    # Rejeita conflitos antes de salvar a quantidade ou qualquer etapa recebida.
+    if limite_recomendacoes is not None and limite_recomendacoes != registro.get("limite_recomendacoes"):
+        registro = _salvar_etapa_api(identificador, limite_recomendacoes=limite_recomendacoes)
+    if emocoes_confirmadas is not None and not progresso["emocoes_confirmadas"]:
+        analise = dict(analise)
+        analise["emocoes"] = emocoes_confirmadas
+        progresso["emocoes_confirmadas"] = True
+        registro = _salvar_etapa_api(identificador, analise=analise, progresso=progresso)
+
+    if not progresso["estado_desejado_informado"]:
+        texto_salvo = registro.get("texto_desejado")
         texto = texto_salvo if texto_salvo is not None else texto_desejado
         if texto is not None:
             registro = _salvar_etapa_api(identificador, texto_desejado=texto)
@@ -324,20 +344,24 @@ def _avancar_sessao_api(identificador, registro, emocoes_confirmadas, texto_dese
     if not progresso["estado_desejado_informado"]:
         return _resposta_estado(registro)
 
+    limite = validar_limite_recomendacoes(registro.get("limite_recomendacoes", 3))
+    opcoes = {} if limite == 3 else {"limite": limite}
     estrategia, explicacao, recomendacoes = recomendar_musicas(
-        registro["analise"]["emocoes"], registro["analise"]["estado_desejado"]
+        registro["analise"]["emocoes"], registro["analise"]["estado_desejado"], **opcoes,
     )
+    motivos = explicar_recomendacoes(registro["analise"]["emocoes"], estrategia, recomendacoes)
     progresso["recomendacoes_geradas"] = True
     registro = _salvar_etapa_api(
         identificador, estrategia=estrategia, explicacao=explicacao,
-        recomendacoes=recomendacoes, progresso=progresso,
+        recomendacoes=recomendacoes, motivos_recomendacoes=motivos,
+        limite_recomendacoes=limite, progresso=progresso,
     )
     return _resposta_estado(registro)
 
 
-def _executar_avanco_api(identificador, registro, emocoes, desejo):
+def _executar_avanco_api(identificador, registro, emocoes, desejo, limite=None):
     try:
-        return _avancar_sessao_api(identificador, registro, emocoes, desejo)
+        return _avancar_sessao_api(identificador, registro, emocoes, desejo, limite)
     except HTTPException:
         raise
     except OSError as erro:
@@ -358,6 +382,7 @@ def registrar_estado(req: EstadoEmocionalRequest):
         data_hora=datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
         texto_usuario=req.texto_atual,
         finalidade=req.finalidade, contexto=req.contexto,
+        limite_recomendacoes=req.limite_recomendacoes,
     )
     try:
         salvar_nova_sessao(ARQ_HISTORICO, registro)
@@ -380,6 +405,7 @@ def retomar_sessao(req: RetomarSessaoRequest):
     return _executar_avanco_api(
         identificador, historico[identificador],
         req.emocoes_confirmadas, req.texto_desejado,
+        req.limite_recomendacoes,
     )
 
 

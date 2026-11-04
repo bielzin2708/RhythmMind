@@ -6,7 +6,9 @@ com limitações documentadas. A revisão agora permite a
 [escolha explícita de seguir sem categoria](seguir_sem_categoria.md).
 A sessão agora também aceita
 [finalidade, contexto e filtros do histórico](finalidade_contexto_historico.md).
-A próxima etapa é ampliar a escolha musical e explicar o motivo das sugestões.
+A escolha musical agora permite
+[quantidade de sugestões e motivos por faixa](escolha_musical_explicada.md).
+A próxima etapa é implementar a decisão explícita de seguir sem avaliação.
 O fluxo aprovado permanece:
 
 **Relato e finalidade → Revisar interpretação → Escolha musical → Retorno após a escuta → Histórico.**
@@ -16,12 +18,12 @@ A ordem das melhorias posteriores é:
 1. Melhorar a interpretação do relato, incluindo negação: base lexical local entregue; limitações documentadas.
 2. Permitir revisão com a opção de seguir sem categoria: entregue na CLI e API.
 3. Completar finalidade, contexto e filtros do histórico: entregue na CLI e API.
-4. Ampliar a escolha musical e explicar o motivo das sugestões.
+4. Ampliar a escolha musical e explicar o motivo das sugestões: quantidade de 1 a 10 e motivos por faixa entregues.
 5. Implementar a decisão explícita “sem avaliação”.
 6. Completar correção, exportação e exclusão dos registros.
 7. Avaliar personalização com evidências.
 
-As etapas 4 a 7 continuam separadas; não foram implementadas nesta rodada.
+As etapas 5 a 7 continuam separadas; não foram implementadas nesta rodada.
 
 ## Ampliação via Spotify em rodada separada
 

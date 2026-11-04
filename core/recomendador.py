@@ -43,12 +43,96 @@ def definir_estrategia(emocoes_atuais, estado_desejado):
         return "espelhamento", "Vou seguir uma estratégia de espelhamento: músicas que combinam e acolhem o que estás a sentir neste momento."
 
 
-def recomendar_musicas(emocoes_atuais, estado_desejado=None, ajuste_aprendizagem=None):
+def validar_limite_recomendacoes(limite):
+    """Aceita somente inteiros entre um e dez, sem coerção de booleanos/textos."""
+    if type(limite) is not int or not 1 <= limite <= 10:
+        raise ValueError("O limite de recomendações deve ser um inteiro de 1 a 10.")
+    return limite
+
+
+def _pontuar_musica(musica, emocoes_atuais, estrategia, ajuste_aprendizagem):
+    """Produz a pontuação e seus critérios a partir dos mesmos campos do cadastro."""
+    criterios = []
+    estrategias_musica = musica.get("estrategias", [])
+    sentimentos_musica = musica.get("sentimentos_associados", [])
+
+    if estrategia in estrategias_musica:
+        criterios.append({"tipo": "estrategia", "valor": estrategia, "pontos": 3})
+    for emocao in emocoes_atuais:
+        if emocao in sentimentos_musica:
+            criterios.append({"tipo": "emocao_confirmada", "valor": emocao, "pontos": 2})
+
+    if estrategia == "transicao_emocional":
+        # A ordem fixa só organiza a explicação; os pesos existentes são preservados.
+        for emocao in ("calmo", "reflexivo", "foco", "normal"):
+            if emocao in sentimentos_musica:
+                criterios.append({"tipo": "categoria_ponte", "valor": emocao, "pontos": 2})
+        if "ativacao_gradual" in estrategias_musica:
+            criterios.append({
+                "tipo": "estrategia_ponte", "valor": "ativacao_gradual", "pontos": 2,
+            })
+
+    chave_busca = f"{musica.get('nome')} - {musica.get('artista')}"
+    ajuste = ajuste_aprendizagem.get(chave_busca, 0)
+    if ajuste != 0:
+        criterios.append({"tipo": "ajuste_informado", "pontos": ajuste})
+    return sum(criterio["pontos"] for criterio in criterios), criterios
+
+
+def _explicar_criterios(criterios):
+    nomes_estrategias = {
+        "transicao_emocional": "transição emocional", "foco_cognitivo": "foco",
+        "catarse": "catarse", "ativacao_gradual": "ativação gradual",
+        "descompressao": "descompressão", "ativacao": "ativação",
+        "espelhamento": "acompanhamento do estado atual",
+    }
+    frases = []
+    for criterio in criterios:
+        tipo = criterio["tipo"]
+        valor = criterio.get("valor")
+        if tipo == "estrategia":
+            nome = nomes_estrategias.get(valor, valor)
+            frases.append(f"A faixa está cadastrada para a estratégia de {nome}.")
+        elif tipo == "emocao_confirmada":
+            frases.append(f"O cadastro associa a faixa à categoria '{valor}', confirmada por você.")
+        elif tipo == "categoria_ponte":
+            frases.append(f"A categoria '{valor}' consta no cadastro e é usada pela regra de transição.")
+        elif tipo == "estrategia_ponte":
+            frases.append("O cadastro inclui ativação gradual, usada pela regra de transição.")
+        elif tipo == "ajuste_informado":
+            frases.append("Um ajuste de pontuação informado foi considerado na ordenação.")
+    return " ".join(frases) or "Não há critérios registrados suficientes para explicar esta sugestão."
+
+
+def explicar_recomendacoes(emocoes_atuais, estrategia, recomendacoes, ajuste_aprendizagem=None):
+    """Explica só as faixas recebidas, na ordem dada, sem reler ou alterar o catálogo.
+
+    A chamada pertence à geração das sugestões. Registros antigos não recebem
+    explicações retroativas ao serem consultados ou retomados.
+    """
+    if ajuste_aprendizagem is None:
+        ajuste_aprendizagem = {}
+    explicacoes = []
+    for indice, musica in enumerate(recomendacoes, 1):
+        pontuacao, criterios = _pontuar_musica(
+            musica, emocoes_atuais, estrategia, ajuste_aprendizagem,
+        )
+        explicacoes.append({
+            "indice_recomendacao": indice,
+            "pontuacao": pontuacao,
+            "criterios": criterios,
+            "explicacao": _explicar_criterios(criterios),
+        })
+    return explicacoes
+
+
+def recomendar_musicas(emocoes_atuais, estado_desejado=None, ajuste_aprendizagem=None, *, limite=3):
     """
     Recomenda músicas com base no estado emocional atual e no estado desejado.
-    Retorna (nome_estrategia, explicacao, lista_de_musicas[:3]).
+    Retorna (nome_estrategia, explicacao, lista_de_musicas[:limite]), com padrão 3.
     Sem categoria atual nem estratégia aplicável ao desejo, retorna (None, explicacao, []).
     """
+    limite = validar_limite_recomendacoes(limite)
     if estado_desejado is None:
         estado_desejado = []
     if ajuste_aprendizagem is None:
@@ -70,33 +154,9 @@ def recomendar_musicas(emocoes_atuais, estado_desejado=None, ajuste_aprendizagem
     
     # Avaliar cada música
     for musica in todas_musicas:
-        score = 0
-        estrategias_musica = musica.get("estrategias", [])
-        sentimentos_musica = musica.get("sentimentos_associados", [])
-        
-        # Lógica de Pontuação Base
-        if nome_estrategia in estrategias_musica:
-            score += 3
-            
-        for emocao in emocoes_atuais:
-            if emocao in sentimentos_musica:
-                score += 2
-                
-        # === A MÁGICA DA TRANSIÇÃO EMOCIONAL (PONTE) ===
-        # Se o sistema escolheu fazer a ponte, bonificamos as músicas intermediárias
-        if nome_estrategia == "transicao_emocional":
-            emocoes_ponte = {"calmo", "reflexivo", "foco", "normal"}
-            for emocao in emocoes_ponte:
-                if emocao in sentimentos_musica:
-                    score += 2
-            # Músicas de ativação gradual são excelentes pontes
-            if "ativacao_gradual" in estrategias_musica:
-                score += 2
-                
-        # Aplica a Aprendizagem
-        chave_busca = f"{musica.get('nome')} - {musica.get('artista')}"
-        if chave_busca in ajuste_aprendizagem:
-            score += ajuste_aprendizagem[chave_busca]
+        score, _criterios = _pontuar_musica(
+            musica, emocoes_atuais, nome_estrategia, ajuste_aprendizagem,
+        )
                 
         # Se a música pontuou positivamente, entra para a lista
         if score > 0:
@@ -108,4 +168,4 @@ def recomendar_musicas(emocoes_atuais, estado_desejado=None, ajuste_aprendizagem
     # Extrair apenas as músicas
     lista_final = [musica for score, musica in recomendadas]
     
-    return nome_estrategia, explicacao, lista_final[:3]
+    return nome_estrategia, explicacao, lista_final[:limite]

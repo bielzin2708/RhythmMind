@@ -4,6 +4,7 @@ from copy import deepcopy
 from uuid import uuid4
 
 from core import storage
+from core.recomendador import validar_limite_recomendacoes
 
 
 def validar_metadados_sessao(**campos):
@@ -25,7 +26,7 @@ def validar_metadados_sessao(**campos):
 
 def criar_sessao(*, data_hora, texto_usuario, analise=None, estrategia=None,
                  recomendacoes=None, escuta=None, feedback=None,
-                 finalidade=None, contexto=None):
+                 finalidade=None, contexto=None, limite_recomendacoes=3):
     if not isinstance(texto_usuario, str) or not texto_usuario.strip():
         raise ValueError("Informe um relato não vazio.")
     return {
@@ -37,6 +38,8 @@ def criar_sessao(*, data_hora, texto_usuario, analise=None, estrategia=None,
         "texto_desejado": None,
         "estrategia": estrategia,
         "recomendacoes": recomendacoes if recomendacoes is not None else [],
+        "limite_recomendacoes": validar_limite_recomendacoes(limite_recomendacoes),
+        "motivos_recomendacoes": [],
         "escuta": escuta,
         "feedback": feedback,
         "progresso": {
@@ -74,9 +77,12 @@ def atualizar_sessao(caminho, identificador, **campos):
         "analise", "texto_desejado", "estrategia", "explicacao", "recomendacoes",
         "escuta", "feedback", "progresso",
         "finalidade", "contexto",
+        "limite_recomendacoes", "motivos_recomendacoes",
     }
     if set(campos) - permitidos:
         raise ValueError("A etapa não pode modificar identidade, data ou relato original.")
+    if "limite_recomendacoes" in campos:
+        campos["limite_recomendacoes"] = validar_limite_recomendacoes(campos["limite_recomendacoes"])
     campos.update(validar_metadados_sessao(**{
         campo: campos[campo] for campo in ("finalidade", "contexto") if campo in campos
     }))

@@ -3,7 +3,9 @@ import re
 from datetime import datetime
 from collections import Counter
 from core.analisador_texto import detectar_emocoes_no_texto, remover_acentos
-from core.recomendador import recomendar_musicas
+from core.recomendador import (
+    recomendar_musicas, explicar_recomendacoes, validar_limite_recomendacoes,
+)
 from core.escuta import preparar_escuta
 from core.historico import filtrar_historico
 from core.sessoes import (
@@ -473,6 +475,30 @@ def selecionar_sessao(historico):
     return chave
 
 
+def exibir_recomendacoes_da_sessao(registro, *, incluir_faixas=True):
+    """Exibe somente os motivos persistidos, sem reinterpretar sessões antigas."""
+    recomendacoes = registro.get("recomendacoes", [])
+    motivos = registro.get("motivos_recomendacoes")
+    por_indice = {}
+    if isinstance(motivos, list):
+        for motivo in motivos:
+            if not isinstance(motivo, dict):
+                continue
+            indice = motivo.get("indice_recomendacao")
+            explicacao = motivo.get("explicacao")
+            if type(indice) is int and isinstance(explicacao, str) and explicacao.strip():
+                por_indice.setdefault(indice, explicacao)
+    for indice, musica in enumerate(recomendacoes, 1):
+        if incluir_faixas:
+            print(f"{indice}. {musica['nome']} - {musica['artista']}")
+        if indice in por_indice:
+            print(f"   Motivo da sugestão {indice}: {por_indice[indice]}")
+        elif isinstance(motivos, list):
+            print(f"   Motivo da sugestão {indice}: não registrado.")
+    if recomendacoes and motivos is None:
+        print("Motivos por faixa não registrados nesta sessão.")
+
+
 def opcao_registrar_escuta():
     historico = carregar_json(ARQ_HISTORICO, {})
     if not historico:
@@ -487,8 +513,7 @@ def opcao_registrar_escuta():
     if not recomendacoes:
         print("Esta sessão não possui sugestões para escolher.")
         return
-    for indice, musica in enumerate(recomendacoes, 1):
-        print(f"{indice}. {musica['nome']} - {musica['artista']}")
+    exibir_recomendacoes_da_sessao(registro)
     exibir_escuta_da_sessao(registro)
     if registro.get("escuta") is not None:
         print("A nova seleção substituirá a lista anterior; Enter conserva a escuta já registrada.")
@@ -583,6 +608,52 @@ def opcao_registrar_contexto():
     print("Finalidade e contexto da sessão registrados.")
 
 
+def coletar_limite_recomendacoes(identificador):
+    """Registra a quantidade antes de gerar a lista que ancora escolhas e escuta."""
+    registro = carregar_json(ARQ_HISTORICO, {})[identificador]
+    if recomendacoes_registradas(registro):
+        print("As sugestões desta sessão já estão salvas; a quantidade não pode ser alterada.")
+        return registro
+    atual = registro.get("limite_recomendacoes", 3)
+    while True:
+        resposta = input(
+            f"\nQuantas sugestões você quer receber (1 a 10)? Enter para manter {atual}.\n> "
+        ).strip()
+        if not resposta:
+            limite = validar_limite_recomendacoes(atual)
+        else:
+            if re.fullmatch(r"[0-9]+", resposta) is None:
+                print("Informe um número inteiro de 1 a 10.")
+                continue
+            try:
+                limite = validar_limite_recomendacoes(int(resposta))
+            except ValueError as erro:
+                print(str(erro))
+                continue
+        if registro.get("limite_recomendacoes") != limite:
+            registro = _gravar_etapa_cli(identificador, limite_recomendacoes=limite)
+        return registro
+
+
+def opcao_quantidade_sugestoes():
+    historico = carregar_json(ARQ_HISTORICO, {})
+    if not historico:
+        print("Você ainda não tem sessões para configurar sugestões.")
+        return
+    print("\n=== Quantidade de sugestões da sessão ===")
+    try:
+        identificador = selecionar_sessao(historico)
+        if identificador is None:
+            return
+        coletar_limite_recomendacoes(identificador)
+    except (KeyboardInterrupt, EOFError):
+        print("Fluxo interrompido; as informações já salvas foram preservadas.")
+    except OSError:
+        print("Falha ao salvar a quantidade. A última versão salva foi preservada.")
+    except KeyError:
+        print("Sessão não encontrada.")
+
+
 def opcao_filtrar_historico():
     perguntas = (
         ("data_inicio", "Data inicial (AAAA-MM-DD)"),
@@ -648,6 +719,8 @@ def opcao_ver_historico(sessao_id=None, **filtros):
         if not progresso.get("recomendacoes_geradas", True):
             musicas_str = "pendentes"
         print(f"Músicas recomendadas: {musicas_str}")
+        if recoms and progresso.get("recomendacoes_geradas", True):
+            exibir_recomendacoes_da_sessao(reg, incluir_faixas=False)
         exibir_escuta_da_sessao(reg)
         fb = reg.get("feedback")
         estado_feedback = classificar_feedback(fb)
@@ -781,11 +854,12 @@ def ler_opcao_menu():
         print("10 - Retomar uma sessão salva")
         print("11 - Finalidade e contexto da sessão")
         print("12 - Filtrar histórico")
+        print("13 - Quantidade de sugestões da sessão")
 
-        opcao = input("Escolha uma opção (1-12): ").strip()
-        if opcao in [str(numero) for numero in range(1, 13)]:
+        opcao = input("Escolha uma opção (1-13): ").strip()
+        if opcao in [str(numero) for numero in range(1, 14)]:
             return opcao
-        print("⚠️ Opção inválida. Por favor, digite apenas um número de 1 a 12.")
+        print("⚠️ Opção inválida. Por favor, digite apenas um número de 1 a 13.")
 
 def analise_tem_estado_identificado(emocoes):
     """Retorna True se a análise conseguiu reconhecer pelo menos um sentimento válido."""
@@ -974,13 +1048,17 @@ def continuar_sessao(identificador):
             else:
                 print("\nVocê escolheu seguir sem categoria para o estado atual.")
                 print("As sugestões dependem das regras disponíveis para o estado desejado informado.\n")
+            limite = validar_limite_recomendacoes(registro.get("limite_recomendacoes", 3))
+            opcoes = {} if limite == 3 else {"limite": limite}
             estrategia, explicacao, recomendacoes = recomendar_musicas(
-                analise["emocoes"], analise["estado_desejado"]
+                analise["emocoes"], analise["estado_desejado"], **opcoes,
             )
+            motivos = explicar_recomendacoes(analise["emocoes"], estrategia, recomendacoes)
             progresso["recomendacoes_geradas"] = True
             registro = _gravar_etapa_cli(
                 identificador, estrategia=estrategia, explicacao=explicacao,
-                recomendacoes=recomendacoes, progresso=progresso,
+                recomendacoes=recomendacoes, motivos_recomendacoes=motivos,
+                limite_recomendacoes=limite, progresso=progresso,
             )
 
         recomendacoes = registro.get("recomendacoes", [])
@@ -990,8 +1068,7 @@ def continuar_sessao(identificador):
             print("Não encontrei músicas para esta sessão. O relato permanece salvo.")
             return
         print("Recomendações salvas:")
-        for indice, musica in enumerate(recomendacoes, 1):
-            print(f"{indice}. {musica['nome']} - {musica['artista']}")
+        exibir_recomendacoes_da_sessao(registro)
         coletar_escuta(
             recomendacoes,
             ao_atualizar=lambda escuta: _gravar_etapa_cli(identificador, escuta=escuta),
@@ -1025,7 +1102,8 @@ def opcao_retomar_sessao():
         continuar_sessao(identificador)
 
 
-def opcao_registar_estado(*, coletar_contexto=False):
+def opcao_registar_estado(*, coletar_contexto=False, limite_recomendacoes=3):
+    limite_recomendacoes = validar_limite_recomendacoes(limite_recomendacoes)
     print("\n--- Registrar Estado e Receber Recomendação ---")
     while True:
         texto = input("Como você está se sentindo agora? Pode escrever com suas próprias palavras.\n> ")
@@ -1034,6 +1112,7 @@ def opcao_registar_estado(*, coletar_contexto=False):
         print("Informe um relato não vazio.")
     registro = criar_sessao(
         data_hora=datetime.now().strftime("%d/%m/%Y %H:%M:%S"), texto_usuario=texto,
+        limite_recomendacoes=limite_recomendacoes,
     )
     try:
         salvar_nova_sessao(ARQ_HISTORICO, registro)
@@ -1046,11 +1125,12 @@ def opcao_registar_estado(*, coletar_contexto=False):
     if coletar_contexto:
         try:
             coletar_metadados_sessao(identificador)
+            coletar_limite_recomendacoes(identificador)
         except (KeyboardInterrupt, EOFError):
             print(f"Fluxo interrompido. As informações já salvas permanecem na sessão {identificador}.")
             return
         except OSError:
-            print(f"Falha ao salvar finalidade ou contexto da sessão {identificador}. A última versão salva foi preservada.")
+            print(f"Falha ao salvar informações da sessão {identificador}. A última versão salva foi preservada.")
             return
     continuar_sessao(identificador)
 
@@ -1082,6 +1162,8 @@ def main():
             opcao_registrar_contexto()
         elif opcao == '12':
             opcao_filtrar_historico()
+        elif opcao == '13':
+            opcao_quantidade_sugestoes()
         elif opcao == '7':
             print("\nA encerrar o RhythmMind... Até logo e fica bem!")
             break

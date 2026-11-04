@@ -53,7 +53,7 @@ class ContextoCliTests(unittest.TestCase):
     def test_criacao_coleta_metadados_antes_da_revisao_e_preserva_relato(self):
         _resultado, saida = self.capturar(
             lambda: cli.opcao_registar_estado(coletar_contexto=True),
-            [RELATO, "  Desacelerar  ", "  Após estudar  ", "sem categoria", ""],
+            [RELATO, "  Desacelerar  ", "  Após estudar  ", "", "sem categoria", ""],
         )
         identificador, registro = self.unica()
         self.assertEqual(registro["sessao_id"], identificador)
@@ -90,7 +90,7 @@ class ContextoCliTests(unittest.TestCase):
     def test_enter_na_criacao_continua_sem_inferir_finalidade_ou_contexto(self):
         self.capturar(
             lambda: cli.opcao_registar_estado(coletar_contexto=True),
-            [RELATO, "", "", "sem categoria", ""],
+            [RELATO, "", "", "", "sem categoria", ""],
         )
         _identificador, registro = self.unica()
         self.assertIsNone(registro["finalidade"])
@@ -208,7 +208,7 @@ class ContextoCliTests(unittest.TestCase):
         self.capturar(cli.main, ["11", identificador, "Relaxar", "Em casa", "7"])
         self.assertEqual(self.ler()[identificador]["finalidade"], "Relaxar")
         storage.salvar_json(str(self.historico), {})
-        self.capturar(cli.main, ["1", RELATO, "Foco", "Estudando", "sem categoria", "", "7"])
+        self.capturar(cli.main, ["1", RELATO, "Foco", "Estudando", "", "sem categoria", "", "7"])
         _identificador, registro = self.unica()
         self.assertEqual(registro["finalidade"], "Foco")
         self.assertEqual(registro["contexto"], "Estudando")

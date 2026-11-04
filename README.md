@@ -56,12 +56,25 @@ e o contexto podem ser enviados na criação ou em `POST /api/contexto-sessao`.
 Os filtros só consultam os registros; não alteram recomendações nem migram
 históricos antigos. Veja [formatos e exemplos](docs/finalidade_contexto_historico.md).
 
+## Escolha musical e motivos por faixa
+
+A sessão pode pedir de **1 a 10 sugestões**, mantendo **3** como padrão.
+No menu **1**, a quantidade é oferecida antes da revisão; o menu **13**
+permite alterá-la enquanto as recomendações ainda estão pendentes. Na API,
+use `limite_recomendacoes` na criação ou na retomada antes de recomendar.
+
+Cada faixa nova recebe uma explicação dos critérios usados na seleção,
+mostrada no terminal e registrada em `motivos_recomendacoes` na API.
+As explicações usam as anotações do catálogo, sem atribuir efeitos emocionais
+comprovados às músicas. Listas já salvas mantêm sua ordem, índices e motivos.
+Veja [contrato e limites](docs/escolha_musical_explicada.md).
+
 ## Caracterização musical opcional
 
 O bloco opcional `caracterizacao` separa características acústicas, anotações
 emocionais e estimativas do sistema, com unidade/escala e procedência.
 Dados ausentes continuam desconhecidos; os campos antigos são preservados.
-O recomendador mantém sua pontuação, ordem e limite atuais.
+O recomendador mantém sua pontuação, ordem e limite padrão de três faixas.
 
 Veja o [formato e as regras de validação](docs/caracterizacao_musical.md)
 e os exemplos fictícios em [musicas_exemplo.json](data/musicas_exemplo.json).
