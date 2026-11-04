@@ -42,6 +42,20 @@ categoria de neutralidade nem uma estratégia de espelhamento automática.
 
 Veja o [contrato, exemplos e limites](docs/seguir_sem_categoria.md).
 
+## Finalidade, contexto e filtros do histórico
+
+Cada sessão pode incluir uma finalidade (o que a pessoa busca com a escuta)
+e um contexto (situação ou atividade), ambos opcionais e sem inferência
+automática. No menu do terminal, a opção **1** oferece essas informações
+depois de salvar o relato; a opção **11** permite preenchê-las ou editá-las
+depois. Cada resposta é salva antes da próxima pergunta.
+
+A opção **12** filtra o histórico por período, finalidade, contexto e retorno
+da sessão. Na API, esses filtros estão em `GET /api/historico`; a finalidade
+e o contexto podem ser enviados na criação ou em `POST /api/contexto-sessao`.
+Os filtros só consultam os registros; não alteram recomendações nem migram
+históricos antigos. Veja [formatos e exemplos](docs/finalidade_contexto_historico.md).
+
 ## Caracterização musical opcional
 
 O bloco opcional `caracterizacao` separa características acústicas, anotações

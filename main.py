@@ -5,8 +5,10 @@ from collections import Counter
 from core.analisador_texto import detectar_emocoes_no_texto, remover_acentos
 from core.recomendador import recomendar_musicas
 from core.escuta import preparar_escuta
+from core.historico import filtrar_historico
 from core.sessoes import (
     criar_sessao, salvar_nova_sessao, atualizar_sessao, recomendacoes_registradas,
+    validar_metadados_sessao,
 )
 from core.feedback import (
     classificar_feedback, resumir_avaliacoes, NAO_REGISTRADO, POSITIVO,
@@ -531,7 +533,74 @@ def opcao_registrar_feedback():
     print("Feedback da sessão salvo.")
 
 
-def opcao_ver_historico(sessao_id=None):
+def coletar_metadados_sessao(identificador):
+    """Salva cada informação opcional antes de pedir a próxima."""
+    registro = carregar_json(ARQ_HISTORICO, {})[identificador]
+    perguntas = (
+        ("finalidade", "Para que você quer usar a música nesta sessão?", "não informada"),
+        ("contexto", "Em que situação você está?", "não informado"),
+    )
+    for campo, pergunta, ausente in perguntas:
+        while True:
+            atual = registro.get(campo) or ausente
+            resposta = input(
+                f"\n{pergunta}\nValor atual: {atual}.\n"
+                "Enter para manter ou continuar sem informar; '-' para apagar.\n> "
+            )
+            comando = resposta.strip()
+            if not comando:
+                break
+            try:
+                campos = validar_metadados_sessao(**{campo: None if comando == "-" else resposta})
+            except ValueError as erro:
+                print(str(erro))
+                continue
+            registro = _gravar_etapa_cli(identificador, **campos)
+            break
+    return registro
+
+
+def opcao_registrar_contexto():
+    historico = carregar_json(ARQ_HISTORICO, {})
+    if not historico:
+        print("Você ainda não tem sessões para registrar finalidade e contexto.")
+        return
+    print("\n=== Finalidade e contexto da sessão ===")
+    try:
+        identificador = selecionar_sessao(historico)
+        if identificador is None:
+            return
+        coletar_metadados_sessao(identificador)
+    except (KeyboardInterrupt, EOFError):
+        print("Fluxo interrompido; as informações já salvas foram preservadas.")
+        return
+    except OSError:
+        print("Falha ao salvar finalidade ou contexto. A última versão salva foi preservada.")
+        return
+    except KeyError:
+        print("Sessão não encontrada.")
+        return
+    print("Finalidade e contexto da sessão registrados.")
+
+
+def opcao_filtrar_historico():
+    perguntas = (
+        ("data_inicio", "Data inicial (AAAA-MM-DD)"),
+        ("data_fim", "Data final (AAAA-MM-DD)"),
+        ("finalidade", "Trecho da finalidade"),
+        ("contexto", "Trecho do contexto"),
+        ("avaliacao", "Retorno da sessão (positivo, negativo ou nao_registrado)"),
+    )
+    print("\n=== Filtrar histórico ===\nEnter deixa o campo sem filtro.")
+    try:
+        filtros = {campo: input(f"{pergunta}:\n> ").strip() or None for campo, pergunta in perguntas}
+    except (KeyboardInterrupt, EOFError):
+        print("Consulta interrompida.")
+        return
+    opcao_ver_historico(**filtros)
+
+
+def opcao_ver_historico(sessao_id=None, **filtros):
     print("\n=== Histórico de Interações ===")
     historico = carregar_json(ARQ_HISTORICO, {})
     if sessao_id is not None:
@@ -540,14 +609,25 @@ def opcao_ver_historico(sessao_id=None):
             return
         historico = {sessao_id: historico[sessao_id]}
 
+    tem_registros = bool(historico)
+    try:
+        historico = filtrar_historico(historico, **filtros)
+    except ValueError as erro:
+        print(f"Filtro inválido: {erro}")
+        return
     if not historico:
-        print("⚠️ Você ainda não tem registros no histórico.")
+        if tem_registros:
+            print("Nenhuma sessão corresponde aos filtros informados.")
+        else:
+            print("⚠️ Você ainda não tem registros no histórico.")
         return
 
     for identificador, reg in historico.items():
         print(f"\n[Sessão: {identificador}]")
         print(f"Data/hora: {reg.get('data_hora', 'não informada')}")
         print(f"Estado relatado: '{reg.get('texto_usuario', '')}'")
+        print(f"Finalidade: {reg.get('finalidade') or 'não informada'}")
+        print(f"Contexto: {reg.get('contexto') or 'não informado'}")
         analise = reg.get('analise', {})
         emocoes = analise.get("emocoes", [])
         progresso = reg.get("progresso", {})
@@ -699,11 +779,13 @@ def ler_opcao_menu():
         print("8 - Registrar escolha e escuta de uma sessão")
         print("9 - Registrar feedback de uma sessão")
         print("10 - Retomar uma sessão salva")
+        print("11 - Finalidade e contexto da sessão")
+        print("12 - Filtrar histórico")
 
-        opcao = input("Escolha uma opção (1-10): ").strip()
-        if opcao in ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']:
+        opcao = input("Escolha uma opção (1-12): ").strip()
+        if opcao in [str(numero) for numero in range(1, 13)]:
             return opcao
-        print("⚠️ Opção inválida. Por favor, digite apenas um número de 1 a 10.")
+        print("⚠️ Opção inválida. Por favor, digite apenas um número de 1 a 12.")
 
 def analise_tem_estado_identificado(emocoes):
     """Retorna True se a análise conseguiu reconhecer pelo menos um sentimento válido."""
@@ -943,7 +1025,7 @@ def opcao_retomar_sessao():
         continuar_sessao(identificador)
 
 
-def opcao_registar_estado():
+def opcao_registar_estado(*, coletar_contexto=False):
     print("\n--- Registrar Estado e Receber Recomendação ---")
     while True:
         texto = input("Como você está se sentindo agora? Pode escrever com suas próprias palavras.\n> ")
@@ -961,6 +1043,15 @@ def opcao_registar_estado():
     identificador = registro["sessao_id"]
     print(f"Relato salvo. ID da sessão: {identificador}")
     print(f"Data/hora de criação: {registro['data_hora']}")
+    if coletar_contexto:
+        try:
+            coletar_metadados_sessao(identificador)
+        except (KeyboardInterrupt, EOFError):
+            print(f"Fluxo interrompido. As informações já salvas permanecem na sessão {identificador}.")
+            return
+        except OSError:
+            print(f"Falha ao salvar finalidade ou contexto da sessão {identificador}. A última versão salva foi preservada.")
+            return
     continuar_sessao(identificador)
 
 def main():
@@ -969,7 +1060,7 @@ def main():
         opcao = ler_opcao_menu()
 
         if opcao == '1':
-            opcao_registar_estado()
+            opcao_registar_estado(coletar_contexto=True)
         elif opcao == '2':
             opcao_ver_musicas()
         elif opcao == '3':
@@ -987,6 +1078,10 @@ def main():
             opcao_registrar_feedback()
         elif opcao == '10':
             opcao_retomar_sessao()
+        elif opcao == '11':
+            opcao_registrar_contexto()
+        elif opcao == '12':
+            opcao_filtrar_historico()
         elif opcao == '7':
             print("\nA encerrar o RhythmMind... Até logo e fica bem!")
             break

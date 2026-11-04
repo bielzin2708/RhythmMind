@@ -6,14 +6,33 @@ from uuid import uuid4
 from core import storage
 
 
+def validar_metadados_sessao(**campos):
+    """Normaliza apenas os metadados fornecidos, sem inferir informações do relato."""
+    limites = {"finalidade": 200, "contexto": 500}
+    if set(campos) - limites.keys():
+        raise ValueError("Informe apenas finalidade e contexto da sessão.")
+    normalizados = {}
+    for campo, valor in campos.items():
+        if valor is not None:
+            if not isinstance(valor, str):
+                raise ValueError(f"O campo {campo} deve ser um texto ou null.")
+            if len(valor) > limites[campo]:
+                raise ValueError(f"O campo {campo} deve ter no máximo {limites[campo]} caracteres.")
+            valor = valor.strip() or None
+        normalizados[campo] = valor
+    return normalizados
+
+
 def criar_sessao(*, data_hora, texto_usuario, analise=None, estrategia=None,
-                 recomendacoes=None, escuta=None, feedback=None):
+                 recomendacoes=None, escuta=None, feedback=None,
+                 finalidade=None, contexto=None):
     if not isinstance(texto_usuario, str) or not texto_usuario.strip():
         raise ValueError("Informe um relato não vazio.")
     return {
         "sessao_id": str(uuid4()),
         "data_hora": data_hora,
         "texto_usuario": texto_usuario,
+        **validar_metadados_sessao(finalidade=finalidade, contexto=contexto),
         "analise": analise if analise is not None else {"emocoes": [], "estado_desejado": []},
         "texto_desejado": None,
         "estrategia": estrategia,
@@ -54,9 +73,13 @@ def atualizar_sessao(caminho, identificador, **campos):
     permitidos = {
         "analise", "texto_desejado", "estrategia", "explicacao", "recomendacoes",
         "escuta", "feedback", "progresso",
+        "finalidade", "contexto",
     }
     if set(campos) - permitidos:
         raise ValueError("A etapa não pode modificar identidade, data ou relato original.")
+    campos.update(validar_metadados_sessao(**{
+        campo: campos[campo] for campo in ("finalidade", "contexto") if campo in campos
+    }))
     historico = _historico_para_gravar(caminho)
     registro = deepcopy(historico[identificador])
     registro.update(deepcopy(campos))

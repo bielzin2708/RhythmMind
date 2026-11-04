@@ -34,7 +34,9 @@ from core.escuta import preparar_escuta
 from core.caracterizacao import validar_caracterizacao
 from core.sessoes import (
     criar_sessao, salvar_nova_sessao, atualizar_sessao, recomendacoes_registradas,
+    validar_metadados_sessao,
 )
+from core.historico import filtrar_historico
 from core.feedback import resumir_avaliacoes, LIMITACAO_POR_FAIXA, INTERPRETACAO_RETORNOS
 from core.storage import (
     carregar_todas_musicas,
@@ -111,9 +113,25 @@ async def restringir_desenvolvimento_local(request: Request, call_next):
 # ============================================================
 # SCHEMAS (equivalentes aos inputs que antes vinham de input())
 # ============================================================
-class EstadoEmocionalRequest(BaseModel):
+class MetadadosSessaoRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    finalidade: Optional[str] = Field(
+        default=None, max_length=200,
+        description="Objetivo da sessão informado pela pessoa; não altera as recomendações.",
+    )
+    contexto: Optional[str] = Field(
+        default=None, max_length=500,
+        description="Situação ou atividade informada pela pessoa, sem inferência automática.",
+    )
+
+    @field_validator("finalidade", "contexto")
+    @classmethod
+    def normalizar_metadados(cls, valor, info):
+        return validar_metadados_sessao(**{info.field_name: valor})[info.field_name]
+
+
+class EstadoEmocionalRequest(MetadadosSessaoRequest):
     texto_atual: str
     emocoes_confirmadas: Optional[List[str]] = Field(
         default=None,
@@ -159,6 +177,14 @@ class RetomarSessaoRequest(ReferenciaSessaoRequest):
         description="Ausente/null: manter a revisão atual. []: seguir sem categoria por escolha explícita.",
     )
     texto_desejado: Optional[str] = None
+
+
+class ContextoSessaoRequest(ReferenciaSessaoRequest, MetadadosSessaoRequest):
+    @model_validator(mode="after")
+    def exigir_metadados(self):
+        if not self.model_fields_set.intersection({"finalidade", "contexto"}):
+            raise ValueError("Informe ao menos um campo: finalidade ou contexto.")
+        return self
 
 
 class FeedbackRequest(ReferenciaSessaoRequest):
@@ -224,6 +250,8 @@ def _resposta_estado(registro, detectadas=None):
         "sessao_id": registro.get("sessao_id"),
         "data_hora": registro.get("data_hora"),
         "texto_usuario": registro.get("texto_usuario"),
+        "finalidade": registro.get("finalidade"),
+        "contexto": registro.get("contexto"),
         "emocoes_atuais": analise.get("emocoes", []),
         "emocoes_detectadas": detectadas or [],
         "estado_desejado": analise.get("estado_desejado", []),
@@ -329,6 +357,7 @@ def registrar_estado(req: EstadoEmocionalRequest):
     registro = criar_sessao(
         data_hora=datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
         texto_usuario=req.texto_atual,
+        finalidade=req.finalidade, contexto=req.contexto,
     )
     try:
         salvar_nova_sessao(ARQ_HISTORICO, registro)
@@ -352,6 +381,24 @@ def retomar_sessao(req: RetomarSessaoRequest):
         identificador, historico[identificador],
         req.emocoes_confirmadas, req.texto_desejado,
     )
+
+
+@router.post("/api/contexto-sessao")
+def registrar_contexto_sessao(req: ContextoSessaoRequest):
+    """Edita só os metadados presentes no pedido, inclusive após recomendar."""
+    try:
+        historico = carregar_json(ARQ_HISTORICO, {}, estrito=True)
+        if not isinstance(historico, dict):
+            raise OSError("Formato de histórico inválido.")
+    except (OSError, ValueError) as erro:
+        raise HTTPException(status_code=503, detail="Histórico indisponível para atualizar.") from erro
+    if req.identificador not in historico:
+        raise HTTPException(status_code=404, detail="Registro de histórico não encontrado.")
+    campos = {campo: getattr(req, campo) for campo in ("finalidade", "contexto")
+              if campo in req.model_fields_set}
+    registro = _salvar_etapa_api(req.identificador, **campos)
+    return {"sessao_id": req.identificador, "finalidade": registro.get("finalidade"),
+            "contexto": registro.get("contexto")}
 
 
 # ============================================================
@@ -464,8 +511,17 @@ def adicionar_musica(req: NovaMusicaRequest):
 # 6) HISTÓRICO (Opção 4 da CLI)
 # ============================================================
 @router.get("/api/historico")
-def ver_historico():
+def ver_historico(data_inicio: Optional[str] = None, data_fim: Optional[str] = None,
+                  finalidade: Optional[str] = None, contexto: Optional[str] = None,
+                  avaliacao: Optional[str] = None):
     historico = carregar_json(ARQ_HISTORICO, {})
+    try:
+        historico = filtrar_historico(
+            historico, data_inicio=data_inicio, data_fim=data_fim,
+            finalidade=finalidade, contexto=contexto, avaliacao=avaliacao,
+        )
+    except ValueError as erro:
+        raise HTTPException(status_code=422, detail=str(erro)) from erro
     return {
         "total": len(historico),
         "registros": historico,
