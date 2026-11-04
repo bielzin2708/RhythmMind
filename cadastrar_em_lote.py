@@ -24,6 +24,7 @@ import re
 import sys
 
 from core.analisador_texto import detectar_emocoes_no_texto
+from core.caracterizacao import preparar_musica
 from core.storage import salvar_musica_usuario, carregar_todas_musicas
 from main import (
     validar_duracao,
@@ -86,7 +87,7 @@ def processar_linha(linha):
         "estrategias": estrategias,
         "tags": tags,
     }
-    return musica, None
+    return preparar_musica(musica), None
 
 
 def main(caminho_csv):

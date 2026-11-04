@@ -8,6 +8,18 @@ O analisador emocional, os cadastros e os arquivos originais de dados foram pres
 Consulte [versionamento](docs/versionamento.md) para preparar um clone com catálogo
 fictício e [validação do salvamento](docs/salvamento_progressivo.md) para os ajustes desta etapa.
 
+## Caracterização musical opcional
+
+O bloco opcional `caracterizacao` separa características acústicas, anotações
+emocionais e estimativas do sistema, com unidade/escala e procedência.
+Dados ausentes continuam desconhecidos; os campos antigos são preservados.
+O recomendador mantém sua pontuação, ordem e limite atuais.
+
+Veja o [formato e as regras de validação](docs/caracterizacao_musical.md)
+e os exemplos fictícios em [musicas_exemplo.json](data/musicas_exemplo.json).
+A leitura de catálogos antigos não migra os arquivos; novos cadastros e
+importações registram a procedência desconhecida quando não documentada.
+
 ## Ambiente e testes (PowerShell)
 
 Execute dentro de `LogPose`. Ambiente verificado nesta máquina: Python 3.12.6 no Windows.

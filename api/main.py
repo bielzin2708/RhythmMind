@@ -23,11 +23,12 @@ from typing import List, Optional
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
 
 from core.analisador_texto import detectar_emocoes_no_texto, remover_acentos
 from core.recomendador import recomendar_musicas
 from core.escuta import preparar_escuta
+from core.caracterizacao import validar_caracterizacao
 from core.sessoes import (
     criar_sessao, salvar_nova_sessao, atualizar_sessao, recomendacoes_registradas,
 )
@@ -155,6 +156,18 @@ class NovaMusicaRequest(BaseModel):
     bpm: Optional[str] = ""  # string porque pode vir vazio do formulário
     sentimentos_texto: str   # texto livre, ex: "calmo reflexivo"
     tags: Optional[str] = "" # separadas por vírgula ou espaço
+    caracterizacao: Optional[dict] = None
+
+    @field_validator("caracterizacao", mode="before")
+    @classmethod
+    def validar_atributos_opcionais(cls, valor):
+        if valor is not None:
+            try:
+                validar_caracterizacao(valor)
+            except ValueError as erro:
+                # Evita ecoar NaN/Inf na serializacao da resposta de validacao.
+                raise HTTPException(status_code=422, detail=str(erro)) from erro
+        return valor
 
 
 # ============================================================
@@ -409,8 +422,9 @@ def adicionar_musica(req: NovaMusicaRequest):
         "estrategias": inferir_estrategias_para_musica(sentimentos, tags, bpm),
         "tags": tags,
     }
-    salvar_musica_usuario(nova_musica)
-    return nova_musica
+    if req.caracterizacao is not None:
+        nova_musica["caracterizacao"] = req.caracterizacao
+    return salvar_musica_usuario(nova_musica)
 
 
 # ============================================================

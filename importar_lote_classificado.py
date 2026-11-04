@@ -9,6 +9,9 @@ inferência do main.py para manter a fórmula de cálculo unificada em
 todo o catálogo.
 """
 import json
+from copy import deepcopy
+
+from core.caracterizacao import preparar_musica, validar_musica
 
 from core.storage import carregar_todas_musicas, salvar_json, ARQ_MUSICAS, ARQ_DICIONARIO, carregar_json
 from main import (
@@ -25,6 +28,8 @@ CHAVES_VALIDAS = set(carregar_json(ARQ_DICIONARIO).keys())
 
 
 def validar_e_completar(musica):
+    validar_musica(musica)
+    musica = deepcopy(musica)
     avisos = []
 
     if not validar_duracao(musica["duracao"]):
@@ -72,7 +77,7 @@ def validar_e_completar(musica):
     if musica.get("intensidade") and musica["intensidade"] != intensidade_calc:
         avisos.append(f"[divergência, NÃO alterado] intensidade manual='{musica.get('intensidade')}' vs fórmula='{intensidade_calc}'")
 
-    return musica, avisos
+    return preparar_musica(musica), avisos
 
 
 def main(caminho_json):

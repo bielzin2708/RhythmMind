@@ -2,6 +2,8 @@ import json
 import os
 import tempfile
 
+from core.caracterizacao import preparar_musica
+
 # Definição das constantes
 ARQ_MUSICAS = 'data/musicas_usuario.json'
 ARQ_HISTORICO = 'data/historico.json'
@@ -57,6 +59,8 @@ def carregar_musicas_usuario():
 
 def salvar_musica_usuario(nova_musica):
     """Adiciona uma nova música à lista e salva no arquivo."""
+    preparada = preparar_musica(nova_musica)
     musicas = carregar_todas_musicas()
-    musicas.append(nova_musica)
+    musicas.append(preparada)
     salvar_json(ARQ_MUSICAS, musicas)
+    return preparada

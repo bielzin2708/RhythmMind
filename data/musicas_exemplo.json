@@ -11,7 +11,88 @@
         "estrategias": [
             "descompressao",
             "espelhamento"
-        ]
+        ],
+        "caracterizacao": {
+            "versao_estrutura": 1,
+            "caracteristicas_acusticas": [
+                {
+                    "atributo": "duracao",
+                    "valor": 180,
+                    "unidade": "s",
+                    "fonte": "exemplo_ficticio",
+                    "metodo": "dado_sintetico_sem_medicao",
+                    "versao": "demo-1"
+                }
+            ],
+            "anotacoes_emocionais": [
+                {
+                    "atributo": "valencia",
+                    "valor": -0.5,
+                    "escala": {
+                        "minimo": -1,
+                        "maximo": 1,
+                        "descricao": "Exemplo fictício: desagradável (-1) a agradável (1)"
+                    },
+                    "fonte": "anotador_ficticio",
+                    "metodo": "anotacao_sintetica",
+                    "versao": "demo-1"
+                },
+                {
+                    "atributo": "ativacao",
+                    "valor": 0.8,
+                    "escala": {
+                        "minimo": 0,
+                        "maximo": 1,
+                        "descricao": "Exemplo fictício: pouco ativada (0) a muito ativada (1)"
+                    },
+                    "fonte": "anotador_ficticio",
+                    "metodo": "anotacao_sintetica",
+                    "versao": "demo-1"
+                }
+            ],
+            "estimativas_sistema": [
+                {
+                    "atributo": "bpm",
+                    "valor": 155.5,
+                    "unidade": "bpm",
+                    "fonte": "estimador_ficticio",
+                    "metodo": "demonstracao_sem_audio",
+                    "versao": "demo-1"
+                }
+            ],
+            "procedencia_legado": {
+                "id": {
+                    "fonte": "desconhecida",
+                    "metodo": null,
+                    "versao": null
+                },
+                "nome": {
+                    "fonte": "desconhecida",
+                    "metodo": null,
+                    "versao": null
+                },
+                "artista": {
+                    "fonte": "desconhecida",
+                    "metodo": null,
+                    "versao": null
+                },
+                "duracao": {
+                    "fonte": "desconhecida",
+                    "metodo": null,
+                    "versao": null
+                },
+                "sentimentos_associados": {
+                    "fonte": "desconhecida",
+                    "metodo": null,
+                    "versao": null
+                },
+                "estrategias": {
+                    "fonte": "desconhecida",
+                    "metodo": null,
+                    "versao": null
+                }
+            }
+        }
     },
     {
         "id": "faixa_ficticia_b",
