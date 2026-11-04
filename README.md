@@ -24,8 +24,23 @@ felicidade; “sem energia” reconhece cansaço. O relato original e a revisão
 antes das recomendações continuam preservados.
 
 Veja [alcance, exemplos antes/depois e limitações](docs/negacao_expressoes.md).
-As regras não representam compreensão completa da linguagem. A opção
-de seguir sem categoria permanece uma próxima etapa separada.
+As regras não representam compreensão completa da linguagem.
+
+## Revisão e escolha de seguir sem categoria
+
+A pessoa pode confirmar as sugestões, corrigir a interpretação ou escolher
+seguir sem categoria para o estado atual. No terminal, digite `sem categoria`
+na confirmação ou no refinamento. Na API, envie `"emocoes_confirmadas": []`.
+Enter no terminal, detecção vazia ou campo ausente/null na API não escolhem
+essa opção automaticamente.
+
+A escolha fica salva antes da pergunta sobre o estado desejado e aparece
+explicitamente no histórico. Sem categoria atual, as sugestões usam apenas
+as regras disponíveis para o desejo informado. Sem uma estratégia aplicável,
+a sessão é salva sem recomendações e com uma explicação; não recebe uma
+categoria de neutralidade nem uma estratégia de espelhamento automática.
+
+Veja o [contrato, exemplos e limites](docs/seguir_sem_categoria.md).
 
 ## Caracterização musical opcional
 
@@ -134,6 +149,11 @@ de criação e relato original permanecem imutáveis. O estado desejado conserva
 o texto informado e sua análise; seu marcador indica que o texto foi informado,
 não que categorias inferidas tenham sido confirmadas pela pessoa.
 
+`analise.emocoes=[]` com `progresso.emocoes_confirmadas=true` registra a
+escolha explícita de seguir sem categoria. Com o marcador `false`, a revisão
+continua pendente. Registros legados sem marcador não recebem essa escolha
+automaticamente.
+
 A etapa de recomendação é salva mesmo se o resultado for uma lista vazia.
 `recomendacoes_geradas=false` significa pendência; `true` com lista vazia
 significa que a busca foi concluída sem sugestões. Isso não cria escolha
@@ -178,9 +198,15 @@ confirmação pendente. As sugestões do analisador aparecem apenas em
 Essa evolução substitui a inferência automática de confirmação e o antigo
 422 para ausência de categorias reconhecidas. Texto vazio continua inválido.
 
+Envie `emocoes_confirmadas: []` para concluir explicitamente a revisão sem
+categoria. Uma lista com itens vazios, como `[""]`, continua inválida. Essa
+escolha também pode ser feita na retomada; omissão/null preservam a revisão
+atual e não desfazem uma escolha já salva.
+
 `texto_desejado` ausente ou `null` agora significa informação pendente.
 Envie `""` explicitamente para continuar sem definir um estado desejado.
-A recomendação aguarda a confirmação das categorias e essa resposta.
+A recomendação aguarda a revisão (categorias confirmadas ou escolha explícita
+de seguir sem categoria) e essa resposta.
 Clientes que antes omitiam o desejo e esperavam recomendações imediatamente
 devem enviar `""` para manter esse comportamento.
 

@@ -21,6 +21,7 @@ def criar_sessao(*, data_hora, texto_usuario, analise=None, estrategia=None,
         "escuta": escuta,
         "feedback": feedback,
         "progresso": {
+            # True com analise.emocoes=[] registra a escolha de seguir sem categoria.
             "emocoes_confirmadas": False,
             "estado_desejado_informado": False,
             "recomendacoes_geradas": False,

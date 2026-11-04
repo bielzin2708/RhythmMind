@@ -108,13 +108,16 @@ class AnalisadorIntegracaoTests(unittest.TestCase):
             self.assertEqual(registro["analise"]["emocoes"], [])
             self.assertFalse(any(registro["progresso"].values()))
             recomendar.assert_not_called()
-            # A futura opcao de seguir sem categoria nao foi acrescentada.
-            antes = self.historico.read_bytes()
+            # Só a escolha explícita conclui a revisão, sem inferir um estado oposto.
             resposta = self.client.post("/api/retomar-sessao", json={
                 "sessao_id": identificador, "emocoes_confirmadas": [],
             })
-            self.assertEqual(resposta.status_code, 422)
-            self.assertEqual(self.historico.read_bytes(), antes)
+            self.assertEqual(resposta.status_code, 200, resposta.text)
+            atual = self.unica_sessao()[1]
+            self.assertEqual(atual["analise"]["emocoes"], [])
+            self.assertTrue(atual["progresso"]["emocoes_confirmadas"])
+            self.assertFalse(atual["progresso"]["estado_desejado_informado"])
+            self.assertEqual(atual["texto_usuario"], texto)
             recomendar.assert_not_called()
 
     def test_sessao_confirmada_anterior_nao_e_reanalisada_ou_migrada(self):

@@ -550,9 +550,15 @@ def opcao_ver_historico(sessao_id=None):
         print(f"Estado relatado: '{reg.get('texto_usuario', '')}'")
         analise = reg.get('analise', {})
         emocoes = analise.get("emocoes", [])
-        print(f"Emoções confirmadas: {', '.join(emocoes) if emocoes else 'pendentes'}")
-        est_desejado = analise.get('estado_desejado', [])
         progresso = reg.get("progresso", {})
+        if emocoes:
+            descricao_emocoes = ', '.join(emocoes)
+        elif progresso.get("emocoes_confirmadas"):
+            descricao_emocoes = "sem categoria (escolha explícita)"
+        else:
+            descricao_emocoes = "pendentes" if progresso else "não informadas"
+        print(f"Emoções confirmadas: {descricao_emocoes}")
+        est_desejado = analise.get('estado_desejado', [])
         desejo = ', '.join(est_desejado) if est_desejado else "Não definido"
         if not progresso.get("estado_desejado_informado", True):
             desejo = "pendente"
@@ -704,22 +710,21 @@ def analise_tem_estado_identificado(emocoes):
     return bool(emocoes)
 
 def solicitar_refinamento_estado(texto_original):
-    """
-    Chamada quando o sistema não consegue identificar nenhum estado emocional.
-    Pede refinamento até reconhecer ao menos um sentimento.
-    """
-    print("\nNão consegui identificar com segurança o estado emocional descrito.")
-    print("Vamos refinar isso juntos antes de continuar.")
+    """Permite corrigir a interpretação ou escolher explicitamente não usar categoria."""
+    print("\nVamos refinar a interpretação ou seguir sem categoria.")
     while True:
         texto_manual = input(
             "\nDigite apenas os sentimentos que descrevem melhor o que você está sentindo agora.\n"
-            "Exemplos: triste, cansado, ansioso, calmo, reflexivo, animado, com raiva, sem energia.\n> "
+            "Exemplos: triste, cansado, ansioso, calmo, reflexivo, animado, com raiva, sem energia.\n"
+            "Ou digite 'sem categoria' para continuar sem atribuir uma categoria ao relato.\n> "
         )
+        if texto_manual.strip().lower() == "sem categoria":
+            return []
         emocoes = detectar_emocoes_no_texto(texto_manual)
         if analise_tem_estado_identificado(emocoes):
             return emocoes
         print("\nAinda não consegui reconhecer nenhum desses termos.")
-        print("Tente usar uma palavra só, sem rodeios.")
+        print("Você pode tentar outros termos ou digitar 'sem categoria'.")
 
 # Mapa de adjetivos humanizados para a mensagem de transição
 _ADJETIVOS_ESTADO_DESEJADO = {
@@ -850,13 +855,19 @@ def continuar_sessao(identificador):
                     for emocao in emocoes:
                         print(f"  - {emocao}")
                     while True:
-                        resposta = input("Isso faz sentido para você?\nSim ou não?\n> ").strip().lower()
+                        resposta = input(
+                            "Isso faz sentido para você?\n"
+                            "Sim para confirmar, não para corrigir, ou 'sem categoria' para continuar sem categoria.\n> "
+                        ).strip().lower()
+                        if resposta == "sem categoria":
+                            emocoes = []
+                            break
                         if resposta in {"sim", "s"}:
                             break
                         if resposta in {"não", "nao", "n"}:
                             emocoes = solicitar_refinamento_estado(registro["texto_usuario"])
                             break
-                        print("Por favor, responda 'sim' ou 'não'.")
+                        print("Por favor, responda 'sim', 'não' ou 'sem categoria'.")
                 analise = dict(registro["analise"])
                 analise["emocoes"] = emocoes
                 progresso["emocoes_confirmadas"] = True
@@ -876,7 +887,11 @@ def continuar_sessao(identificador):
                 registro = _gravar_etapa_cli(identificador, analise=analise, progresso=progresso)
 
             analise = registro["analise"]
-            print(f"\n{construir_mensagem_transicao(analise['estado_desejado'])}\n")
+            if analise["emocoes"]:
+                print(f"\n{construir_mensagem_transicao(analise['estado_desejado'])}\n")
+            else:
+                print("\nVocê escolheu seguir sem categoria para o estado atual.")
+                print("As sugestões dependem das regras disponíveis para o estado desejado informado.\n")
             estrategia, explicacao, recomendacoes = recomendar_musicas(
                 analise["emocoes"], analise["estado_desejado"]
             )
@@ -888,6 +903,8 @@ def continuar_sessao(identificador):
 
         recomendacoes = registro.get("recomendacoes", [])
         if not recomendacoes:
+            if registro.get("estrategia") is None and registro.get("explicacao"):
+                print(registro["explicacao"])
             print("Não encontrei músicas para esta sessão. O relato permanece salvo.")
             return
         print("Recomendações salvas:")

@@ -115,7 +115,10 @@ class EstadoEmocionalRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     texto_atual: str
-    emocoes_confirmadas: Optional[List[str]] = None   # se o usuário corrigir a detecção
+    emocoes_confirmadas: Optional[List[str]] = Field(
+        default=None,
+        description="Ausente/null: revisão pendente. []: seguir sem categoria por escolha explícita.",
+    )
     texto_desejado: Optional[str] = None  # ausente: pendente; "" explícito: seguir sem definir
 
     @model_validator(mode="after")
@@ -151,7 +154,10 @@ class ReferenciaSessaoRequest(BaseModel):
 class RetomarSessaoRequest(ReferenciaSessaoRequest):
     model_config = ConfigDict(extra="forbid")
 
-    emocoes_confirmadas: Optional[List[str]] = None
+    emocoes_confirmadas: Optional[List[str]] = Field(
+        default=None,
+        description="Ausente/null: manter a revisão atual. []: seguir sem categoria por escolha explícita.",
+    )
     texto_desejado: Optional[str] = None
 
 
@@ -256,10 +262,10 @@ def _avancar_sessao_api(identificador, registro, emocoes_confirmadas, texto_dese
 
     progresso = dict(registro["progresso"])
     if emocoes_confirmadas is not None:
-        if not emocoes_confirmadas or any(not emocao.strip() for emocao in emocoes_confirmadas):
+        if any(not emocao.strip() for emocao in emocoes_confirmadas):
             raise HTTPException(status_code=422, detail={
                 "sessao_id": identificador, "relato_salvo": True,
-                "mensagem": "Informe categorias confirmadas não vazias, ou deixe a confirmação pendente.",
+                "mensagem": "Informe categorias não vazias, [] para seguir sem categoria, ou null para deixar a revisão pendente.",
             })
         if progresso["emocoes_confirmadas"] and emocoes_confirmadas != analise["emocoes"]:
             raise HTTPException(status_code=409, detail="As categorias desta sessão já foram confirmadas.")

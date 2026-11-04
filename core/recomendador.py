@@ -32,6 +32,13 @@ def definir_estrategia(emocoes_atuais, estado_desejado):
     elif "animado" in desejos or "disposto" in desejos:
         return "ativacao", "Vou procurar uma ativação energética: músicas com um ritmo mais para cima para te dar aquele empurrãozinho."
         
+    elif not emocoes:
+        if desejos:
+            explicacao = "As regras atuais não definem uma estratégia para o estado desejado informado sem uma categoria para o estado atual."
+        else:
+            explicacao = "Sem categoria para o estado atual e sem um estado desejado reconhecido, não há critério para sugerir músicas."
+        return None, explicacao
+
     else:
         return "espelhamento", "Vou seguir uma estratégia de espelhamento: músicas que combinam e acolhem o que estás a sentir neste momento."
 
@@ -40,16 +47,24 @@ def recomendar_musicas(emocoes_atuais, estado_desejado=None, ajuste_aprendizagem
     """
     Recomenda músicas com base no estado emocional atual e no estado desejado.
     Retorna (nome_estrategia, explicacao, lista_de_musicas[:3]).
+    Sem categoria atual nem estratégia aplicável ao desejo, retorna (None, explicacao, []).
     """
     if estado_desejado is None:
         estado_desejado = []
     if ajuste_aprendizagem is None:
         ajuste_aprendizagem = {}
 
-    todas_musicas = carregar_musicas_usuario()
-
     # Definir a estratégia
     nome_estrategia, explicacao = definir_estrategia(emocoes_atuais, estado_desejado)
+    if nome_estrategia is None:
+        return None, explicacao, []
+    if not emocoes_atuais:
+        explicacao = (
+            "As sugestões usam apenas o estado desejado informado; "
+            "nenhuma categoria foi atribuída ao estado atual. " + explicacao
+        )
+
+    todas_musicas = carregar_musicas_usuario()
     
     recomendadas = []
     

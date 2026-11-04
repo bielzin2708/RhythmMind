@@ -1,5 +1,9 @@
 # Negação e expressões compostas — regras locais v1
 
+Este documento registra a rodada do analisador lexical. A revisão evoluiu
+depois para permitir a [escolha explícita de seguir sem categoria](seguir_sem_categoria.md),
+sem mudar as regras de detecção descritas aqui.
+
 A interpretação continua lexical, com biblioteca padrão do Python e
 dicionário local. Não há LLM, serviços externos, treinamento, probabilidades
 ou análise sintática completa. A revisão pela pessoa continua necessária.
@@ -123,7 +127,7 @@ As categorias são sugestões para revisão, sem interpretação clínica.
 | Consumidor | Comportamento nesta rodada |
 | --- | --- |
 | Relato inicial na CLI e API | Detecção corrigida; texto salvo antes da análise e confirmação ainda pendente |
-| Revisão/refinamento na CLI | Continua exigindo uma categoria reconhecida; interrupção conserva relato e UUID |
+| Revisão/refinamento na CLI | Na rodada lexical exigia categoria reconhecida; agora também aceita a escolha explícita de seguir sem categoria. Interrupção conserva relato e UUID |
 | Estado desejado | Mesmo analisador local, sem alterar o texto desejado salvo |
 | `POST /api/detectar-emocoes` | Mesmo parâmetro query `texto` e resposta `emocoes_detectadas`; continua autenticado |
 | Cadastro musical CLI/API | Usa as novas regras para o texto de sensações; ausência de categorias mantém repetição/422 do contrato anterior |
@@ -148,7 +152,7 @@ A autenticação, a autorização por titular, o isolamento, os contratos HTTP,
 UUIDs e salvamento progressivo permanecem. Escolha de nenhuma faixa,
 escuta pendente e feedback da experiência continuam distintos.
 
-A fórmula de `core/recomendador.py` não foi alterada. Novas interpretações
+A fórmula de `core/recomendador.py` não foi alterada na rodada lexical. Novas interpretações
 podem resultar em outras sugestões depois da revisão, por mudarem os dados
 de entrada, sem mudar os pesos ou a ordenação do recomendador.
 
@@ -156,9 +160,9 @@ Não há migração ou reanálise automática dos registros antigos.
 Recomendações e análises já confirmadas e persistidas continuam conservadas
 na retomada. Etapas ainda pendentes usam as regras atuais quando executadas.
 
-A opção de seguir sem categoria permanece uma etapa separada. Não foram
-implementados telas, filtros novos, exportação, exclusão, personalização
-ou integração com Spotify.
+A opção de seguir sem categoria foi implementada em etapa posterior,
+documentada no link acima. Telas, filtros novos, exportação, exclusão,
+personalização e integração com Spotify continuam fora desta entrega.
 
 ## Verificação
 
