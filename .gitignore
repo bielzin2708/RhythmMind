@@ -46,6 +46,7 @@ historico*.json
 historico*.json.*
 musicas_usuario*.json
 *history*
+!/static/history.js
 *.log
 *.tmp
 *.temp

@@ -23,10 +23,12 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.staticfiles import StaticFiles
 
 from api.autenticacao import router as router_autenticacao, usuario_autenticado
 from api.interpretacao import router as router_interpretacao
 from api.titular import router as router_titular
+from api.web import STATIC_DIR, router as router_web
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
 
@@ -110,6 +112,15 @@ async def restringir_desenvolvimento_local(request: Request, call_next):
     if request.url.path.startswith("/api/"):
         resposta.headers["Cache-Control"] = "no-store"
         resposta.headers["Pragma"] = "no-cache"
+    if request.url.path in {"/", "/app"} or request.url.path.startswith("/static/"):
+        resposta.headers["Cache-Control"] = "no-store"
+        resposta.headers["X-Content-Type-Options"] = "nosniff"
+        resposta.headers["Referrer-Policy"] = "no-referrer"
+        resposta.headers["Content-Security-Policy"] = (
+            "default-src 'self'; script-src 'self'; style-src 'self'; "
+            "img-src 'self' data:; connect-src 'self'; font-src 'self'; "
+            "base-uri 'none'; form-action 'self'; frame-ancestors 'self'"
+        )
     return resposta
 
 
@@ -636,3 +647,5 @@ app.include_router(router_autenticacao)
 app.include_router(router)
 app.include_router(router_interpretacao)
 app.include_router(router_titular)
+app.include_router(router_web)
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
