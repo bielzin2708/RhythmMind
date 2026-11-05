@@ -51,6 +51,11 @@ def detectar_emocoes_no_texto(texto):
     recebido e os dados persistidos nao sao modificados por esta consulta.
     """
     dicionario = carregar_json(ARQ_DICIONARIO, {})
+    return detectar_emocoes_com_dicionario(texto, dicionario)
+
+
+def detectar_emocoes_com_dicionario(texto, dicionario):
+    """Aplica as mesmas regras a um snapshot explícito, sem reler arquivos."""
     por_inicio = _unidades_por_inicio(dicionario)
     tokens = _TOKENS_COM_FRONTEIRAS.findall(remover_acentos(texto))
     encontradas = set()

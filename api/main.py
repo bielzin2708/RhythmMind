@@ -25,6 +25,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 
 from api.autenticacao import router as router_autenticacao, usuario_autenticado
+from api.interpretacao import router as router_interpretacao
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
 
@@ -34,7 +35,7 @@ from core.escuta import preparar_escuta
 from core.caracterizacao import validar_caracterizacao
 from core.sessoes import (
     criar_sessao, salvar_nova_sessao, atualizar_sessao, recomendacoes_registradas,
-    validar_metadados_sessao,
+    validar_metadados_sessao, ConflitoSessao,
 )
 from core.historico import filtrar_historico
 from core.feedback import resumir_avaliacoes, LIMITACAO_POR_FAIXA, INTERPRETACAO_RETORNOS
@@ -277,6 +278,8 @@ def _resposta_estado(registro, detectadas=None):
 def _salvar_etapa_api(identificador, **campos):
     try:
         return atualizar_sessao(ARQ_HISTORICO, identificador, **campos)
+    except ConflitoSessao as erro:
+        raise HTTPException(status_code=409, detail=str(erro)) from erro
     except OSError as erro:
         raise HTTPException(status_code=503, detail={
             "sessao_id": identificador, "relato_salvo": True,
@@ -321,22 +324,22 @@ def _avancar_sessao_api(identificador, registro, emocoes_confirmadas, texto_dese
 
     # Rejeita conflitos antes de salvar a quantidade ou qualquer etapa recebida.
     if limite_recomendacoes is not None and limite_recomendacoes != registro.get("limite_recomendacoes"):
-        registro = _salvar_etapa_api(identificador, limite_recomendacoes=limite_recomendacoes)
+        registro = _salvar_etapa_api(identificador, esperado=registro, limite_recomendacoes=limite_recomendacoes)
     if emocoes_confirmadas is not None and not progresso["emocoes_confirmadas"]:
         analise = dict(analise)
         analise["emocoes"] = emocoes_confirmadas
         progresso["emocoes_confirmadas"] = True
-        registro = _salvar_etapa_api(identificador, analise=analise, progresso=progresso)
+        registro = _salvar_etapa_api(identificador, esperado=registro, analise=analise, progresso=progresso)
 
     if not progresso["estado_desejado_informado"]:
         texto_salvo = registro.get("texto_desejado")
         texto = texto_salvo if texto_salvo is not None else texto_desejado
         if texto is not None:
-            registro = _salvar_etapa_api(identificador, texto_desejado=texto)
+            registro = _salvar_etapa_api(identificador, esperado=registro, texto_desejado=texto)
             analise = dict(registro["analise"])
             analise["estado_desejado"] = detectar_emocoes_no_texto(texto) if texto else []
             progresso["estado_desejado_informado"] = True
-            registro = _salvar_etapa_api(identificador, analise=analise, progresso=progresso)
+            registro = _salvar_etapa_api(identificador, esperado=registro, analise=analise, progresso=progresso)
 
     if not progresso["emocoes_confirmadas"]:
         detectadas = detectar_emocoes_no_texto(registro["texto_usuario"])
@@ -352,7 +355,7 @@ def _avancar_sessao_api(identificador, registro, emocoes_confirmadas, texto_dese
     motivos = explicar_recomendacoes(registro["analise"]["emocoes"], estrategia, recomendacoes)
     progresso["recomendacoes_geradas"] = True
     registro = _salvar_etapa_api(
-        identificador, estrategia=estrategia, explicacao=explicacao,
+        identificador, esperado=registro, estrategia=estrategia, explicacao=explicacao,
         recomendacoes=recomendacoes, motivos_recomendacoes=motivos,
         limite_recomendacoes=limite, progresso=progresso,
     )
@@ -422,7 +425,7 @@ def registrar_contexto_sessao(req: ContextoSessaoRequest):
         raise HTTPException(status_code=404, detail="Registro de histórico não encontrado.")
     campos = {campo: getattr(req, campo) for campo in ("finalidade", "contexto")
               if campo in req.model_fields_set}
-    registro = _salvar_etapa_api(req.identificador, **campos)
+    registro = _salvar_etapa_api(req.identificador, esperado=historico[req.identificador], **campos)
     return {"sessao_id": req.identificador, "finalidade": registro.get("finalidade"),
             "contexto": registro.get("contexto")}
 
@@ -443,7 +446,7 @@ def enviar_feedback(req: FeedbackRequest):
     for campo in ("motivo", "melhoria"):
         if campo in req.model_fields_set or campo not in feedback:
             feedback[campo] = getattr(req, campo)
-    _salvar_etapa_api(chave, feedback=feedback)
+    _salvar_etapa_api(chave, esperado=historico[chave], feedback=feedback)
     return {"status": "ok"}
 
 
@@ -466,7 +469,7 @@ def registrar_escuta(req: EscutaRequest):
     except ValueError as erro:
         raise HTTPException(status_code=422, detail=str(erro)) from erro
 
-    _salvar_etapa_api(chave, escuta=escuta)
+    _salvar_etapa_api(chave, esperado=registro, escuta=escuta)
     return {"status": "ok", "escuta": escuta}
 
 
@@ -633,3 +636,4 @@ def ver_proposta():
 
 app.include_router(router_autenticacao)
 app.include_router(router)
+app.include_router(router_interpretacao)

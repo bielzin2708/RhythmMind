@@ -1,10 +1,18 @@
 """Sessões com UUID estável e atualizações progressivas por chave exata."""
 
 from copy import deepcopy
+from threading import RLock
 from uuid import uuid4
 
 from core import storage
 from core.recomendador import validar_limite_recomendacoes
+
+
+_LOCK_HISTORICO = RLock()
+
+
+class ConflitoSessao(ValueError):
+    """O registro mudou desde a leitura usada para preparar uma atualização."""
 
 
 def validar_metadados_sessao(**campos):
@@ -62,22 +70,28 @@ def _historico_para_gravar(caminho):
 
 
 def salvar_nova_sessao(caminho, registro):
-    historico = _historico_para_gravar(caminho)
-    identificador = registro["sessao_id"]
-    if identificador in historico:
-        raise ValueError("Identificador de sessão já existente.")
-    historico[identificador] = deepcopy(registro)
-    storage.salvar_json(caminho, historico)
+    with _LOCK_HISTORICO:
+        historico = _historico_para_gravar(caminho)
+        identificador = registro["sessao_id"]
+        if identificador in historico:
+            raise ValueError("Identificador de sessão já existente.")
+        historico[identificador] = deepcopy(registro)
+        storage.salvar_json(caminho, historico)
     return registro
 
 
-def atualizar_sessao(caminho, identificador, **campos):
-    """Altera só os campos da etapa; identidade, criação e relato são imutáveis."""
+def atualizar_sessao(caminho, identificador, *, esperado=None, **campos):
+    """Altera só a etapa; esperado impede sobrescrever um snapshot obsoleto.
+
+    Leitura, comparação e escrita são serializadas entre threads deste processo.
+    Não substitui transações entre múltiplos processos ou máquinas.
+    """
     permitidos = {
         "analise", "texto_desejado", "estrategia", "explicacao", "recomendacoes",
         "escuta", "feedback", "progresso",
         "finalidade", "contexto",
         "limite_recomendacoes", "motivos_recomendacoes",
+        "interpretacao",
     }
     if set(campos) - permitidos:
         raise ValueError("A etapa não pode modificar identidade, data ou relato original.")
@@ -86,11 +100,14 @@ def atualizar_sessao(caminho, identificador, **campos):
     campos.update(validar_metadados_sessao(**{
         campo: campos[campo] for campo in ("finalidade", "contexto") if campo in campos
     }))
-    historico = _historico_para_gravar(caminho)
-    registro = deepcopy(historico[identificador])
-    registro.update(deepcopy(campos))
-    historico[identificador] = registro
-    storage.salvar_json(caminho, historico)
+    with _LOCK_HISTORICO:
+        historico = _historico_para_gravar(caminho)
+        if esperado is not None and historico.get(identificador) != esperado:
+            raise ConflitoSessao("A sessão mudou durante a operação. Consulte a versão atual.")
+        registro = deepcopy(historico[identificador])
+        registro.update(deepcopy(campos))
+        historico[identificador] = registro
+        storage.salvar_json(caminho, historico)
     return registro
 
 
