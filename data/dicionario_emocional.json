@@ -6,7 +6,10 @@
         "alegre",
         "contente",
         "satisfeito",
-        "radiante"
+        "radiante",
+        "satisfeita",
+        "felizinho",
+        "felizinha"
     ],
     "animado": [
         "animado",
@@ -17,7 +20,16 @@
         "empolgante",
         "agitado",
         "animacao",
-        "animação"
+        "animação",
+        "animada",
+        "animadinho",
+        "animadinha",
+        "animadona",
+        "energizada",
+        "empolgada",
+        "agitada",
+        "pilhado",
+        "pilhada"
     ],
     "foco": [
         "foco",
@@ -26,7 +38,12 @@
         "concentracao",
         "concentrado",
         "clareza",
-        "atento"
+        "atento",
+        "focada",
+        "focadinho",
+        "focadinha",
+        "concentrada",
+        "atenta"
     ],
     "calmo": [
         "calmo",
@@ -39,7 +56,14 @@
         "sereno",
         "serenidade",
         "leveza",
-        "leve"
+        "leve",
+        "tranquila",
+        "relaxada",
+        "sossegada",
+        "serena",
+        "calminho",
+        "calminha",
+        "de boa"
     ],
     "disposto": [
         "disposto",
@@ -49,7 +73,11 @@
         "motivação",
         "motivacao",
         "produtivo",
-        "ativo"
+        "ativo",
+        "disposta",
+        "motivada",
+        "produtiva",
+        "ativa"
     ],
     "reflexivo": [
         "reflexivo",
@@ -61,7 +89,12 @@
         "introspeccao",
         "meditativo",
         "contemplativo",
-        "entendimento"
+        "entendimento",
+        "reflexiva",
+        "pensativa",
+        "introspectiva",
+        "meditativa",
+        "contemplativa"
     ],
     "triste": [
         "triste",
@@ -75,7 +108,15 @@
         "abatido",
         "desanimado",
         "chateado",
-        "magoado"
+        "magoado",
+        "tristinha",
+        "tristonho",
+        "tristonha",
+        "melancólica",
+        "abatida",
+        "desanimada",
+        "chateada",
+        "magoada"
     ],
     "cansado": [
         "cansado",
@@ -89,7 +130,17 @@
         "exaustao",
         "fatigado",
         "sem energia",
-        "sem disposição"
+        "sem disposição",
+        "cansada",
+        "cansadinho",
+        "cansadão",
+        "cansadona",
+        "drenada",
+        "esgotada",
+        "esgotadinho",
+        "esgotadinha",
+        "exausta",
+        "fatigada"
     ],
     "sofrendo": [
         "sofrendo",
@@ -100,7 +151,10 @@
         "sofrido",
         "angustiado",
         "angústia",
-        "angustia"
+        "angustia",
+        "machucada",
+        "dolorida",
+        "angustiada"
     ],
     "ansioso": [
         "ansioso",
@@ -113,7 +167,15 @@
         "tenso",
         "tensão",
         "tensao",
-        "inquieto"
+        "inquieto",
+        "nervosa",
+        "aflita",
+        "agitada",
+        "preocupada",
+        "tensa",
+        "inquieta",
+        "pilhado",
+        "pilhada"
     ],
     "raiva": [
         "raiva",
@@ -122,14 +184,21 @@
         "puto",
         "bravo",
         "indignado",
-        "revoltado"
+        "revoltado",
+        "irritada",
+        "furiosa",
+        "brava",
+        "indignada",
+        "revoltada"
     ],
     "explosivo": [
         "explosivo",
         "descontrolado",
         "transbordando",
         "fora de controle",
-        "no limite"
+        "no limite",
+        "explosiva",
+        "descontrolada"
     ],
     "amor": [
         "amor",
@@ -139,7 +208,10 @@
         "amando",
         "saudade",
         "apego",
-        "carinho"
+        "carinho",
+        "apaixonada",
+        "apaixonadinho",
+        "apaixonadinha"
     ],
     "normal": [
         "normal",
@@ -149,6 +221,12 @@
         "bem",
         "estável",
         "estavel",
-        "equilibrado"
+        "equilibrado",
+        "neutra",
+        "equilibrada",
+        "normalzinho",
+        "normalzinha",
+        "tranquila",
+        "de boa"
     ]
 }

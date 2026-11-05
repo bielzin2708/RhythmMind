@@ -2,7 +2,7 @@ import os
 import re
 from datetime import datetime
 from collections import Counter
-from core.analisador_texto import detectar_emocoes_no_texto, remover_acentos
+from core.analisador_texto import detectar_emocoes_no_texto, remover_acentos, separar_papeis_texto
 from core.recomendador import (
     recomendar_musicas, explicar_recomendacoes, validar_limite_recomendacoes,
 )
@@ -876,7 +876,7 @@ def solicitar_refinamento_estado(texto_original):
         )
         if texto_manual.strip().lower() == "sem categoria":
             return []
-        emocoes = detectar_emocoes_no_texto(texto_manual)
+        emocoes = detectar_emocoes_no_texto(separar_papeis_texto(texto_manual)[0])
         if analise_tem_estado_identificado(emocoes):
             return emocoes
         print("\nAinda não consegui reconhecer nenhum desses termos.")
@@ -1003,7 +1003,7 @@ def continuar_sessao(identificador):
         if not recomendacoes_registradas(registro):
             progresso = dict(registro["progresso"])
             if not progresso["emocoes_confirmadas"]:
-                emocoes = detectar_emocoes_no_texto(registro["texto_usuario"])
+                emocoes = detectar_emocoes_no_texto(separar_papeis_texto(registro["texto_usuario"])[0])
                 if not analise_tem_estado_identificado(emocoes):
                     emocoes = solicitar_refinamento_estado(registro["texto_usuario"])
                 else:

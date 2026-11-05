@@ -161,7 +161,7 @@ class LexicalMetadadosTests(unittest.TestCase):
         base = BaseConhecimento("0" * 64, json.dumps({"taxonomia": dicionario, "ordem_categorias": list(dicionario)}))
         motor = InterpretadorLexical()
         proposta = motor.interpretar("Estou triste e cansado, quero ficar calmo", None, base)
-        self.assertEqual(motor.identificador, "lexical_contextual_v2")
+        self.assertEqual(motor.identificador, "lexical_contextual_v3")
         self.assertEqual({item.categoria for item in proposta.estado_atual.sugestoes}, {"triste", "cansado"})
         self.assertEqual({item.categoria for item in proposta.estado_desejado.sugestoes}, {"calmo"})
         self.assertEqual(proposta.objetivos, [])

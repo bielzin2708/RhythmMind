@@ -30,7 +30,7 @@ from api.titular import router as router_titular
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
 
-from core.analisador_texto import detectar_emocoes_no_texto, remover_acentos
+from core.analisador_texto import detectar_emocoes_no_texto, remover_acentos, separar_papeis_texto
 from core.recomendador import recomendar_musicas, explicar_recomendacoes, validar_limite_recomendacoes
 from core.escuta import preparar_escuta
 from core.caracterizacao import validar_caracterizacao
@@ -246,8 +246,9 @@ class NovaMusicaRequest(BaseModel):
 @router.post("/api/detectar-emocoes")
 def detectar_emocoes(texto: str):
     """Usado pelo front-end para mostrar 'Acho que você está se sentindo: X, Y.
-    Correto?' antes de pedir confirmação, como na CLI."""
-    emocoes = detectar_emocoes_no_texto(texto)
+    Correto?' antes de pedir confirmação, como na CLI. Intenções explícitas
+    são separadas para não serem apresentadas como estado atual."""
+    emocoes = detectar_emocoes_no_texto(separar_papeis_texto(texto)[0])
     return {"emocoes_detectadas": emocoes}
 
 
@@ -344,7 +345,7 @@ def _avancar_sessao_api(identificador, registro, emocoes_confirmadas, texto_dese
             registro = _salvar_etapa_api(identificador, esperado=registro, analise=analise, progresso=progresso)
 
     if not progresso["emocoes_confirmadas"]:
-        detectadas = detectar_emocoes_no_texto(registro["texto_usuario"])
+        detectadas = detectar_emocoes_no_texto(separar_papeis_texto(registro["texto_usuario"])[0])
         return _resposta_estado(registro, detectadas)
     if not progresso["estado_desejado_informado"]:
         return _resposta_estado(registro)

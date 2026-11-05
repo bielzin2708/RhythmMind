@@ -8,7 +8,7 @@ os sinais locais desses limites geram pedidos de revisão, nunca diagnósticos.
 import re
 from typing import Literal, Protocol
 
-from core.analisador_texto import detectar_emocoes_com_dicionario, extrair_palavras
+from core.analisador_texto import detectar_emocoes_com_dicionario, extrair_palavras, separar_papeis_texto
 from core.interpretacao.base import BaseConhecimento
 from core.interpretacao.contratos import ParteInterpretacao, PropostaInterpretacao, SugestaoCategoria
 
@@ -22,20 +22,6 @@ class Interpretador(Protocol):
     ) -> PropostaInterpretacao: ...
 
 
-_INTENCAO = re.compile(
-    r"\b(?:(?:eu\s+)?(?:não|nao|nem|nunca|jamais)\s+)?"
-    r"(?:quero|gostaria(?:\s+de)?|pretendo|busco|desejo|almejo|meu\s+objetivo\s+[eé])\b",
-    re.IGNORECASE,
-)
-_FRONTEIRA = re.compile(
-    r"[,;:.!?\n\r…–—]+|\b(?:mas|por[eé]m|contudo|todavia|entretanto)\b",
-    re.IGNORECASE,
-)
-_ESTADO_EXPLICITO = re.compile(
-    r"\b(?:(?:e|agora|hoje|atualmente)\s+)?(?:eu\s+)?"
-    r"(?:(?:não|nao|nem|nunca|jamais)\s+)?(?:estou|me\s+sinto|sinto-me|ando)\b",
-    re.IGNORECASE,
-)
 _TEMPORAL = re.compile(
     r"\b(?:ontem|antigamente|estava|estive|era|fui|amanha|amanhã|estarei|serei)\b",
     re.IGNORECASE,
@@ -45,42 +31,6 @@ _OUTRA_PESSOA = re.compile(
     r"(?:meu|minha)\s+(?:amig[oa]|pai|m[aã]e|irm[aã]o?|namorad[oa]|professor[a]?))\b",
     re.IGNORECASE,
 )
-
-
-def _recortar_intencoes(texto):
-    """Retorna intervalos literais de intenção sem consumir um novo estado explícito."""
-    intervalos = []
-    inicio = 0
-    fronteiras = list(_FRONTEIRA.finditer(texto))
-    segmentos = [(fronteira.start(), fronteira.end()) for fronteira in fronteiras]
-    segmentos.append((len(texto), len(texto)))
-    for fim, proximo_inicio in segmentos:
-        marcadores = list(_INTENCAO.finditer(texto, inicio, fim))
-        for indice, marcador in enumerate(marcadores):
-            final = marcadores[indice + 1].start() if indice + 1 < len(marcadores) else fim
-            novo_estado = _ESTADO_EXPLICITO.search(texto, marcador.end(), final)
-            if novo_estado:
-                final = novo_estado.start()
-            while final > marcador.start() and texto[final - 1].isspace():
-                final -= 1
-            if final > marcador.start():
-                intervalos.append((marcador.start(), final))
-        inicio = proximo_inicio
-    return intervalos
-
-
-def _separar_papeis(texto):
-    intervalos = _recortar_intencoes(texto)
-    atual = []
-    inicio = 0
-    for primeiro, ultimo in intervalos:
-        atual.append(texto[inicio:primeiro])
-        inicio = ultimo
-    atual.append(texto[inicio:])
-    # A quebra de linha evita transportar negação de uma oração para outra.
-    intencoes = [texto[primeiro:ultimo] for primeiro, ultimo in intervalos]
-    trecho_literal = texto[intervalos[0][0]:intervalos[-1][1]] if intervalos else None
-    return "\n".join(atual), intencoes, trecho_literal
 
 
 def _ambiguidades_locais(texto, categorias, dicionario):
@@ -129,13 +79,13 @@ def _parte(texto, dicionario, papel, mensagens_extras=()):
 
 class InterpretadorLexical:
     origem = "dicionario"
-    identificador = "lexical_contextual_v2"
+    identificador = "lexical_contextual_v3"
 
     def interpretar(
         self, texto_original: str, texto_desejado: str | None, base: BaseConhecimento,
     ) -> PropostaInterpretacao:
         dicionario = base.dicionario
-        atual, intencoes, trecho_literal = _separar_papeis(texto_original)
+        atual, intencoes, trecho_literal = separar_papeis_texto(texto_original)
         desejo_no_relato = "\n".join(intencoes)
         desejo = texto_desejado if texto_desejado is not None else desejo_no_relato
         mensagens = []

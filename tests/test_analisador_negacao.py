@@ -160,7 +160,7 @@ class AnalisadorNegacaoTests(unittest.TestCase):
         casos = [
             ("Nao so triste, mas cansado", ["cansado"]),
             ("Sem duvida feliz", []),
-            ("Nao li o livro e estou triste", []),
+            ("Nao li o livro e estou triste", ["triste"]),
             ("Deixei de estar triste", ["triste"]),
         ]
         for texto, esperado in casos:
