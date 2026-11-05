@@ -39,6 +39,7 @@ secrets.*
 /data/*
 !/data/dicionario_emocional.json
 !/data/base_conhecimento.json
+!/data/casos_avaliacao_interpretacao.json
 !/data/musicas_base.json
 !/data/musicas_exemplo.json
 historico*.json
@@ -59,6 +60,7 @@ backup/
 tmp/
 temp/
 /avaliacao/cache/
+/avaliacao/resultados_interpretacao/
 
 # Sistema e estado pessoal do editor
 .DS_Store

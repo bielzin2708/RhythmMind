@@ -96,10 +96,11 @@ def _objeto_sem_chaves_repetidas(pares):
     return resultado
 
 
-def carregar_base() -> BaseConhecimento:
+def carregar_base(*, caminho_dicionario=None) -> BaseConhecimento:
     """Lê o arquivo configurado estritamente; nunca substitui falhas por defaults."""
     try:
-        caminho = Path(storage.resolver_caminho(storage.ARQ_DICIONARIO))
+        caminho = (Path(caminho_dicionario) if caminho_dicionario is not None
+                   else Path(storage.resolver_caminho(storage.ARQ_DICIONARIO)))
         taxonomia = json.loads(
             caminho.read_text(encoding="utf-8"),
             object_pairs_hook=_objeto_sem_chaves_repetidas,

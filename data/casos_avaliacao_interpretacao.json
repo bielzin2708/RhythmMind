@@ -1,0 +1,343 @@
+{
+  "versao": "rhythmmind.casos-interpretacao.v1",
+  "natureza": "sintetico",
+  "nota": "24 relatos inteiramente fictícios, distribuídos em seis grupos com quatro casos cada. Os campos esperado são anotações editoriais provisórias feitas para esta bateria, não rótulos fornecidos por participantes nem verdade emocional ou clínica. Foram definidos antes da execução comparativa e não devem ser ajustados aos resultados do motor lexical. A correspondência entre expressões e categorias segue escolhas operacionais do projeto, sujeitas à revisão humana. O conjunto pequeno e dirigido permite identificar falhas, mas não estima desempenho em usuários nem valida um modelo real. Um modo mock verifica contratos e estrutura, não constitui resultado de qualidade de uma LLM.",
+  "casos": [
+    {
+      "id": "DIR01",
+      "grupo": "escrita_direta",
+      "texto_original": "Estou feliz.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["feliz"],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": false
+      },
+      "nota": "Controle direto com uma categoria atual explícita e sem intenção de mudança."
+    },
+    {
+      "id": "DIR02",
+      "grupo": "escrita_direta",
+      "texto_original": "Hoje me sinto cansado.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["cansado"],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": false
+      },
+      "nota": "O cansaço é relatado no presente; não há atividade ou estado desejado declarado."
+    },
+    {
+      "id": "DIR03",
+      "grupo": "escrita_direta",
+      "texto_original": "Estou reflexivo neste momento.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["reflexivo"],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": false
+      },
+      "nota": "A categoria reflexivo não autoriza inventar um objetivo de reflexão ou uma atividade."
+    },
+    {
+      "id": "DIR04",
+      "grupo": "escrita_direta",
+      "texto_original": "Estou explosivo, no limite.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["explosivo"],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": false
+      },
+      "nota": "Duas expressões da mesma categoria não devem produzir sugestões duplicadas."
+    },
+    {
+      "id": "TYP01",
+      "grupo": "variacao_escrita",
+      "texto_original": "Tô trsite hoje.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["triste"],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": false
+      },
+      "nota": "Inversão de letras e variação coloquial; a anotação pretendida é tristeza."
+    },
+    {
+      "id": "TYP02",
+      "grupo": "variacao_escrita",
+      "texto_original": "Tô cansadao depois desse dia.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["cansado"],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": false
+      },
+      "nota": "Forma coloquial sem acento. Não há intenção de aumentar a disposição no relato."
+    },
+    {
+      "id": "TYP03",
+      "grupo": "variacao_escrita",
+      "texto_original": "Tô ancioso com o que pode acontecer.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["ansioso"],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": false
+      },
+      "nota": "Erro ortográfico com interpretação editorial de ansiedade cotidiana, sem diagnóstico."
+    },
+    {
+      "id": "TYP04",
+      "grupo": "variacao_escrita",
+      "texto_original": "to animadao pra treinar",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["animado"],
+        "estado_desejado": [],
+        "objetivos": ["treinar"],
+        "contextos": ["treinar"],
+        "precisa_esclarecimento": false
+      },
+      "nota": "A animação já é atual; treinar identifica uma atividade, sem declarar outro estado desejado."
+    },
+    {
+      "id": "NEG01",
+      "grupo": "negacao",
+      "texto_original": "Não estou triste, só cansado.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["cansado"],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": false
+      },
+      "nota": "Triste é negado explicitamente; a confirmação de cansaço não é uma intenção."
+    },
+    {
+      "id": "NEG02",
+      "grupo": "negacao",
+      "texto_original": "Não me sinto feliz, estou ansioso.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["ansioso"],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": false
+      },
+      "nota": "Feliz não deve ser sugerido como categoria atual; ansioso é declarado na oração seguinte."
+    },
+    {
+      "id": "NEG03",
+      "grupo": "negacao",
+      "texto_original": "Não estou com raiva; estou calmo.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["calmo"],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": false
+      },
+      "nota": "A negação não deve atravessar o ponto e vírgula e negar também o estado calmo."
+    },
+    {
+      "id": "NEG04",
+      "grupo": "negacao",
+      "texto_original": "Hoje não estou cansado, estou disposto.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["disposto"],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": false
+      },
+      "nota": "Disposição atual é afirmada; o cansaço é negado, sem pedido de ativação."
+    },
+    {
+      "id": "INT01",
+      "grupo": "estado_intencao",
+      "texto_original": "Estou ansioso com a prova e quero ficar calmo para estudar.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["ansioso"],
+        "estado_desejado": ["calmo"],
+        "objetivos": ["estudar"],
+        "contextos": ["estudar"],
+        "precisa_esclarecimento": false
+      },
+      "nota": "Separar ansiedade percebida, calma desejada e atividade de estudo, sem inferir desempenho."
+    },
+    {
+      "id": "INT02",
+      "grupo": "estado_intencao",
+      "texto_original": "Estou triste e quero ficar animado para treinar.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["triste"],
+        "estado_desejado": ["animado"],
+        "objetivos": ["treinar"],
+        "contextos": ["treinar"],
+        "precisa_esclarecimento": false
+      },
+      "nota": "A vontade de se animar não confirma animação atual nem autoriza recomendar uma faixa."
+    },
+    {
+      "id": "INT03",
+      "grupo": "estado_intencao",
+      "texto_original": "Estou calmo e quero me sentir focado para trabalhar.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["calmo"],
+        "estado_desejado": ["foco"],
+        "objetivos": ["trabalhar"],
+        "contextos": ["trabalhar"],
+        "precisa_esclarecimento": false
+      },
+      "nota": "Calma e foco têm papéis diferentes; trabalhar é a finalidade da atividade, não uma emoção."
+    },
+    {
+      "id": "INT04",
+      "grupo": "estado_intencao",
+      "texto_original": "Estou cansado.",
+      "texto_desejado": "Quero ficar disposto para socializar com meus amigos.",
+      "esperado": {
+        "estado_atual": ["cansado"],
+        "estado_desejado": ["disposto"],
+        "objetivos": ["social"],
+        "contextos": ["social"],
+        "precisa_esclarecimento": false
+      },
+      "nota": "A intenção foi informada no campo separado e não deve contaminar o estado atual."
+    },
+    {
+      "id": "COE01",
+      "grupo": "coexistencia",
+      "texto_original": "Essa lembrança me dá saudade e tristeza, mas me sinto em paz.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["amor", "triste", "calmo"],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": false
+      },
+      "nota": "Saudade→amor e paz→calmo são escolhas editoriais da taxonomia operacional, não equivalências universais. O contraste não elimina os sentimentos coexistentes."
+    },
+    {
+      "id": "COE02",
+      "grupo": "coexistencia",
+      "texto_original": "Estou feliz com a notícia e ansioso com a mudança.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["feliz", "ansioso"],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": false
+      },
+      "nota": "Duas categorias atuais estão associadas a motivos diferentes; não reduzir a uma categoria única."
+    },
+    {
+      "id": "COE03",
+      "grupo": "coexistencia",
+      "texto_original": "Estou cansado, mas animado para treinar.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["cansado", "animado"],
+        "estado_desejado": [],
+        "objetivos": ["treinar"],
+        "contextos": ["treinar"],
+        "precisa_esclarecimento": false
+      },
+      "nota": "Cansaço e animação são apresentados como atuais; o contraste não declara desejo de mudança."
+    },
+    {
+      "id": "COE04",
+      "grupo": "coexistencia",
+      "texto_original": "Estou pensativo e sofrendo com essa lembrança.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": ["reflexivo", "sofrendo"],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": false
+      },
+      "nota": "A anotação reconhece reflexão e sofrimento cotidianos, sem diagnóstico ou finalidade presumida."
+    },
+    {
+      "id": "AMB01",
+      "grupo": "ambiguidade",
+      "texto_original": "Pesado.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": [],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": true
+      },
+      "nota": "Não se sabe se pesado descreve o dia, um objeto, uma sensação ou um gosto; pedir contexto."
+    },
+    {
+      "id": "AMB02",
+      "grupo": "ambiguidade",
+      "texto_original": "Só quero ouvir algo.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": [],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": true
+      },
+      "nota": "A vontade de ouvir algo não informa categoria emocional, estado desejado ou atividade da taxonomia."
+    },
+    {
+      "id": "AMB03",
+      "grupo": "ambiguidade",
+      "texto_original": "Meu amigo está triste, e eu não sei dizer como estou.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": [],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": true
+      },
+      "nota": "A tristeza é de outra pessoa. O estado do autor fictício não está claro e não deve ser preenchido por transferência."
+    },
+    {
+      "id": "AMB04",
+      "grupo": "ambiguidade",
+      "texto_original": "Ontem eu estava feliz; hoje está tudo diferente, mas não sei explicar.",
+      "texto_desejado": null,
+      "esperado": {
+        "estado_atual": [],
+        "estado_desejado": [],
+        "objetivos": [],
+        "contextos": [],
+        "precisa_esclarecimento": true
+      },
+      "nota": "A felicidade é passada. O contraste temporal não fornece uma categoria atual nem uma intenção de mudança."
+    }
+  ]
+}
