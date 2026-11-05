@@ -26,6 +26,7 @@ from fastapi.exceptions import RequestValidationError
 
 from api.autenticacao import router as router_autenticacao, usuario_autenticado
 from api.interpretacao import router as router_interpretacao
+from api.titular import router as router_titular
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
 
@@ -38,6 +39,7 @@ from core.sessoes import (
     validar_metadados_sessao, ConflitoSessao,
 )
 from core.historico import filtrar_historico
+from core.titular import ErroTitular, corrigir_registro
 from core.feedback import resumir_avaliacoes, LIMITACAO_POR_FAIXA, INTERPRETACAO_RETORNOS
 from core.storage import (
     carregar_todas_musicas,
@@ -414,18 +416,13 @@ def retomar_sessao(req: RetomarSessaoRequest):
 
 @router.post("/api/contexto-sessao")
 def registrar_contexto_sessao(req: ContextoSessaoRequest):
-    """Edita só os metadados presentes no pedido, inclusive após recomendar."""
-    try:
-        historico = carregar_json(ARQ_HISTORICO, {}, estrito=True)
-        if not isinstance(historico, dict):
-            raise OSError("Formato de histórico inválido.")
-    except (OSError, ValueError) as erro:
-        raise HTTPException(status_code=503, detail="Histórico indisponível para atualizar.") from erro
-    if req.identificador not in historico:
-        raise HTTPException(status_code=404, detail="Registro de histórico não encontrado.")
+    """Mantém o contrato anterior, com a mesma rastreabilidade da correção do titular."""
     campos = {campo: getattr(req, campo) for campo in ("finalidade", "contexto")
               if campo in req.model_fields_set}
-    registro = _salvar_etapa_api(req.identificador, esperado=historico[req.identificador], **campos)
+    try:
+        registro = corrigir_registro(req.identificador, campos)["registro"]
+    except ErroTitular as erro:
+        raise HTTPException(status_code=erro.status, detail=str(erro)) from erro
     return {"sessao_id": req.identificador, "finalidade": registro.get("finalidade"),
             "contexto": registro.get("contexto")}
 
@@ -637,3 +634,4 @@ def ver_proposta():
 app.include_router(router_autenticacao)
 app.include_router(router)
 app.include_router(router_interpretacao)
+app.include_router(router_titular)

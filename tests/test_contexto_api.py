@@ -121,7 +121,14 @@ class ContextoSessaoApiTests(_ContextoApiBase):
              patch.object(api, "recomendar_musicas", side_effect=AssertionError("Não recalcular")):
             resposta = self.editar(identificador, contexto="Em casa")
         self.assertEqual(resposta.status_code, 200, resposta.text)
-        self.assertEqual(self.ler()[identificador], {**anterior, "contexto": "Em casa"})
+        atualizado = self.ler()[identificador]
+        self.assertEqual({campo: valor for campo, valor in atualizado.items()
+                          if campo not in {"correcoes", "revisao_registro"}},
+                         {**anterior, "contexto": "Em casa"})
+        self.assertEqual(atualizado["revisao_registro"], 1)
+        self.assertEqual(atualizado["correcoes"][0]["campos"], {
+            "contexto": {"anterior": "Estudo", "novo": "Em casa"},
+        })
 
     def test_edicao_invalida_ou_sem_campos_nao_grava(self):
         identificador = self.criar(finalidade="Focar", contexto="Estudo")["sessao_id"]
@@ -162,7 +169,15 @@ class ContextoSessaoApiTests(_ContextoApiBase):
             "data_hora": chave, "finalidade": "Descansar",
         })
         self.assertEqual(resposta.status_code, 200, resposta.text)
-        self.assertEqual(self.ler(), {chave: {**legado, "finalidade": "Descansar"}})
+        historico = self.ler()
+        self.assertEqual(set(historico), {chave})
+        atualizado = historico[chave]
+        self.assertEqual({campo: valor for campo, valor in atualizado.items()
+                          if campo not in {"correcoes", "revisao_registro"}},
+                         {**legado, "finalidade": "Descansar"})
+        self.assertEqual(atualizado["correcoes"][0]["campos"], {
+            "finalidade": {"anterior": None, "novo": "Descansar"},
+        })
 
     def test_metadados_e_filtros_exigem_autenticacao_e_isolam_contas(self):
         identificador = self.criar(finalidade="Focar", contexto="Estudo")["sessao_id"]
