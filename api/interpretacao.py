@@ -5,6 +5,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 
 from api.autenticacao import usuario_autenticado
+from core.interpretacao.llm import criar_interpretador_llm_do_ambiente
 from core.interpretacao.servico import (
     ErroInterpretacao, InterpretacaoRegistrada, MotoresInterpretacao,
     PedidoInterpretacao, PedidoRevisao, ResultadoRevisao,
@@ -16,8 +17,8 @@ router = APIRouter(tags=["interpretação"], dependencies=[Depends(usuario_auten
 
 
 def obter_motores():
-    """Sem LLM por padrão; testes podem injetar adaptadores pelo FastAPI."""
-    return MotoresInterpretacao()
+    """Configuração só do servidor; motor externo exige escolha explícita no pedido."""
+    return MotoresInterpretacao(llm=criar_interpretador_llm_do_ambiente())
 
 
 def _executar(funcao, *args):

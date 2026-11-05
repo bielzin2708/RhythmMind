@@ -18,7 +18,8 @@ from core.recomendador import recomendar_musicas, explicar_recomendacoes, valida
 from core.sessoes import ConflitoSessao, atualizar_sessao, recomendacoes_registradas
 from core.interpretacao.adaptadores import InterpretadorLexical
 from core.interpretacao.base import BaseIndisponivel, carregar_base
-from core.interpretacao.contratos import Categoria, PropostaInterpretacao
+from core.interpretacao.contratos import Categoria, PropostaInterpretacao, PropostaLLM
+from core.interpretacao.llm import SaidaLLMInvalida
 
 
 class ErroInterpretacao(Exception):
@@ -77,6 +78,8 @@ class InterpretacaoRegistrada(ContratoServico):
     motor_solicitado: Literal["dicionario", "llm"]
     motor_utilizado: Literal["dicionario", "llm", "mock"]
     motor_versao: StrictStr = Field(min_length=1, max_length=200)
+    provedor: StrictStr | None = Field(default=None, min_length=1, max_length=100)
+    modelo: StrictStr | None = Field(default=None, min_length=1, max_length=100)
     fallback_motivo: Literal["indisponivel", "saida_invalida", "falha_motor"] | None = None
     estado_revisao: Literal["pendente", "revisada", "superada"] = "pendente"
     proposta: PropostaInterpretacao
@@ -183,6 +186,8 @@ def _executar_motor(motor, original, desejo, base):
         raise _FalhaMotor("indisponivel")
     try:
         saida = motor.interpretar(original, desejo, base)
+    except SaidaLLMInvalida as erro:
+        raise _FalhaMotor("saida_invalida") from erro
     except Exception as erro:
         raise _FalhaMotor("falha_motor") from erro
     try:
@@ -195,8 +200,16 @@ def _executar_motor(motor, original, desejo, base):
         # Revalidar mesmo modelos construídos internamente sem validação.
         if isinstance(saida, BaseModel):
             saida = saida.model_dump()
-        proposta = (PropostaInterpretacao.model_validate_json(saida) if isinstance(saida, str)
-                    else PropostaInterpretacao.model_validate(saida))
+        contrato = PropostaLLM if origem == "llm" else PropostaInterpretacao
+        proposta = (contrato.model_validate_json(saida) if isinstance(saida, str)
+                    else contrato.model_validate(saida))
+        referencias_validas = {regra["id"] for regra in base.conhecimento["regras"]}
+        if not set(proposta.referencias_base) <= referencias_validas:
+            raise ValueError("Referência ausente da base utilizada.")
+        if origem == "llm" and (getattr(motor, "provedor", None) not in {"openai", "gemini"}
+                               or not isinstance(getattr(motor, "modelo", None), str)
+                               or not 1 <= len(motor.modelo) <= 100):
+            raise ValueError("Metadados de LLM inválidos.")
         for parte, texto in ((proposta.estado_atual, original),
                              (proposta.estado_desejado, desejo if desejo is not None else original)):
             for sugestao in parte.sugestoes:
@@ -240,8 +253,9 @@ def interpretar_sessao(pedido: PedidoInterpretacao, motores: MotoresInterpretaca
         if pedido.motor != "llm" or not pedido.permitir_fallback_dicionario:
             raise ErroInterpretacao(503, "O motor solicitado não concluiu a interpretação. O relato foi preservado.") from erro
         fallback = erro.motivo
+        motor = motores.dicionario
         try:
-            proposta, origem, versao = _executar_motor(motores.dicionario, original, desejo, base)
+            proposta, origem, versao = _executar_motor(motor, original, desejo, base)
             if origem not in {"dicionario", "mock"}:
                 raise _FalhaMotor("saida_invalida")
         except _FalhaMotor as falha:
@@ -251,6 +265,8 @@ def interpretar_sessao(pedido: PedidoInterpretacao, motores: MotoresInterpretaca
         criada_em=datetime.now(timezone.utc).isoformat(), base_sha256=base.sha256,
         hash_entrada=_hash_entrada(registro), chave_reuso=chave,
         motor_solicitado=pedido.motor, motor_utilizado=origem, motor_versao=versao,
+        provedor=motor.provedor if origem == "llm" else None,
+        modelo=motor.modelo if origem == "llm" else None,
         fallback_motivo=fallback, proposta=proposta,
     )
     _gravar(identificador, esperado=registro, interpretacao=rascunho.model_dump(mode="json"))

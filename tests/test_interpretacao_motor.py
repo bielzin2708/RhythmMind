@@ -167,7 +167,10 @@ class TestBaseConhecimento(unittest.TestCase):
             with self.assertRaises(FrozenInstanceError):
                 base.sha256 = "outro"
             conteudo = json.loads(base.conteudo_json)
-            self.assertEqual(set(conteudo), {"versao", "taxonomia", "ordem_categorias", "regras"})
+            self.assertEqual(set(conteudo), {
+                "versao", "taxonomia", "ordem_categorias", "regras", "conhecimento_operacional",
+            })
+            self.assertEqual(conteudo["conhecimento_operacional"], base.conhecimento)
             self.assertEqual(list(base.dicionario), list(_DICIONARIO_REAL))
 
 

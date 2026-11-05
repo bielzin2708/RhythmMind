@@ -1,0 +1,136 @@
+{
+  "versao": "rhythmmind.base-contexto.v1",
+  "fonte_documental": {
+    "titulo": "TCC RhythmMind 02/11",
+    "versao": "02/11, 40 páginas",
+    "nota": "Síntese operacional do TCC, especialmente seções 5.2–5.5, páginas impressas 21–28. As categorias, objetivos/contextos e estratégias são vocabulários heurísticos do código existente (data/dicionario_emocional.json, main.py e core/recomendador.py), descrito na seção 5.3; não constituem taxonomia científica validada. A coexistência é um critério operacional de representação em listas compatível com RF02, não um resultado experimental demonstrado no relatório. Objetivos e contextos abaixo reutilizam o vocabulário de atividades do protótipo sem restringir os campos livres já existentes. As referências identificam o relatório consultado, não nova consulta às obras que ele cita."
+  },
+  "taxonomia": {
+    "categorias": [
+      "feliz",
+      "animado",
+      "foco",
+      "calmo",
+      "disposto",
+      "reflexivo",
+      "triste",
+      "cansado",
+      "sofrendo",
+      "ansioso",
+      "raiva",
+      "explosivo",
+      "amor",
+      "normal"
+    ],
+    "objetivos": [
+      "treinar",
+      "relaxar",
+      "estudar",
+      "reflexao",
+      "entender",
+      "trabalhar",
+      "social"
+    ],
+    "contextos": [
+      "treinar",
+      "relaxar",
+      "estudar",
+      "reflexao",
+      "entender",
+      "trabalhar",
+      "social"
+    ],
+    "estrategias": [
+      {
+        "id": "transicao_emocional",
+        "proposito": "Heurística de organizar sugestões entre o estado percebido e o desejado, sem prometer uma mudança emocional."
+      },
+      {
+        "id": "foco_cognitivo",
+        "proposito": "Heurística para uma finalidade de concentração, considerando que a música também pode interferir na tarefa."
+      },
+      {
+        "id": "catarse",
+        "proposito": "Heurística de associar intensidade musical à vontade de expressar o que se sente, sem finalidade terapêutica."
+      },
+      {
+        "id": "ativacao_gradual",
+        "proposito": "Heurística de organizar uma passagem gradual de intensidade conforme a intenção declarada, sem garantir disposição."
+      },
+      {
+        "id": "descompressao",
+        "proposito": "Heurística de sugerir uma escuta percebida como mais tranquila para uma intenção de relaxamento."
+      },
+      {
+        "id": "ativacao",
+        "proposito": "Heurística de organizar sugestões para uma intenção de maior energia percebida, sem efeito corporal garantido."
+      },
+      {
+        "id": "espelhamento",
+        "proposito": "Heurística de aproximar sugestões das categorias reconhecidas pela pessoa, sem afirmar que a música produz essas emoções."
+      }
+    ]
+  },
+  "regras": [
+    {
+      "id": "RM01",
+      "enunciado": "Separe emoção atual percebida, intenção de regulação/estado desejado e objetivo/contexto da atividade. Querer ficar calmo não significa já estar calmo; querer estudar não demonstra uma emoção. Sugira objetivo/contexto apenas quando sustentado no relato, sem preencher fatos ausentes.",
+      "fontes": [
+        "TCC RhythmMind 02/11, seção 5.2, p. 22; seção 5.3, pp. 23–24; seção 5.4, RF01, p. 25",
+        "main.py, inferir_contextos_para_musica (vocabulário operacional)"
+      ]
+    },
+    {
+      "id": "RM02",
+      "enunciado": "Permita sentimentos coexistentes em listas distintas de estado atual e desejado. Não force uma categoria única nem elimine automaticamente sentimentos contrastantes; peça esclarecimento quando o papel ou o momento não estiver claro. Este é um critério operacional de representação e revisão, não uma conclusão clínica.",
+      "fontes": [
+        "core/interpretacao/contratos.py, ParteInterpretacao.sugestoes (representação operacional em lista)",
+        "TCC RhythmMind 02/11, seção 5.4, RF02, pp. 25–26 (participação e revisão)"
+      ]
+    },
+    {
+      "id": "RM03",
+      "enunciado": "Em estudar ou trabalhar, considere a natureza da tarefa: música, especialmente com letra, pode interferir em memória e linguagem. Concentração percebida não equivale a desempenho ou aprendizagem medidos. Não prometa melhora de foco.",
+      "fontes": [
+        "TCC RhythmMind 02/11, seção 5.1, Quadro 3, p. 21; seção 5.2, p. 21"
+      ]
+    },
+    {
+      "id": "RM04",
+      "enunciado": "Relaxamento/descompressão e treino são finalidades possíveis de escuta. Os resultados discutidos dependem da pessoa, atividade e condições; não garantem redução de estresse nem melhora de desempenho individual. Preserve a intenção relatada e permita retorno sem mudança.",
+      "fontes": [
+        "TCC RhythmMind 02/11, seção 5.2, pp. 21–22; seção 5.4, RF04, p. 25"
+      ]
+    },
+    {
+      "id": "RM05",
+      "enunciado": "Use linguagem cotidiana, cuidadosa e provisória: apresente possibilidades para a pessoa revisar, sem diagnósticos, rótulos clínicos ou percentuais de certeza emocional. Diferencie relato pessoal, interpretação computacional e mensuração fisiológica.",
+      "fontes": [
+        "TCC RhythmMind 02/11, seção 1.3, p. 9; seção 5.2, p. 21; seção 5.5, pp. 27–28",
+        "core/interpretacao/contratos.py (restrição operacional da devolutiva)"
+      ]
+    },
+    {
+      "id": "RM06",
+      "enunciado": "A interpretação é uma sugestão separada da decisão humana. A pessoa pode corrigir, confirmar só o que reconhece ou seguir sem categoria. Entradas vagas ou ambíguas exigem esclarecimento; não preencher lacunas com emoções presumidas.",
+      "fontes": [
+        "TCC RhythmMind 02/11, seção 5.3, p. 24; seção 5.4, RF02, pp. 25–26"
+      ]
+    },
+    {
+      "id": "RM07",
+      "enunciado": "Respeite negações, contrastes, referência temporal e a pessoa de quem se fala. Não estou triste não confirma triste; um estado passado ou de outra pessoa não deve ser automaticamente atribuído ao usuário agora. Distinga erro de escrita de ambiguidade sem criar fatos.",
+      "fontes": [
+        "TCC RhythmMind 02/11, seção 5.3, pp. 23–24; seção 5.4, p. 26"
+      ]
+    },
+    {
+      "id": "RM08",
+      "enunciado": "A interpretação não seleciona, inventa nem recomenda faixas. Seleção e validação pertencem ao motor determinístico sobre o catálogo existente após a revisão. Nomes das estratégias são heurísticas; BPM e outros metadados não determinam emoções, respostas fisiológicas ou efeitos clínicos universais.",
+      "fontes": [
+        "TCC RhythmMind 02/11, seção 5.3, pp. 23–24; seção 5.5, pp. 27–28",
+        "core/recomendador.py, definir_estrategia e recomendar_musicas (responsabilidade operacional)"
+      ]
+    }
+  ]
+}

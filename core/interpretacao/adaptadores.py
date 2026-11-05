@@ -129,7 +129,7 @@ def _parte(texto, dicionario, papel, mensagens_extras=()):
 
 class InterpretadorLexical:
     origem = "dicionario"
-    identificador = "lexical_contextual_v1"
+    identificador = "lexical_contextual_v2"
 
     def interpretar(
         self, texto_original: str, texto_desejado: str | None, base: BaseConhecimento,
@@ -148,8 +148,23 @@ class InterpretadorLexical:
             mensagens.append("O relato contém vários trechos de intenção; revise o estado desejado e o trecho destacado.")
         if intencoes and _OUTRA_PESSOA.search(texto_original):
             mensagens.append("Há referência a outra pessoa; confirme de quem é o estado descrito.")
+        parte_atual = _parte(atual, dicionario, "atual")
+        parte_desejada = _parte(desejo, dicionario, "desejado", mensagens)
+        precisa_esclarecimento = (
+            parte_atual.estado in {"ambigua", "sem_correspondencia"}
+            or parte_desejada.estado == "ambigua"
+        )
+        referencias = ["RM01", "RM05", "RM06", "RM07", "RM08"]
+        if len(parte_atual.sugestoes) > 1 or len(parte_desejada.sugestoes) > 1:
+            referencias.insert(1, "RM02")
         return PropostaInterpretacao(
-            estado_atual=_parte(atual, dicionario, "atual"),
-            estado_desejado=_parte(desejo, dicionario, "desejado", mensagens),
+            estado_atual=parte_atual,
+            estado_desejado=parte_desejada,
             texto_intencao=trecho_literal,
+            resumo_reflexivo=(
+                "Esta leitura lexical é provisória. Confirme o que representa seu momento "
+                "e sua intenção; você também pode continuar sem categoria."
+            ),
+            precisa_esclarecimento=precisa_esclarecimento,
+            referencias_base=referencias,
         )

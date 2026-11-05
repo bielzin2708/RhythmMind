@@ -1,8 +1,10 @@
 """Contratos de interpretação: sugestões sem autoridade para confirmar uma sessão."""
 
+import re
+import unicodedata
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr, StringConstraints, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, StringConstraints, field_validator, model_validator
 
 
 Categoria = Literal[
@@ -13,6 +15,12 @@ CATEGORIAS = (
     "feliz", "animado", "foco", "calmo", "disposto", "reflexivo", "triste",
     "cansado", "sofrendo", "ansioso", "raiva", "explosivo", "amor", "normal",
 )
+Objetivo = Literal["treinar", "relaxar", "estudar", "reflexao", "entender", "trabalhar", "social"]
+Contexto = Literal["treinar", "relaxar", "estudar", "reflexao", "entender", "trabalhar", "social"]
+ReferenciaBase = Literal["RM01", "RM02", "RM03", "RM04", "RM05", "RM06", "RM07", "RM08"]
+OBJETIVOS = ("treinar", "relaxar", "estudar", "reflexao", "entender", "trabalhar", "social")
+CONTEXTOS = OBJETIVOS
+REFERENCIAS_BASE = ("RM01", "RM02", "RM03", "RM04", "RM05", "RM06", "RM07", "RM08")
 TextoCurto = Annotated[StrictStr, StringConstraints(min_length=1, max_length=500)]
 Resumo = Annotated[StrictStr, StringConstraints(min_length=1, max_length=600)]
 TextoIntencao = Annotated[StrictStr, StringConstraints(min_length=1, max_length=4000)]
@@ -75,6 +83,25 @@ class PropostaInterpretacao(_Contrato):
     estado_atual: ParteInterpretacao
     estado_desejado: ParteInterpretacao
     texto_intencao: TextoIntencao | None = None
+    objetivos: list[Objetivo] = Field(default_factory=list, max_length=len(OBJETIVOS))
+    contextos: list[Contexto] = Field(default_factory=list, max_length=len(CONTEXTOS))
+    resumo_reflexivo: Resumo | None = None
+    precisa_esclarecimento: StrictBool = False
+    referencias_base: list[ReferenciaBase] = Field(default_factory=list, max_length=len(REFERENCIAS_BASE))
+
+    @field_validator("objetivos", "contextos", "referencias_base")
+    @classmethod
+    def sem_repeticoes(cls, valores):
+        if len(valores) != len(set(valores)):
+            raise ValueError("Objetivos, contextos e referências não podem se repetir.")
+        return valores
+
+    @field_validator("resumo_reflexivo")
+    @classmethod
+    def resumo_reflexivo_nao_branco(cls, valor):
+        if valor is not None and not valor.strip():
+            raise ValueError("O resumo reflexivo não pode ser apenas espaços.")
+        return valor
 
     @field_validator("texto_intencao")
     @classmethod
@@ -82,3 +109,57 @@ class PropostaInterpretacao(_Contrato):
         if valor is not None and not valor.strip():
             raise ValueError("O trecho de intenção não pode ser apenas espaços.")
         return valor
+
+
+def _validar_linguagem_gerada(texto):
+    """Barreira conservadora para alegações clínicas e percentuais em devolutivas.
+
+    Não se aplica a evidências literais ou ao relato. Não constitui um detector
+    semântico completo; a revisão humana continua sendo parte do fluxo.
+    """
+    normalizado = "".join(
+        caractere for caractere in unicodedata.normalize("NFKD", texto.casefold())
+        if not unicodedata.combining(caractere)
+    )
+    if re.search(r"%|\bpor\s+cento\b", normalizado):
+        raise ValueError("A devolutiva não pode apresentar percentuais de certeza emocional.")
+    if re.search(
+        r"\b(?:diagnostic\w*|transtorno\w*|depressa\w*|depressiv\w*|"
+        r"bipolar\w*|esquizofren\w*|patologi\w*|sindrome\w*|doenca\w*|"
+        r"tratamento\w*|terapeutic\w*|clinicamente|cura\w*|tdah|toc|tept|"
+        r"ansiedade\s+generalizada|(?:crise|sindrome)\s+de\s+panico)\b",
+        normalizado,
+    ):
+        raise ValueError("A devolutiva deve usar linguagem cotidiana e não clínica.")
+    if re.search(
+        r"https?://|www\.|\b(?:musica\w*|faixas?|artistas?|cancoes?|cancao|"
+        r"playlists?|bpm|ouca|escute|batimentos?|cardiac\w*|fisiologic\w*)\b",
+        normalizado,
+    ):
+        raise ValueError("A devolutiva deve se limitar ao estado, à intenção e à atividade.")
+
+
+class PropostaLLM(PropostaInterpretacao):
+    """Resposta externa completa; defaults legados não completam omissões da LLM."""
+
+    texto_intencao: TextoIntencao | None
+    objetivos: list[Objetivo] = Field(max_length=len(OBJETIVOS))
+    contextos: list[Contexto] = Field(max_length=len(CONTEXTOS))
+    resumo_reflexivo: Resumo
+    precisa_esclarecimento: StrictBool
+    referencias_base: list[ReferenciaBase] = Field(min_length=1, max_length=len(REFERENCIAS_BASE))
+
+    @model_validator(mode="after")
+    def validar_devolutiva(self):
+        partes = (self.estado_atual, self.estado_desejado)
+        if (any(parte.estado == "ambigua" for parte in partes)
+                or self.estado_atual.estado == "sem_correspondencia") and not self.precisa_esclarecimento:
+            raise ValueError("Entradas insuficientes ou ambíguas precisam de esclarecimento.")
+        textos = [self.resumo_reflexivo]
+        for parte in partes:
+            textos.extend([parte.resumo, *parte.ambiguidades])
+            if any(sugestao.confianca_autodeclarada is not None for sugestao in parte.sugestoes):
+                raise ValueError("A LLM não deve declarar certeza emocional.")
+        for texto in textos:
+            _validar_linguagem_gerada(texto)
+        return self
