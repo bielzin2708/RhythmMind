@@ -10,6 +10,41 @@ let session;
 
 function isStale(error) { return error instanceof StaleRequestError || error.name === 'StaleRequestError'; }
 
+function setAccessAppearance(access) {
+  document.body.classList.toggle('auth-screen', access);
+  document.querySelector('meta[name="color-scheme"]').content = access ? 'dark' : 'light';
+  document.querySelector('meta[name="theme-color"]').content = access ? '#0B1329' : '#193440';
+}
+
+function resetPasswordVisibility(form) {
+  const input = form.elements.namedItem('senha');
+  if (input) input.type = 'password';
+  const button = form.querySelector('[data-toggle-password]');
+  if (!button) return;
+  button.setAttribute('aria-pressed', 'false');
+  button.setAttribute('aria-label', 'Mostrar senha');
+  button.querySelector('[data-password-label]').textContent = 'Mostrar';
+}
+
+function clearPasswords() {
+  for (const id of ['auth-login-form', 'auth-register-form']) {
+    const form = $(id);
+    form.elements.namedItem('senha').value = '';
+    resetPasswordVisibility(form);
+  }
+}
+
+for (const button of document.querySelectorAll('[data-toggle-password]')) {
+  button.addEventListener('click', () => {
+    const input = document.getElementById(button.dataset.togglePassword);
+    const visible = input.type === 'password';
+    input.type = visible ? 'text' : 'password';
+    button.setAttribute('aria-pressed', String(visible));
+    button.setAttribute('aria-label', visible ? 'Ocultar senha' : 'Mostrar senha');
+    button.querySelector('[data-password-label]').textContent = visible ? 'Ocultar' : 'Mostrar';
+  });
+}
+
 function showView(next) {
   if (!user) return;
   for (const name of ['session', 'history', 'catalog']) {
@@ -40,10 +75,12 @@ function clearIdentity() {
   $('#account-name').textContent = '';
   $('#app-shell').hidden = true;
   $('#auth-shell').hidden = false;
+  setAccessAppearance(true);
   $('#auth-login-form').hidden = false;
   $('#auth-register-form').hidden = true;
   $('#auth-login-form').reset();
   $('#auth-register-form').reset();
+  clearPasswords();
   $('#auth-status').textContent = '';
   notify('');
   $('#login-name').focus();
@@ -66,12 +103,14 @@ for (const name of ['session', 'history', 'catalog']) {
 }
 
 $('#show-register').addEventListener('click', () => {
+  clearPasswords();
   $('#auth-login-form').hidden = true;
   $('#auth-register-form').hidden = false;
   $('#auth-status').textContent = '';
   $('#register-name').focus();
 });
 $('#show-login').addEventListener('click', () => {
+  clearPasswords();
   $('#auth-register-form').hidden = true;
   $('#auth-login-form').hidden = false;
   $('#auth-status').textContent = '';
@@ -84,6 +123,7 @@ async function authenticate(form, register) {
   const credentials = { nome_usuario: String(fields.get('nome_usuario')).trim(), senha: String(fields.get('senha')) };
   await withBusy(form, async () => {
     $('#auth-status').textContent = register ? 'Criando seu espaço…' : 'Conferindo seu acesso…';
+    $('#auth-status').setAttribute('role', 'status');
     try {
       if (register) await api('/api/auth/registrar', { method: 'POST', body: credentials });
       const access = await api('/api/auth/entrar', { method: 'POST', body: credentials });
@@ -95,6 +135,7 @@ async function authenticate(form, register) {
       $('#account-name').textContent = profile.nome_usuario;
       $('#auth-shell').hidden = true;
       $('#app-shell').hidden = false;
+      setAccessAppearance(false);
       $('#auth-status').textContent = '';
       form.reset();
       session.newSession();
@@ -108,7 +149,8 @@ async function authenticate(form, register) {
       }
     } finally {
       // Senhas não ficam no formulário depois de uma tentativa.
-      form.querySelector('input[type="password"]').value = '';
+      form.elements.namedItem('senha').value = '';
+      resetPasswordVisibility(form);
       credentials.senha = '';
     }
   });

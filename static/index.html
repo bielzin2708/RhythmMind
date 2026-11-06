@@ -3,15 +3,16 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light">
-    <meta name="theme-color" content="#193440">
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#0B1329">
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
     <meta name="description" content="RhythmMind: um diário de relatos, escolhas musicais e percepções para revisar com calma.">
     <title>RhythmMind — seu momento, sua escuta</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/auth.css">
     <script type="module" src="/static/app.js"></script>
   </head>
-  <body>
+  <body class="auth-screen">
     <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
     <header class="site-header">
       <div class="header-inner">
@@ -32,38 +33,45 @@
 
       <section id="auth-shell" class="auth-layout" aria-labelledby="welcome-title">
         <div class="welcome-panel">
+          <div class="welcome-intro">
           <p class="eyebrow">UM ESPAÇO PARA A SUA ESCUTA</p>
           <h1 id="welcome-title">Seu momento,<br> em palavras<br> <span>e música.</span></h1>
           <p class="welcome-description">Conte como está, revise o que faz sentido para você e registre sua experiência com a música.</p>
+          </div>
+          <div class="listening-art" aria-hidden="true">
+            <svg class="sound-wave" viewBox="0 0 640 100" fill="none" focusable="false">
+              <path d="M0 50C65 50 72 22 123 22S194 78 246 78 314 25 366 25 438 74 488 74 570 50 640 50"/>
+              <path d="M0 50C65 50 72 30 123 30S194 70 246 70 314 18 366 18 438 82 488 82 570 50 640 50"/>
+              <path d="M0 50C65 50 72 38 123 38S194 62 246 62 314 10 366 10 438 90 488 90 570 50 640 50"/>
+              <path d="M0 50C65 50 72 46 123 46S194 54 246 54 314 34 366 34 438 66 488 66 570 50 640 50"/>
+              <path d="M0 50C65 50 72 54 123 54S194 46 246 46 314 42 366 42 438 58 488 58 570 50 640 50"/>
+            </svg>
+          </div>
           <ol class="welcome-steps" aria-label="Como funciona">
             <li><span class="step-number" aria-hidden="true">01</span><div><strong>Conte do seu jeito</strong><p>Um relato, uma intenção, um contexto.</p></div></li>
-            <li><span class="step-number" aria-hidden="true">02</span><div><strong>Você revisa a interpretação</strong><p>As sugestões nunca decidem por você.</p></div></li>
-            <li><span class="step-number" aria-hidden="true">03</span><div><strong>Escolha e perceba</strong><p>Guarde o que fez sentido após a escuta.</p></div></li>
+            <li><span class="step-number" aria-hidden="true">02</span><div><strong>Você revisa a interpretação</strong><p>Marque apenas o que faz sentido para você.</p></div></li>
+            <li><span class="step-number" aria-hidden="true">03</span><div><strong>Escolha sua escuta</strong><p>Registre como foi a sua experiência.</p></div></li>
           </ol>
-          <div class="listening-art" aria-hidden="true">
-            <div class="record-ring ring-outer"></div><div class="record-ring ring-middle"></div><div class="record-ring ring-inner"></div>
-            <div class="record-center"></div><span class="art-caption">Cada escuta tem seu contexto.</span>
-          </div>
         </div>
 
         <div class="access-card card">
           <div class="card-topline"><span class="eyebrow">SEU DIÁRIO</span><span class="small-label">Acesso individual</span></div>
           <form method="post" id="auth-login-form" class="stack-form">
-            <div class="form-intro"><h2>Bom ter você por aqui.</h2><p>Entre para acessar seus registros e continuar de onde parou.</p></div>
-            <div class="field"><label for="login-name">Nome de usuário ou pseudônimo</label><input id="login-name" name="nome_usuario" autocomplete="username" minlength="3" maxlength="64" pattern="[a-zA-Z0-9_.\-]+" placeholder="Seu nome de usuário" required></div>
-            <div class="field"><label for="login-password">Senha</label><input id="login-password" name="senha" type="password" minlength="12" maxlength="128" autocomplete="current-password" placeholder="Sua senha" required></div>
+            <div class="form-intro"><h2>Bom ter você por aqui.</h2><p>Acesse seus registros e continue de onde parou.</p></div>
+            <div class="field"><label for="login-name">Usuário ou pseudônimo</label><input id="login-name" name="nome_usuario" autocomplete="username" minlength="3" maxlength="64" pattern="[a-zA-Z0-9_.\-]+" placeholder="Seu nome de usuário" required></div>
+            <div class="field"><label for="login-password">Senha</label><div class="password-field"><input id="login-password" name="senha" type="password" minlength="12" maxlength="128" autocomplete="current-password" placeholder="Sua senha" required><button class="password-toggle" type="button" data-toggle-password="login-password" aria-controls="login-password" aria-pressed="false" aria-label="Mostrar senha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span data-password-label>Mostrar</span></button></div></div>
             <button class="button button-primary button-wide" type="submit">Entrar no meu espaço <span aria-hidden="true">→</span></button>
-            <p class="access-switch">Ainda não tem uma conta? <button id="show-register" class="button-link" type="button">Criar conta</button></p>
+            <p class="access-switch">Primeira vez por aqui? <button id="show-register" class="button-link" type="button">Criar conta</button></p>
           </form>
           <form method="post" id="auth-register-form" class="stack-form" hidden>
             <div class="form-intro"><h2>Crie seu espaço.</h2><p>Você pode usar um pseudônimo para identificar sua conta.</p></div>
             <div class="field"><label for="register-name">Nome de usuário ou pseudônimo</label><input id="register-name" name="nome_usuario" autocomplete="username" minlength="3" maxlength="64" pattern="[a-zA-Z0-9_.\-]+" placeholder="Como quer se identificar?" aria-describedby="register-name-help" required><small id="register-name-help">De 3 a 64 caracteres: letras sem acento, números, ponto, traço ou sublinhado.</small></div>
-            <div class="field"><label for="register-password">Crie uma senha</label><input id="register-password" name="senha" type="password" minlength="12" maxlength="128" autocomplete="new-password" placeholder="Pelo menos 12 caracteres" aria-describedby="register-password-help" required><small id="register-password-help">Use entre 12 e 128 caracteres.</small></div>
+            <div class="field"><label for="register-password">Crie uma senha</label><div class="password-field"><input id="register-password" name="senha" type="password" minlength="12" maxlength="128" autocomplete="new-password" placeholder="Pelo menos 12 caracteres" aria-describedby="register-password-help" required><button class="password-toggle" type="button" data-toggle-password="register-password" aria-controls="register-password" aria-pressed="false" aria-label="Mostrar senha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span data-password-label>Mostrar</span></button></div><small id="register-password-help">Use entre 12 e 128 caracteres.</small></div>
             <button class="button button-primary button-wide" type="submit">Criar minha conta <span aria-hidden="true">→</span></button>
             <p class="access-switch">Já tem uma conta? <button id="show-login" class="button-link" type="button">Entrar</button></p>
           </form>
           <div id="auth-status" class="notice" role="status" aria-live="polite"></div>
-          <div class="development-note"><span class="note-icon" aria-hidden="true">i</span><p>Este é um ambiente de desenvolvimento. Use relatos e dados fictícios; os registros são temporários neste ambiente.</p></div>
+          <div class="development-note"><span class="note-icon" aria-hidden="true">i</span><p>Use dados fictícios. Seus registros são temporários neste protótipo.</p></div>
         </div>
       </section>
 

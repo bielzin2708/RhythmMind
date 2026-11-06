@@ -48,7 +48,7 @@ class InterfaceWebTests(unittest.TestCase):
                 self.assertIn('id="auth-login-form"', resposta.text)
 
     def test_assets_estaticos_respondem_200_com_tipos_corretos(self):
-        for arquivo in ("styles.css", "app.js", "api.js", "ui.js", "session.js", "history.js"):
+        for arquivo in ("styles.css", "auth.css", "app.js", "api.js", "ui.js", "session.js", "history.js"):
             with self.subTest(arquivo=arquivo):
                 resposta = self.client.get(f"/static/{arquivo}")
                 self.assertEqual(resposta.status_code, 200, resposta.text)
