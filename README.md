@@ -22,6 +22,20 @@ OAuth do aplicativo estão configuradas no servidor. O modo opcional
 localmente entre reinicializações; sem a opção, os dados continuam temporários.
 Veja o [guia de configuração e teste do login Google](docs/login_google.md).
 
+## Seu espaço na interface web
+
+Depois de entrar, a página **Seu espaço** apresenta as etapas pendentes e os
+registros recentes da própria conta. **Começar um relato** inicia uma sessão;
+**Sua sessão** permite voltar à etapa aberta. O menu também oferece **Meu diário**,
+**Meu catálogo**, informações sobre o projeto e saída da conta. As áreas usam
+a mesma identidade marinho/ciano do acesso e se adaptam ao celular.
+
+Os cartões consultam a API autenticada. Uma escuta não informada, a escolha
+de nenhuma faixa e um retorno negativo continuam sendo situações distintas.
+Para verificar essa classificação no frontend, execute
+`node --test tests/js/test_home_records.mjs` (Node.js 24 ou posterior), além
+da suíte Python descrita abaixo.
+
 ## Negação e expressões compostas
 
 O analisador usa regras locais para negação e reconhece os compostos já

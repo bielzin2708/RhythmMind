@@ -475,5 +475,5 @@ export function initHistory({ api, notify, onResume, onChanged }) {
   }
 
   reset();
-  return { load, reset };
+  return { load, reset, open: openRecord };
 }

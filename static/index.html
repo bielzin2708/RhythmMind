@@ -10,6 +10,7 @@
     <title>RhythmMind — seu momento, sua escuta</title>
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="/static/auth.css">
+    <link rel="stylesheet" href="/static/workspace.css">
     <script type="module" src="/static/app.js"></script>
   </head>
   <body class="auth-screen">
@@ -27,7 +28,24 @@
       </div>
     </header>
 
-    <main id="main-content" class="page-wrap">
+    <aside id="workspace-sidebar" class="workspace-sidebar" aria-label="Seu espaço no RhythmMind" hidden>
+      <button id="workspace-home-link" class="workspace-brand" type="button" aria-label="RhythmMind, ir para seu espaço">
+        <svg class="brand-symbol" width="38" height="38" viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="12" fill="#131F3A"/><path d="M11 18v4m6-10v16m6-12v8m6-6v4" stroke="#00C2CB" stroke-width="2.6" stroke-linecap="round"/></svg>
+        <span>Rhythm<span class="brand-light">Mind</span></span>
+      </button>
+      <nav class="workspace-nav" aria-label="Navegação principal">
+        <button id="nav-home" class="nav-button active" type="button" aria-current="page"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3zM9 20v-6h6v6"/></svg><span>Seu espaço</span></button>
+        <button id="nav-session" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span>Sua sessão</span></button>
+        <button id="nav-history" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5zM9 7h6M9 11h6M9 15h4"/></svg><span>Meu diário</span></button>
+        <button id="nav-catalog" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13M9 8l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></svg><span>Meu catálogo</span></button>
+      </nav>
+      <div class="workspace-sidebar-bottom">
+        <button id="about-button" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>Sobre o RhythmMind</span></button>
+        <button id="logout-button" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H4v16h6M14 8l4 4-4 4M8 12h10"/></svg><span>Sair</span></button>
+      </div>
+    </aside>
+
+    <main id="main-content" class="page-wrap" tabindex="-1">
       <noscript><p class="notice notice-warning">Ative o JavaScript do navegador para usar os formulários e acessar suas sessões.</p></noscript>
       <div id="global-status" class="notice global-notice" role="status" aria-live="polite" tabindex="-1"></div>
 
@@ -81,16 +99,34 @@
       </section>
 
       <div id="app-shell" hidden>
-        <div class="workspace-header">
-          <nav class="workspace-nav" aria-label="Navegação principal">
-            <button id="nav-session" class="nav-button active" data-view="session" type="button" aria-current="page">Sua sessão</button>
-            <button id="nav-history" class="nav-button" data-view="history" type="button">Histórico e padrões</button>
-            <button id="nav-catalog" class="nav-button" data-view="catalog" type="button">Seu catálogo</button>
-          </nav>
-          <div class="account-controls"><span class="account-label">Seu espaço: <strong id="account-name"></strong></span><button id="logout-button" class="button-link" type="button">Sair</button></div>
+        <div class="workspace-accountbar">
+          <div class="workspace-account-info"><span class="workspace-prototype">Protótipo</span><span class="account-label">Seu espaço: <strong id="account-name"></strong></span></div>
+          <span id="workspace-avatar" class="workspace-avatar" aria-hidden="true"></span>
         </div>
 
-        <section id="view-session" class="workspace-view" aria-labelledby="session-heading">
+        <section id="view-home" class="workspace-view" aria-labelledby="home-heading">
+          <div class="home-heading"><p id="home-greeting" class="eyebrow"></p><h1 id="home-heading" tabindex="-1">Seu espaço, no seu ritmo.</h1><p>Comece um relato ou continue de onde parou.</p></div>
+          <div id="home-status" class="notice" role="status" aria-live="polite" hidden></div>
+          <button id="home-retry" class="button button-secondary" type="button" hidden>Tentar carregar novamente</button>
+          <section class="home-hero" aria-labelledby="home-hero-heading">
+            <div class="home-hero-copy"><h2 id="home-hero-heading">Como está seu momento?</h2><p>Conte com suas palavras. Você poderá revisar a interpretação antes de escolher sua escuta.</p><button id="home-new-session" class="button button-primary" type="button">Começar um relato <span aria-hidden="true">→</span></button></div>
+            <svg class="home-wave" viewBox="0 0 300 170" fill="none" aria-hidden="true" focusable="false"><path d="M12 75v20m20-36v52m20-68v84m20-99v114m20-89v64m20-115v166m20-124v82m20-98v114m20-102v90m20-126v162m20-125v88m20-67v46m20-32v18" stroke="currentColor" stroke-width="5" stroke-linecap="round"/></svg>
+          </section>
+          <section class="home-section" aria-labelledby="home-pending-heading">
+            <div class="home-section-heading"><h2 id="home-pending-heading">Continue de onde parou</h2></div>
+            <div id="home-pending-list" class="home-pending-grid"></div>
+            <div id="home-pending-empty" class="home-empty" hidden><h3>No seu tempo.</h3><p>Você não tem etapas pendentes. Pode começar um novo relato quando quiser.</p></div>
+          </section>
+          <section class="home-section" aria-labelledby="home-recent-heading">
+            <div class="home-section-heading"><h2 id="home-recent-heading">Seu diário recente</h2><button id="home-open-history" class="button-link" type="button">Ver meu diário <span aria-hidden="true">→</span></button></div>
+            <div id="home-recent-list" class="home-recent-list"></div>
+            <div id="home-recent-empty" class="home-empty" hidden><h3>Seu diário começa com um relato.</h3><p>Seus registros aparecerão aqui depois que você começar uma sessão.</p></div>
+          </section>
+          <aside class="home-support"><h2>Você decide o que faz sentido.</h2><p>As interpretações são sugestões. Você pode ajustar, seguir sem categoria e registrar seu retorno quando quiser.</p></aside>
+          <aside class="home-catalog-note"><p>Suas músicas fazem parte da experiência. Você pode preparar seu catálogo antes da próxima sessão.</p><button id="home-open-catalog" class="button-link" type="button">Conhecer meu catálogo <span aria-hidden="true">→</span></button></aside>
+        </section>
+
+        <section id="view-session" class="workspace-view" aria-labelledby="session-heading" hidden>
           <div class="page-heading"><div><p class="eyebrow">UM REGISTRO DE CADA VEZ</p><h1 id="session-heading" tabindex="-1">Como está seu momento?</h1><p>Você conta. A interpretação sugere. A escolha continua sendo sua.</p></div><div class="heading-actions"><span class="quiet-badge">Sua experiência importa</span><button id="new-session-button" class="button button-secondary" type="button">Novo relato</button></div></div>
           <ol id="session-progress" class="progress-steps" aria-label="Etapas da sessão">
             <li id="step-relato" class="current" aria-current="step"><span aria-hidden="true">1</span>Relato e finalidade</li>
@@ -161,5 +197,6 @@
     <footer class="site-footer"><span>RhythmMind</span><p>Um diário de relatos, escolhas musicais e percepções.</p><span class="small-label">No seu ritmo.</span></footer>
 
     <dialog id="confirm-dialog" class="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-text"><form method="post" id="confirm-form"><span class="eyebrow">UMA ESCOLHA SOBRE SEUS DADOS</span><h2 id="confirm-title">Confirmar ação</h2><p id="confirm-text"></p><div class="button-row"><button id="confirm-cancel" class="button button-secondary" type="button">Cancelar</button><button id="confirm-submit" class="button button-danger" type="submit">Confirmar exclusão</button></div></form></dialog>
+    <dialog id="about-dialog" class="confirm-dialog" aria-labelledby="about-title"><span class="eyebrow">NO SEU RITMO</span><h2 id="about-title">Sobre o RhythmMind</h2><p>Um diário de relatos, escolhas musicais e percepções. Você conta como está, revisa as sugestões e registra o que fez sentido na sua experiência.</p><p>A interpretação é provisória e as escolhas são suas. As sugestões musicais vêm do seu catálogo; a reprodução acontece no serviço de sua preferência.</p><p>O RhythmMind oferece apoio reflexivo. Não realiza diagnósticos nem substitui acompanhamento profissional.</p><button id="about-close" class="button button-primary" type="button">Voltar ao meu espaço</button></dialog>
   </body>
 </html>

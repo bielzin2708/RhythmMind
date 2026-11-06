@@ -2,11 +2,15 @@ import { api, setToken, onUnauthorized, StaleRequestError } from './api.js';
 import { $, notify, withBusy, dismissConfirmation } from './ui.js';
 import { initSession } from './session.js';
 import { initHistory } from './history.js';
+import { initHome } from './home.js';
 
 let user = null;
 let accessEpoch = 0;
 let history;
 let session;
+let home;
+let activeView = 'home';
+let navigationVersion = 0;
 let accessBusy = false;
 let googleAvailable = false;
 
@@ -14,8 +18,10 @@ function isStale(error) { return error instanceof StaleRequestError || error.nam
 
 function setAccessAppearance(access) {
   document.body.classList.toggle('auth-screen', access);
-  document.querySelector('meta[name="color-scheme"]').content = access ? 'dark' : 'light';
-  document.querySelector('meta[name="theme-color"]').content = access ? '#0B1329' : '#193440';
+  document.body.classList.toggle('workspace-screen', !access);
+  $('#workspace-sidebar').hidden = access;
+  document.querySelector('meta[name="color-scheme"]').content = 'dark';
+  document.querySelector('meta[name="theme-color"]').content = '#0B1329';
 }
 
 function resetPasswordVisibility(form) {
@@ -84,34 +90,85 @@ for (const button of document.querySelectorAll('[data-toggle-password]')) {
   });
 }
 
-function showView(next) {
-  if (!user) return;
-  for (const name of ['session', 'history', 'catalog']) {
+function focusContent(target) {
+  if (!target || !target.getClientRects().length) return;
+  target.focus({ preventScroll: true });
+  target.scrollIntoView({ block: 'start', behavior: 'auto' });
+}
+
+function showView(next, { load = true, focus = true } = {}) {
+  const names = ['home', 'session', 'history', 'catalog'];
+  if (!user || !names.includes(next)) return;
+  activeView = next;
+  navigationVersion += 1;
+  for (const name of names) {
     $(`#view-${name}`).hidden = name !== next;
     const navigation = $(`#nav-${name}`);
     navigation.classList.toggle('active', name === next);
     if (name === next) navigation.setAttribute('aria-current', 'page');
     else navigation.removeAttribute('aria-current');
   }
-  if (next === 'history') void history.load();
-  if (next === 'catalog') void session.loadCatalog();
-  if (next === 'session') void session.loadDrafts();
+  const headings = { home: 'home-heading', session: 'session-heading', history: 'history-heading', catalog: 'catalog-heading' };
+  const heading = $(`#${headings[next]}`);
+  document.title = `RhythmMind — ${heading.textContent}`;
+  if (load && next === 'home') void home.load();
+  if (load && next === 'history') void history.load();
+  if (load && next === 'catalog') void session.loadCatalog();
+  if (load && next === 'session') void session.loadDrafts();
+  if (focus) focusContent(heading);
+}
+
+function startNewSession() {
+  if (!user) return;
+  showView('session', { load: false, focus: false });
+  session.newSession();
+}
+
+async function resumeSession(id, kind) {
+  if (!user) return;
+  const attempt = accessEpoch;
+  showView('session', { load: false, focus: false });
+  const navigation = navigationVersion;
+  await session.open(id);
+  if (attempt !== accessEpoch || navigation !== navigationVersion || !user) return;
+  focusContent(kind === 'retorno' ? $('#feedback-answer') : $('#session-heading'));
+}
+
+async function openDiaryRecord(id) {
+  if (!user) return;
+  const attempt = accessEpoch;
+  showView('history', { load: false, focus: false });
+  const navigation = navigationVersion;
+  // Uma abertura direta nao fica sujeita aos filtros da ultima consulta.
+  history.reset();
+  await history.load();
+  if (attempt !== accessEpoch || navigation !== navigationVersion || !user) return;
+  await history.open(id, false);
+  if (attempt !== accessEpoch || navigation !== navigationVersion || !user) return;
+  focusContent($('#history-detail-title'));
 }
 
 function onChanged(change = {}) {
   if (!user) return;
   if (change.deletedIds?.length) session.invalidateDeleted(change.deletedIds);
+  home.setUser(user);
+  if (activeView === 'home') void home.load();
   void session.loadDrafts();
 }
 
 function clearIdentity() {
   accessEpoch += 1;
+  navigationVersion += 1;
   user = null;
   setToken(null);
   dismissConfirmation();
   session.reset();
   history.reset();
+  home.reset();
+  $('#about-dialog').close();
   $('#account-name').textContent = '';
+  $('#workspace-avatar').textContent = '';
+  document.title = 'RhythmMind — seu momento, sua escuta';
   $('#app-shell').hidden = true;
   $('#auth-shell').hidden = false;
   setAccessAppearance(true);
@@ -130,7 +187,11 @@ session = initSession({ api, notify, onChanged,
   onHistory: () => showView('history'), onCatalog: () => showView('catalog'),
 });
 history = initHistory({ api, notify, onChanged,
-  onResume: async id => { showView('session'); await session.open(id); },
+  onResume: id => resumeSession(id),
+});
+home = initHome({ api, onNew: startNewSession, onResume: resumeSession,
+  onRecord: openDiaryRecord, onHistory: () => showView('history'),
+  onCatalog: () => showView('catalog'),
 });
 
 onUnauthorized(() => {
@@ -138,9 +199,14 @@ onUnauthorized(() => {
   notify('Seu acesso terminou. Entre novamente; seus registros salvos permanecem no servidor.', 'error');
 });
 
-for (const name of ['session', 'history', 'catalog']) {
+for (const name of ['home', 'session', 'history', 'catalog']) {
   $(`#nav-${name}`).addEventListener('click', () => showView(name));
 }
+$('#workspace-home-link').addEventListener('click', () => showView('home'));
+$('#about-button').addEventListener('click', () => {
+  if (user) $('#about-dialog').showModal();
+});
+$('#about-close').addEventListener('click', () => $('#about-dialog').close());
 
 $('#show-register').addEventListener('click', () => {
   clearPasswords();
@@ -164,6 +230,7 @@ async function activateAccess(access, attempt, message) {
   if (attempt !== accessEpoch) return;
   user = profile;
   $('#account-name').textContent = profile.nome_usuario;
+  $('#workspace-avatar').textContent = Array.from(profile.nome_usuario || 'R')[0].toLocaleUpperCase('pt-BR');
   $('#auth-shell').hidden = true;
   $('#app-shell').hidden = false;
   setAccessAppearance(false);
@@ -171,8 +238,10 @@ async function activateAccess(access, attempt, message) {
   $('#auth-login-form').reset();
   $('#auth-register-form').reset();
   clearPasswords();
-  session.newSession();
-  showView('session');
+  session.reset();
+  history.reset();
+  home.setUser(profile);
+  showView('home');
   notify(message, 'success');
 }
 
