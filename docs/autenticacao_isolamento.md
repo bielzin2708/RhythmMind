@@ -47,7 +47,7 @@ Cadastro e entrada recebem:
 Este é apenas um exemplo descartável, não uma conta padrão criada pelo
 sistema. O nome admite 3 a 64 letras ASCII, números, ponto, hífen ou
 sublinhado e é armazenado em minúsculas; nomes são únicos sem distinguir
-maiúsculas. Senhas têm de 12 a 128 caracteres e não são recortadas nem
+maiúsculas. Senhas têm de 6 a 128 caracteres e não são recortadas nem
 normalizadas.
 
 O perfil contém `usuario_id` UUID gerado no servidor, `nome_usuario` e

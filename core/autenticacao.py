@@ -43,8 +43,8 @@ def normalizar_nome(nome_usuario):
 
 
 def validar_senha(senha):
-    if not isinstance(senha, str) or not 12 <= len(senha) <= 128:
-        raise ValueError("Senha deve ter entre 12 e 128 caracteres.")
+    if not isinstance(senha, str) or not 6 <= len(senha) <= 128:
+        raise ValueError("Senha deve ter entre 6 e 128 caracteres.")
 
 
 @lru_cache(maxsize=1)

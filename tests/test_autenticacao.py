@@ -113,6 +113,26 @@ class AutenticacaoIsolamentoTests(unittest.TestCase):
             self.assertEqual(resposta.status_code, 422)
             self.assertNotIn(dados["senha"], resposta.text)
 
+    def test_limites_senha_permitidos_no_cadastro_e_login(self):
+        for tamanho in (6, 128):
+            with self.subTest(tamanho=tamanho):
+                nome = f"conta_limite_{tamanho}"
+                perfil, token = self.cadastrar(nome, "a" * tamanho)
+                self.assertEqual(perfil["nome_usuario"], nome)
+                self.assertEqual(self.cliente(token).get("/api/auth/eu").json(), perfil)
+
+    def test_senhas_fora_dos_limites_recusadas_sem_expor_conteudo(self):
+        for senha in ("", "abcde", "a" * 129):
+            for rota in ("/api/auth/registrar", "/api/auth/entrar"):
+                with self.subTest(tamanho=len(senha), rota=rota):
+                    resposta = self.anonimo.post(rota, json={
+                        "nome_usuario": "conta_limite_invalido", "senha": senha,
+                    })
+                    self.assertEqual(resposta.status_code, 422)
+                    self.assertIn("entre 6 e 128 caracteres", resposta.text)
+                    if senha:
+                        self.assertNotIn(senha, resposta.text)
+
     def test_todas_operacoes_pessoais_recusam_credencial_ausente_ou_invalida(self):
         casos = [
             ("GET", "/api/auth/eu", {}),
