@@ -53,7 +53,9 @@ export async function api(path, { method = 'GET', body, query } = {}) {
   try {
     const response = await fetch(url, {
       method, headers, body: body === undefined ? undefined : JSON.stringify(body),
-      signal: controller.signal, credentials: 'omit', cache: 'no-store', redirect: 'error',
+      // Somente a conclusão OAuth troca o cookie HttpOnly por uma credencial local.
+      signal: controller.signal, credentials: path === '/api/auth/google/concluir' ? 'same-origin' : 'omit',
+      cache: 'no-store', redirect: 'error',
     });
     if (requestEpoch !== epoch) throw new StaleRequestError();
     if (response.status === 204) return null;

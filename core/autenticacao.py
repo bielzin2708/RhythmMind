@@ -16,8 +16,12 @@ from pwdlib.exceptions import UnknownHashError
 
 
 TTL_ACESSO_SEGUNDOS = 3600
+TTL_FLUXO_GOOGLE_SEGUNDOS = 600
+TTL_ENTRADA_GOOGLE_SEGUNDOS = 60
 _NOME_USUARIO = re.compile(r"[a-zA-Z0-9_.-]{3,64}\Z")
 _TOKEN = re.compile(r"[a-zA-Z0-9_-]{43}\Z")
+_VERIFIER = re.compile(r"[a-zA-Z0-9_.~-]{43,128}\Z")
+_ISSUER_GOOGLE = "https://accounts.google.com"
 
 
 class ErroCredenciais(Exception):
@@ -86,11 +90,32 @@ class RepositorioAcesso:
             raise ValueError("Validade de acesso deve ser um inteiro positivo.")
         self.caminho.parent.mkdir(parents=True, exist_ok=True)
         with self._conexao() as conexao:
+            # A reconstrução preserva UUIDs e referências existentes. As chaves
+            # são verificadas antes de confirmar a transação; outras conexões
+            # continuam usando foreign_keys=ON.
+            conexao.execute("PRAGMA foreign_keys = OFF")
+            conexao.execute("BEGIN IMMEDIATE")
+            colunas = conexao.execute("PRAGMA table_info(usuarios)").fetchall()
+            if any(coluna["name"] == "senha_hash" and coluna["notnull"] for coluna in colunas):
+                conexao.execute("""
+                    CREATE TABLE usuarios_migracao_google (
+                        usuario_id TEXT PRIMARY KEY,
+                        nome_usuario TEXT NOT NULL UNIQUE,
+                        senha_hash TEXT,
+                        criado_em TEXT NOT NULL
+                    )
+                """)
+                conexao.execute("""
+                    INSERT INTO usuarios_migracao_google
+                    SELECT usuario_id, nome_usuario, senha_hash, criado_em FROM usuarios
+                """)
+                conexao.execute("DROP TABLE usuarios")
+                conexao.execute("ALTER TABLE usuarios_migracao_google RENAME TO usuarios")
             conexao.execute("""
                 CREATE TABLE IF NOT EXISTS usuarios (
                     usuario_id TEXT PRIMARY KEY,
                     nome_usuario TEXT NOT NULL UNIQUE,
-                    senha_hash TEXT NOT NULL,
+                    senha_hash TEXT,
                     criado_em TEXT NOT NULL
                 )
             """)
@@ -104,6 +129,36 @@ class RepositorioAcesso:
                 )
             """)
             conexao.execute("CREATE INDEX IF NOT EXISTS acessos_por_usuario ON acessos(usuario_id)")
+            conexao.execute("""
+                CREATE TABLE IF NOT EXISTS identidades_google (
+                    issuer TEXT NOT NULL,
+                    subject TEXT NOT NULL,
+                    usuario_id TEXT NOT NULL REFERENCES usuarios(usuario_id),
+                    PRIMARY KEY (issuer, subject),
+                    UNIQUE (usuario_id)
+                )
+            """)
+            conexao.execute("""
+                CREATE TABLE IF NOT EXISTS fluxos_google (
+                    state_hash TEXT PRIMARY KEY,
+                    vinculo_hash TEXT NOT NULL,
+                    nonce TEXT NOT NULL,
+                    verifier TEXT NOT NULL,
+                    redirect_uri TEXT NOT NULL,
+                    expira_em REAL NOT NULL
+                )
+            """)
+            conexao.execute("""
+                CREATE TABLE IF NOT EXISTS entradas_google (
+                    segredo_hash TEXT PRIMARY KEY,
+                    usuario_id TEXT NOT NULL REFERENCES usuarios(usuario_id),
+                    expira_em REAL NOT NULL
+                )
+            """)
+            conexao.execute("CREATE INDEX IF NOT EXISTS fluxos_google_por_expiracao ON fluxos_google(expira_em)")
+            conexao.execute("CREATE INDEX IF NOT EXISTS entradas_google_por_expiracao ON entradas_google(expira_em)")
+            if conexao.execute("PRAGMA foreign_key_check").fetchone() is not None:
+                raise sqlite3.IntegrityError("Referencias de acesso inconsistentes.")
 
     @contextmanager
     def _conexao(self):
@@ -147,33 +202,133 @@ class RepositorioAcesso:
                 "SELECT usuario_id, nome_usuario, senha_hash, criado_em FROM usuarios WHERE nome_usuario = ?",
                 (nome,),
             ).fetchone()
-        senha_hash = registro["senha_hash"] if registro is not None else _hash_sem_conta()
+        tem_senha = registro is not None and registro["senha_hash"] is not None
+        senha_hash = registro["senha_hash"] if tem_senha else _hash_sem_conta()
         try:
             valida, hash_atualizado = _senhas().verify_and_update(senha, senha_hash)
         except (ValueError, UnknownHashError):
             valida, hash_atualizado = False, None
-        if not valida or registro is None:
+        if not valida or not tem_senha:
             raise ErroCredenciais()
 
-        token = secrets.token_urlsafe(32)
-        instante = agora()
-        expira_em = instante + self.ttl_segundos
         with self._conexao() as conexao:
             if hash_atualizado is not None:
                 conexao.execute(
                     "UPDATE usuarios SET senha_hash = ? WHERE usuario_id = ? AND senha_hash = ?",
                     (hash_atualizado, registro["usuario_id"], registro["senha_hash"]),
                 )
-            conexao.execute(
-                "INSERT INTO acessos(token_hash, usuario_id, criado_em, expira_em) VALUES (?, ?, ?, ?)",
-                (_hash_token(token), registro["usuario_id"], instante, expira_em),
-            )
+            return self._emitir_acesso(conexao, registro["usuario_id"])
+
+    def _emitir_acesso(self, conexao, usuario_id):
+        if conexao.execute("SELECT 1 FROM usuarios WHERE usuario_id = ?", (usuario_id,)).fetchone() is None:
+            raise ErroCredenciais()
+        token = secrets.token_urlsafe(32)
+        instante = agora()
+        expira_em = instante + self.ttl_segundos
+        conexao.execute(
+            "INSERT INTO acessos(token_hash, usuario_id, criado_em, expira_em) VALUES (?, ?, ?, ?)",
+            (_hash_token(token), usuario_id, instante, expira_em),
+        )
         return {
             "token_acesso": token,
             "tipo_token": "bearer",
             "expires_in": self.ttl_segundos,
             "expira_em": _data_utc(expira_em),
         }
+
+    def emitir_acesso(self, usuario_id):
+        """Somente o servidor emite uma sessão depois de autenticar a identidade."""
+        with self._conexao() as conexao:
+            return self._emitir_acesso(conexao, usuario_id)
+
+    def entrar_google(self, issuer, subject):
+        """Recebe apenas claims já verificadas pelo adaptador OpenID Connect."""
+        if not isinstance(issuer, str) or issuer not in {_ISSUER_GOOGLE, "accounts.google.com"}:
+            raise ErroCredenciais()
+        if (not isinstance(subject, str) or not 1 <= len(subject) <= 255
+                or any(c.isspace() or ord(c) < 32 or ord(c) == 127 for c in subject)):
+            raise ErroCredenciais()
+        with self._conexao() as conexao:
+            conexao.execute("BEGIN IMMEDIATE")
+            registro = conexao.execute("""
+                SELECT u.usuario_id, u.nome_usuario, u.criado_em
+                FROM identidades_google i JOIN usuarios u ON u.usuario_id = i.usuario_id
+                WHERE i.issuer = ? AND i.subject = ?
+            """, (_ISSUER_GOOGLE, subject)).fetchone()
+            if registro is not None:
+                return _perfil(registro)
+            identificador = uuid4()
+            perfil = {
+                "usuario_id": str(identificador),
+                "nome_usuario": "google_" + identificador.hex,
+                "criado_em": _data_utc(agora()),
+            }
+            conexao.execute(
+                "INSERT INTO usuarios(usuario_id, nome_usuario, senha_hash, criado_em) VALUES (?, ?, NULL, ?)",
+                (perfil["usuario_id"], perfil["nome_usuario"], perfil["criado_em"]),
+            )
+            conexao.execute(
+                "INSERT INTO identidades_google(issuer, subject, usuario_id) VALUES (?, ?, ?)",
+                (_ISSUER_GOOGLE, subject, perfil["usuario_id"]),
+            )
+            return perfil
+
+    def criar_fluxo_google(self, state, vinculo, nonce, verifier, redirect_uri):
+        """Transação curta: state e cookie não ficam em texto no banco."""
+        state_hash, vinculo_hash = _hash_token(state), _hash_token(vinculo)
+        if not isinstance(nonce, str) or not _TOKEN.fullmatch(nonce):
+            raise ValueError("Nonce Google invalido.")
+        if not isinstance(verifier, str) or not _VERIFIER.fullmatch(verifier):
+            raise ValueError("Verificador PKCE invalido.")
+        if (not isinstance(redirect_uri, str) or not 1 <= len(redirect_uri) <= 2048
+                or any(ord(c) < 32 or ord(c) == 127 for c in redirect_uri)):
+            raise ValueError("URI de retorno invalida.")
+        instante = agora()
+        with self._conexao() as conexao:
+            conexao.execute("DELETE FROM fluxos_google WHERE expira_em <= ?", (instante,))
+            conexao.execute("""
+                INSERT INTO fluxos_google(state_hash, vinculo_hash, nonce, verifier, redirect_uri, expira_em)
+                VALUES (?, ?, ?, ?, ?, ?)
+            """, (state_hash, vinculo_hash, nonce, verifier, redirect_uri, instante + TTL_FLUXO_GOOGLE_SEGUNDOS))
+
+    def consumir_fluxo_google(self, state, vinculo):
+        state_hash, vinculo_hash = _hash_token(state), _hash_token(vinculo)
+        with self._conexao() as conexao:
+            conexao.execute("BEGIN IMMEDIATE")
+            registro = conexao.execute("""
+                SELECT nonce, verifier, redirect_uri FROM fluxos_google
+                WHERE state_hash = ? AND vinculo_hash = ? AND expira_em > ?
+            """, (state_hash, vinculo_hash, agora())).fetchone()
+            if registro is None:
+                raise ErroCredenciais()
+            conexao.execute("DELETE FROM fluxos_google WHERE state_hash = ?", (state_hash,))
+            return dict(registro)
+
+    def preparar_entrada_google(self, usuario_id):
+        segredo = secrets.token_urlsafe(32)
+        instante = agora()
+        with self._conexao() as conexao:
+            if conexao.execute("SELECT 1 FROM usuarios WHERE usuario_id = ?", (usuario_id,)).fetchone() is None:
+                raise ErroCredenciais()
+            conexao.execute("DELETE FROM entradas_google WHERE expira_em <= ?", (instante,))
+            conexao.execute(
+                "INSERT INTO entradas_google(segredo_hash, usuario_id, expira_em) VALUES (?, ?, ?)",
+                (_hash_token(segredo), usuario_id, instante + TTL_ENTRADA_GOOGLE_SEGUNDOS),
+            )
+        return segredo
+
+    def concluir_entrada_google(self, segredo):
+        segredo_hash = _hash_token(segredo)
+        with self._conexao() as conexao:
+            conexao.execute("BEGIN IMMEDIATE")
+            registro = conexao.execute(
+                "SELECT usuario_id FROM entradas_google WHERE segredo_hash = ? AND expira_em > ?",
+                (segredo_hash, agora()),
+            ).fetchone()
+            if registro is None:
+                raise ErroCredenciais()
+            conexao.execute("DELETE FROM entradas_google WHERE segredo_hash = ?", (segredo_hash,))
+            return self._emitir_acesso(conexao, registro["usuario_id"])
 
     def identificar(self, token):
         token_hash = _hash_token(token)

@@ -16,6 +16,12 @@ Históricos e músicas pessoais ficam separados pelo UUID da conta autenticada,
 sem atribuição automática de arquivos legados. Consulte [execução, decisões e
 limites](docs/autenticacao_isolamento.md) e a [ordem das próximas rodadas](docs/proximas_etapas.md).
 
+O acesso também oferece **Continuar com Google**, quando as credenciais
+OAuth do aplicativo estão configuradas no servidor. O modo opcional
+`python -m api.desenvolvimento --persistente` conserva contas e histórico
+localmente entre reinicializações; sem a opção, os dados continuam temporários.
+Veja o [guia de configuração e teste do login Google](docs/login_google.md).
+
 ## Negação e expressões compostas
 
 O analisador usa regras locais para negação e reconhece os compostos já
@@ -124,7 +130,7 @@ projeto é usado. O dicionário de referência rastreado é copiado para o tempo
 O diretório temporário pode permanecer após encerramento forçado do processo.
 
 O servidor escuta em 127.0.0.1, sem confiar em cabeçalhos de proxy. A API
-recusa cliente ou Host externos e retorna 503 fora do diretório temporário
+recusa cliente ou Host externos e retorna 503 fora do diretório de dados
 explicitamente autorizado. A antiga inicialização direta com
 `uvicorn api.main:app` fica bloqueada nas requisições. Não use reload,
 workers, proxy ou publicação na rede nesta fase.

@@ -26,6 +26,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 
 from api.autenticacao import router as router_autenticacao, usuario_autenticado
+from api.google_auth import router as router_google
 from api.interpretacao import router as router_interpretacao
 from api.titular import router as router_titular
 from api.web import STATIC_DIR, router as router_web
@@ -112,6 +113,8 @@ async def restringir_desenvolvimento_local(request: Request, call_next):
     if request.url.path.startswith("/api/"):
         resposta.headers["Cache-Control"] = "no-store"
         resposta.headers["Pragma"] = "no-cache"
+    if request.url.path.startswith("/api/auth/google/"):
+        resposta.headers["Referrer-Policy"] = "no-referrer"
     if request.url.path in {"/", "/app"} or request.url.path.startswith("/static/"):
         resposta.headers["Cache-Control"] = "no-store"
         resposta.headers["X-Content-Type-Options"] = "nosniff"
@@ -644,6 +647,7 @@ def ver_proposta():
 
 
 app.include_router(router_autenticacao)
+app.include_router(router_google)
 app.include_router(router)
 app.include_router(router_interpretacao)
 app.include_router(router_titular)

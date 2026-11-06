@@ -7,3 +7,6 @@ uvicorn==0.54.0
 # Senhas Argon2id; acesso opaco revogavel validado no servidor.
 pwdlib[argon2]==0.3.1
 argon2-cffi==25.1.0
+
+# Verificacao oficial de identidade Google; troca OAuth somente no backend.
+google-auth[requests]==2.62.1

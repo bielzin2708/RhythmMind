@@ -71,6 +71,8 @@ Desktop.ini
 .idea/
 
 # Contas e credenciais de acesso locais
+/.rhythmmind-local/
+client_secret*.json
 *.sqlite
 *.sqlite-*
 *.sqlite3

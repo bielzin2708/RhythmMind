@@ -1,7 +1,8 @@
 # Contas, autenticação e isolamento local
 
-Esta entrega implementa somente backend e lógica. Não cria telas nem muda
-a interpretação emocional, a escolha musical ou a semântica do feedback.
+O acesso local usa contas com senha ou a integração opcional de
+[login com Google](login_google.md). A interface fica em `/`; os dados
+pessoais continuam isolados pela credencial validada no servidor.
 
 ## Executar
 
@@ -16,15 +17,16 @@ Na raiz do projeto, em PowerShell:
 Abra http://127.0.0.1:8000/docs. Use exclusivamente contas, senhas e relatos
 fictícios. A API continua escutando somente em 127.0.0.1, sem confiar em
 cabeçalhos de proxy. Host/cliente externos são recusados, e requisições fora
-da raiz temporária autorizada retornam 503. Não habilite reload, workers,
+da raiz de dados autorizada retornam 503. Não habilite reload, workers,
 proxy ou publicação na rede.
 
-O inicializador é descartável: contas, acessos e JSON pessoais ficam em
+Por padrão, o inicializador é descartável: contas, acessos e JSON pessoais ficam em
 diretório temporário e são apagados ao encerrar normalmente. Reiniciar esse
 inicializador cria outra base fictícia. O armazenamento suporta reabertura
-sobre os mesmos arquivos, como verificado nos testes; esse launcher não
-oferece persistência entre lançamentos. Encerramento forçado pode deixar
-o temporário no disco.
+sobre os mesmos arquivos. Para manter dados entre lançamentos, use
+`python -m api.desenvolvimento --persistente`: a pasta `.rhythmmind-local/`
+é preservada e fica fora do Git. Encerramento forçado no modo temporário
+pode deixar o temporário no disco.
 
 ## Rotas de acesso
 
@@ -62,7 +64,8 @@ Authorization: Bearer <credencial recebida na entrada>
 ```
 
 A credencial é um segredo de acesso: não a coloque em URL, logs, exemplos
-persistidos ou no Git. Não há JWT nem segredo de assinatura estático. Cada
+persistidos ou no Git. A credencial local é opaca, sem JWT nem segredo de
+assinatura estático; o ID token Google é verificado somente no backend. Cada
 entrada gera outra credencial; sair encerra somente a entrada atual.
 Não apaga a conta, o histórico ou as sessões de relato.
 
@@ -72,8 +75,10 @@ a cada requisição. Credenciais ausentes, inválidas, expiradas ou revogadas
 retornam 401 com `WWW-Authenticate: Bearer`. Nome/senha incorretos usam uma
 mensagem genérica. Cadastro duplicado retorna 409.
 
-Todas as rotas funcionais em `/api/` exigem autenticação, exceto cadastro e
-entrada. Respostas da API usam `Cache-Control: no-store`. Erros de validação
+As rotas pessoais em `/api/` exigem autenticação. Cadastro, entrada e o
+fluxo de autenticação Google são públicos; este último confere também a
+transação vinculada ao navegador e a identidade externa. Respostas da API
+usam `Cache-Control: no-store`. Erros de validação
 não devolvem o corpo recebido; falhas do banco retornam 503 sem detalhes
 internos. Cadastros rejeitam campos extras.
 

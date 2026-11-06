@@ -7,6 +7,8 @@ let user = null;
 let accessEpoch = 0;
 let history;
 let session;
+let accessBusy = false;
+let googleAvailable = false;
 
 function isStale(error) { return error instanceof StaleRequestError || error.name === 'StaleRequestError'; }
 
@@ -32,6 +34,43 @@ function clearPasswords() {
     form.elements.namedItem('senha').value = '';
     resetPasswordVisibility(form);
   }
+}
+
+function updateGoogleButton() {
+  $('#google-login-button').disabled = accessBusy || !googleAvailable;
+  $('#google-login-label').textContent = 'Continuar com Google';
+}
+
+async function withAccessBusy(task) {
+  if (accessBusy) return;
+  accessBusy = true;
+  try { await withBusy($('#access-card'), task); }
+  finally { accessBusy = false; updateGoogleButton(); }
+}
+
+function accessStatus(message, error = false) {
+  $('#auth-status').textContent = message;
+  $('#auth-status').setAttribute('role', error ? 'alert' : 'status');
+}
+
+async function configureGoogle() {
+  try {
+    const config = await api('/api/auth/google/config');
+    const persistent = config.armazenamento === 'persistente';
+    $('#environment-label').textContent = persistent ? 'Protótipo · dados locais' : 'Protótipo · dados fictícios';
+    $('#development-note-text').textContent = persistent
+      ? 'Seus registros ficam salvos neste computador. Use dados fictícios durante os testes.'
+      : 'Use dados fictícios. Seus registros são temporários neste protótipo.';
+    googleAvailable = config.disponivel === true && config.inicio_url === '/api/auth/google/iniciar';
+    $('#google-access-help').textContent = googleAvailable
+      ? 'Use uma guia do Chrome ou Edge para confirmar seu acesso no Google.'
+      : 'O acesso com Google ainda não está disponível neste ambiente.';
+  } catch (error) {
+    if (isStale(error)) return;
+    googleAvailable = false;
+    $('#development-note-text').textContent = 'Ambiente local de desenvolvimento. Use dados fictícios.';
+    $('#google-access-help').textContent = 'Não foi possível conferir o acesso com Google. Você pode entrar com sua senha.';
+  } finally { updateGoogleButton(); }
 }
 
 for (const button of document.querySelectorAll('[data-toggle-password]')) {
@@ -84,6 +123,7 @@ function clearIdentity() {
   $('#auth-status').textContent = '';
   notify('');
   $('#login-name').focus();
+  void configureGoogle();
 }
 
 session = initSession({ api, notify, onChanged,
@@ -117,30 +157,38 @@ $('#show-login').addEventListener('click', () => {
   $('#login-name').focus();
 });
 
+async function activateAccess(access, attempt, message) {
+  if (attempt !== accessEpoch) return;
+  setToken(access.token_acesso);
+  const profile = await api('/api/auth/eu');
+  if (attempt !== accessEpoch) return;
+  user = profile;
+  $('#account-name').textContent = profile.nome_usuario;
+  $('#auth-shell').hidden = true;
+  $('#app-shell').hidden = false;
+  setAccessAppearance(false);
+  accessStatus('');
+  $('#auth-login-form').reset();
+  $('#auth-register-form').reset();
+  clearPasswords();
+  session.newSession();
+  showView('session');
+  notify(message, 'success');
+}
+
 async function authenticate(form, register) {
+  if (accessBusy) return;
   const attempt = ++accessEpoch;
   const fields = new FormData(form);
   const credentials = { nome_usuario: String(fields.get('nome_usuario')).trim(), senha: String(fields.get('senha')) };
-  await withBusy(form, async () => {
-    $('#auth-status').textContent = register ? 'Criando seu espaço…' : 'Conferindo seu acesso…';
-    $('#auth-status').setAttribute('role', 'status');
+  await withAccessBusy(async () => {
+    accessStatus(register ? 'Criando seu espaço…' : 'Conferindo seu acesso…');
     try {
       if (register) await api('/api/auth/registrar', { method: 'POST', body: credentials });
       const access = await api('/api/auth/entrar', { method: 'POST', body: credentials });
-      if (attempt !== accessEpoch) return;
-      setToken(access.token_acesso);
-      const profile = await api('/api/auth/eu');
-      if (attempt !== accessEpoch) return;
-      user = profile;
-      $('#account-name').textContent = profile.nome_usuario;
-      $('#auth-shell').hidden = true;
-      $('#app-shell').hidden = false;
-      setAccessAppearance(false);
-      $('#auth-status').textContent = '';
-      form.reset();
-      session.newSession();
-      showView('session');
-      notify(register ? 'Seu espaço está pronto. Comece um relato ou adicione faixas ao catálogo.' : 'Acesso confirmado. Você pode começar ou retomar uma sessão.', 'success');
+      await activateAccess(access, attempt, register
+        ? 'Seu espaço está pronto. Comece um relato ou adicione faixas ao catálogo.'
+        : 'Acesso confirmado. Você pode começar ou retomar uma sessão.');
     } catch (error) {
       if (!isStale(error) && attempt === accessEpoch) {
         $('#auth-status').textContent = error.message;
@@ -154,6 +202,51 @@ async function authenticate(form, register) {
       credentials.senha = '';
     }
   });
+}
+
+$('#google-login-button').addEventListener('click', () => {
+  if (accessBusy || !googleAvailable || user) return;
+  void withAccessBusy(async () => {
+    accessEpoch += 1;
+    clearPasswords();
+    accessStatus('Abrindo o Google para confirmar seu acesso…');
+    $('#google-login-label').textContent = 'Abrindo o Google…';
+    // A navegação completa mantém a autenticação fora de frames e dispensa SDK externo.
+    window.location.assign('/api/auth/google/iniciar');
+  });
+});
+
+async function completeGoogle() {
+  if (accessBusy || user) return;
+  const attempt = ++accessEpoch;
+  await withAccessBusy(async () => {
+    clearPasswords();
+    accessStatus('Concluindo seu acesso com Google…');
+    try {
+      const access = await api('/api/auth/google/concluir', { method: 'POST' });
+      await activateAccess(access, attempt, 'Acesso com Google confirmado. Você pode começar ou retomar uma sessão.');
+    } catch (error) {
+      if (!isStale(error) && attempt === accessEpoch) {
+        accessStatus(error.status === 401
+          ? 'O retorno do Google expirou. Tente entrar com Google novamente.'
+          : 'Não foi possível concluir o acesso com Google. Tente novamente ou entre com sua senha.', true);
+      }
+    }
+  });
+}
+
+async function initializeGoogle() {
+  const current = new URL(window.location.href);
+  const returned = current.searchParams.get('google');
+  if (current.searchParams.has('google')) {
+    current.searchParams.delete('google');
+    window.history.replaceState(null, '', `${current.pathname}${current.search}${current.hash}`);
+    if (returned === 'concluir') await completeGoogle();
+    else if (returned === 'cancelado') accessStatus('Você cancelou o acesso com Google. Pode tentar novamente quando quiser.');
+    else if (returned === 'indisponivel') accessStatus('O acesso com Google está indisponível neste momento. Você pode entrar com sua senha.', true);
+    else accessStatus('Não foi possível confirmar o acesso com Google. Tente novamente ou entre com sua senha.', true);
+  }
+  await configureGoogle();
 }
 
 for (const [id, register] of [['auth-login-form', false], ['auth-register-form', true]]) {
@@ -172,3 +265,4 @@ $('#logout-button').addEventListener('click', () => {
 
 // A sessão é retomada após autenticação, sempre a partir do servidor.
 $('#global-status').hidden = true;
+void initializeGoogle();

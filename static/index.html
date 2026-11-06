@@ -23,7 +23,7 @@
           </svg>
           <span>Rhythm<span class="brand-light">Mind</span></span>
         </a>
-        <span class="environment-badge"><span aria-hidden="true" class="status-dot"></span>Protótipo · dados fictícios</span>
+        <span class="environment-badge"><span aria-hidden="true" class="status-dot"></span><span id="environment-label">Protótipo · dados fictícios</span></span>
       </div>
     </header>
 
@@ -54,7 +54,7 @@
           </ol>
         </div>
 
-        <div class="access-card card">
+        <div id="access-card" class="access-card card">
           <div class="card-topline"><span class="eyebrow">SEU DIÁRIO</span><span class="small-label">Acesso individual</span></div>
           <form method="post" id="auth-login-form" class="stack-form">
             <div class="form-intro"><h2>Bom ter você por aqui.</h2><p>Acesse seus registros e continue de onde parou.</p></div>
@@ -70,8 +70,13 @@
             <button class="button button-primary button-wide" type="submit">Criar minha conta <span aria-hidden="true">→</span></button>
             <p class="access-switch">Já tem uma conta? <button id="show-login" class="button-link" type="button">Entrar</button></p>
           </form>
+          <div class="google-access">
+            <div class="access-divider" aria-hidden="true"><span>ou</span></div>
+            <button id="google-login-button" class="button google-login-button" type="button" aria-describedby="google-access-help" disabled><img src="/static/google.svg" width="20" height="20" alt=""><span id="google-login-label">Continuar com Google</span></button>
+            <p id="google-access-help" class="google-access-help" role="status">Conferindo a disponibilidade do Google…</p>
+          </div>
           <div id="auth-status" class="notice" role="status" aria-live="polite"></div>
-          <div class="development-note"><span class="note-icon" aria-hidden="true">i</span><p>Use dados fictícios. Seus registros são temporários neste protótipo.</p></div>
+          <div class="development-note"><span class="note-icon" aria-hidden="true">i</span><p id="development-note-text">Ambiente local de desenvolvimento. Use dados fictícios.</p></div>
         </div>
       </section>
 
