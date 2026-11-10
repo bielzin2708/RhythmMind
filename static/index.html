@@ -8,9 +8,11 @@
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
     <meta name="description" content="RhythmMind: um diário de relatos, escolhas musicais e percepções para revisar com calma.">
     <title>RhythmMind — seu momento, sua escuta</title>
+    <script src="/static/theme.js"></script>
     <link rel="stylesheet" href="/static/styles.css">
     <link rel="stylesheet" href="/static/auth.css">
     <link rel="stylesheet" href="/static/workspace.css">
+    <link rel="stylesheet" href="/static/themes.css">
     <script type="module" src="/static/app.js"></script>
   </head>
   <body class="auth-screen">
@@ -24,7 +26,13 @@
           </svg>
           <span>Rhythm<span class="brand-light">Mind</span></span>
         </a>
-        <span class="environment-badge"><span aria-hidden="true" class="status-dot"></span><span id="environment-label">Protótipo · dados fictícios</span></span>
+        <div class="access-header-actions">
+          <span class="environment-badge"><span aria-hidden="true" class="status-dot"></span><span id="environment-label">Protótipo · dados fictícios</span></span>
+          <button id="access-theme-toggle" class="theme-toggle" type="button" data-theme-toggle aria-label="Ativar modo claro" title="Ativar modo claro">
+            <svg data-theme-icon="light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
+            <svg data-theme-icon="dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z"/></svg>
+          </button>
+        </div>
       </div>
     </header>
 
@@ -40,6 +48,11 @@
         <button id="nav-history" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5zM9 7h6M9 11h6M9 15h4"/></svg><span>Meu diário</span></button>
         <button id="nav-catalog" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13M9 8l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></svg><span>Minhas músicas</span></button>
       </nav>
+        <div class="workspace-user-controls">
+          <button id="workspace-theme-toggle" class="theme-toggle" type="button" data-theme-toggle aria-label="Ativar modo claro" title="Ativar modo claro">
+            <svg data-theme-icon="light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
+            <svg data-theme-icon="dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13Z"/></svg>
+          </button>
         <details id="account-menu" class="account-menu">
           <summary id="account-menu-toggle" aria-label="Opções da sua conta"><span id="workspace-avatar" class="workspace-avatar" aria-hidden="true"></span><span class="account-menu-label">Sua conta</span><svg class="nav-icon account-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></summary>
           <div class="account-menu-panel">
@@ -56,6 +69,7 @@
             <div class="home-environment"><span class="home-environment-badge">Protótipo · dados fictícios</span><span id="workspace-storage-label" class="home-storage-label">desenvolvimento local</span><details class="storage-info"><summary aria-label="Sobre o armazenamento dos registros"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></summary><p id="workspace-storage-description">Use dados fictícios durante os testes deste ambiente.</p></details></div>
           </div>
         </details>
+        </div>
       </div>
     </header>
 
@@ -288,6 +302,16 @@
 
     <dialog id="confirm-dialog" class="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-text"><form method="post" id="confirm-form"><span class="eyebrow">UMA ESCOLHA SOBRE SEUS DADOS</span><h2 id="confirm-title">Confirmar ação</h2><p id="confirm-text"></p><div class="button-row"><button id="confirm-cancel" class="button button-secondary" type="button">Cancelar</button><button id="confirm-submit" class="button button-danger" type="submit">Confirmar exclusão</button></div></form></dialog>
     <dialog id="about-dialog" class="confirm-dialog" aria-labelledby="about-title"><span class="eyebrow">NO SEU RITMO</span><h2 id="about-title">Sobre o RhythmMind</h2><p>Um diário de relatos, escolhas musicais e percepções. Você conta como está, revisa as sugestões e registra o que fez sentido na sua experiência.</p><p>A interpretação é provisória e as escolhas são suas. As sugestões musicais vêm do seu catálogo; a reprodução acontece no serviço de sua preferência.</p><p>O RhythmMind oferece apoio reflexivo. Não realiza diagnósticos nem substitui acompanhamento profissional.</p><button id="about-close" class="button button-primary" type="button">Voltar ao meu espaço</button></dialog>
-    <dialog id="appearance-dialog" class="confirm-dialog" aria-labelledby="appearance-title"><span class="eyebrow">DO SEU JEITO</span><h2 id="appearance-title">Preferências visuais</h2><p>A ambientação alterna suavemente entre menta, ciano e índigo a cada 10 segundos. As cores são decorativas e não representam o seu estado emocional.</p><label class="checkbox-line"><input id="ambient-toggle" type="checkbox" checked aria-describedby="ambient-help"><span>Ativar transição de cores</span></label><p id="ambient-help" class="field-help"></p><button id="appearance-close" class="button button-primary" type="button">Concluir</button></dialog>
+    <dialog id="appearance-dialog" class="confirm-dialog" aria-labelledby="appearance-title">
+      <h2 id="appearance-title">Preferências visuais</h2>
+      <p>Escolha o tema e os efeitos que prefere. São ajustes independentes.</p>
+      <div class="field theme-picker"><label for="theme-mode">Tema da interface</label><select id="theme-mode" data-theme-preference aria-describedby="theme-status"><option value="light">Claro</option><option value="dark" selected>Escuro</option><option value="system">Usar o sistema</option></select><p id="theme-status" class="field-help" role="status" aria-live="polite"></p></div>
+      <label class="checkbox-line"><input id="soft-effects-toggle" type="checkbox" data-soft-effects-toggle aria-describedby="soft-effects-help"><span>Suavizar brilhos decorativos</span></label>
+      <p id="soft-effects-help" class="field-help">Reduz os halos da onda e os brilhos de fundo, mantendo o texto e os controles legíveis.</p>
+      <label class="checkbox-line"><input id="ambient-toggle" type="checkbox" checked aria-describedby="ambient-help"><span>Ativar transição de cores</span></label>
+      <p id="ambient-help" class="field-help"></p>
+      <p class="field-help">A ambientação alterna entre menta, ciano e índigo. As cores são decorativas e não representam o seu estado emocional.</p>
+      <button id="appearance-close" class="button button-primary" type="button">Concluir</button>
+    </dialog>
   </body>
 </html>

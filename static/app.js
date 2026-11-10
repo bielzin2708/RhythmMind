@@ -68,8 +68,6 @@ function setAccessAppearance(access) {
   document.body.classList.toggle('auth-screen', access);
   document.body.classList.toggle('workspace-screen', !access);
   $('#workspace-sidebar').hidden = access;
-  document.querySelector('meta[name="color-scheme"]').content = 'dark';
-  document.querySelector('meta[name="theme-color"]').content = '#0B1329';
 }
 
 function resetPasswordVisibility(form) {

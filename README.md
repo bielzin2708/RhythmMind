@@ -37,6 +37,13 @@ sessões, último estado confirmado, escutas informadas e faixas no catálogo.
 Nas preferências, a ambientação em menta, ciano e índigo pode ser pausada;
 a preferência de movimento reduzido do dispositivo é respeitada.
 
+O botão de sol/lua no cabeçalho alterna entre claro e escuro, inclusive no acesso.
+Em **Sua conta → Preferências visuais**, também é possível escolher **Usar o
+sistema** e suavizar os brilhos decorativos. Tema, suavização e transição de cores
+são controles independentes. O tema e a suavização ficam salvos neste navegador;
+somente essas preferências visuais são armazenadas, sem relatos ou credenciais.
+Se o armazenamento estiver bloqueado, os controles continuam funcionando na aba.
+
 O diário mostra os registros primeiro. Filtros e padrões ficam em expansões;
 os filtros aplicados continuam indicados mesmo recolhidos. Detalhes, correção,
 exportação e exclusão permanecem restritos à própria conta.
