@@ -25,8 +25,14 @@ function categoryGroup(title, categories, empty) {
   return group;
 }
 
-function listeningText(record) {
-  if (!record.escuta || !Array.isArray(record.escuta.faixas)) return 'Escolha ainda não registrada';
+export function listeningText(record) {
+  if (!record.escuta || !Array.isArray(record.escuta.faixas)) {
+    if (!completed(record)) return 'Sessão ainda em andamento';
+    if (completed(record) && Array.isArray(record.recomendacoes) && record.recomendacoes.length === 0) {
+      return 'Nenhuma faixa sugerida nesta sessão';
+    }
+    return 'Escolha ainda não registrada';
+  }
   if (!record.escuta.faixas.length) return 'Você optou por não escolher uma faixa';
   const selected = record.escuta.faixas.length;
   const heard = record.escuta.faixas.filter((track) => track.ouvida === true).length;
@@ -39,10 +45,36 @@ function listeningText(record) {
   return `${selected} ${selected === 1 ? 'faixa escolhida' : 'faixas escolhidas'} · ${detail.join('; ')}`;
 }
 
-function feedbackText(record) {
+export function feedbackText(record) {
   if (record.feedback?.ajudou === true) return 'Ajuda percebida relatada';
+  if (record.feedback?.ajudou === false && typeof record.feedback.motivo === 'string'
+    && record.feedback.motivo.startsWith('Não percebi mudança.')) {
+    return 'Não percebi mudança';
+  }
   if (record.feedback?.ajudou === false) return 'Sem ajuda relatada';
-  return 'Retorno ainda não registrado';
+  return 'Retorno opcional não registrado';
+}
+
+export function historyRecordTitle(record) {
+  const purpose = typeof record.finalidade === 'string' ? record.finalidade.trim() : '';
+  if (purpose) return purpose;
+  const text = typeof record.texto_usuario === 'string' ? record.texto_usuario.trim().replace(/\s+/g, ' ') : '';
+  const characters = Array.from(text);
+  return characters.length > 90 ? `${characters.slice(0, 89).join('')}…` : text || 'Relato registrado';
+}
+
+export function historyFilterSummary(query = {}) {
+  const returns = { positivo: 'Com ajuda relatada', negativo: 'Sem ajuda ou sem mudança', nao_registrado: 'Sem retorno registrado' };
+  const date = value => /^\d{4}-\d{2}-\d{2}$/.test(value) ? value.split('-').reverse().join('/') : value;
+  const fields = [
+    ['data_inicio', 'De', date], ['data_fim', 'Até', date],
+    ['finalidade', 'Finalidade'], ['contexto', 'Contexto'],
+    ['avaliacao', 'Retorno', value => returns[value] || value],
+  ];
+  return fields.flatMap(([key, label, format = value => value]) => {
+    const value = typeof query[key] === 'string' ? query[key].trim() : '';
+    return value ? [`${label}: ${format(value)}`] : [];
+  });
 }
 
 function completed(record) {
@@ -63,6 +95,14 @@ function dateSort(record) {
   return Date.parse(value) || 0;
 }
 
+export function historyEntries(records) {
+  // A inclusão mais recente desempata registros salvos no mesmo segundo.
+  return Object.entries(records)
+    .map(([id, record], index) => ({ id, record, index }))
+    .sort((a, b) => dateSort(b.record) - dateSort(a.record) || b.index - a.index)
+    .map(({ id, record }) => [id, record]);
+}
+
 export function initHistory({ api, notify, onResume, onChanged }) {
   let epoch = 0;
   let listVersion = 0;
@@ -70,6 +110,7 @@ export function initHistory({ api, notify, onResume, onChanged }) {
   let records = {};
   let selected = null;
   let totalRecords = 0;
+  let appliedFilters = {};
 
   const status = (message = '', kind = 'info') => {
     const box = byId('history-status');
@@ -112,16 +153,24 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     return query;
   }
 
+  function renderFilterState() {
+    const summary = historyFilterSummary(appliedFilters);
+    byId('history-filter-count').hidden = !summary.length;
+    byId('history-filter-count').textContent = `${summary.length} ${summary.length === 1 ? 'ativo' : 'ativos'}`;
+    byId('history-active-filters').hidden = !summary.length;
+    byId('history-active-filter-text').textContent = summary.join(' · ');
+  }
+
   function renderList() {
     const list = byId('history-list');
     list.replaceChildren();
-    const entries = Object.entries(records).sort((a, b) => dateSort(b[1]) - dateSort(a[1]));
+    const entries = historyEntries(records);
     byId('history-summary').textContent = `${entries.length} ${entries.length === 1 ? 'registro encontrado' : 'registros encontrados'}`;
     byId('history-empty').hidden = entries.length > 0;
     for (const [id, record] of entries) {
       const card = textNode('article', 'history-card card');
       const heading = textNode('div', 'history-card-heading');
-      const title = textNode('h3', '', present(record.finalidade) === 'Não informado' ? 'Sessão de escuta' : record.finalidade);
+      const title = textNode('h3', '', historyRecordTitle(record));
       const stamp = textNode('p', 'muted small', formatDate(record.data_hora));
       heading.append(title, textNode('span', 'badge', sessionState(record)));
       card.append(heading, stamp);
@@ -146,7 +195,7 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     const items = [
       [counts.sessoes_totais, 'Sessões registradas'],
       [counts.retornos_positivos, 'Com ajuda percebida relatada'],
-      [counts.retornos_negativos, 'Sem ajuda relatada'],
+      [counts.retornos_negativos, 'Sem ajuda percebida ou sem mudança'],
       [counts.retornos_nao_registrados, 'Sem retorno registrado'],
     ];
     for (const [count, label] of items) {
@@ -178,8 +227,10 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     list.replaceChildren(textNode('p', 'muted', 'Carregando seus registros…'));
     byId('history-empty').hidden = true;
     status('Consultando o seu histórico…');
+    appliedFilters = filterQuery();
+    renderFilterState();
     const [history, patterns] = await Promise.allSettled([
-      api('/api/historico', { query: filterQuery() }), api('/api/padroes'),
+      api('/api/historico', { query: appliedFilters }), api('/api/padroes'),
     ]);
     if (epoch !== ownEpoch || version !== listVersion) return;
     list.setAttribute('aria-busy', 'false');
@@ -334,10 +385,15 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     event.preventDefault();
     void load();
   });
-  byId('history-clear-filters').addEventListener('click', () => {
+  function clearFilters(event) {
     byId('history-filter-form').reset();
+    appliedFilters = {};
+    renderFilterState();
+    if (event.currentTarget.id === 'history-clear-active-filters') byId('history-filters-summary').focus();
     void load();
-  });
+  }
+  byId('history-clear-filters').addEventListener('click', clearFilters);
+  byId('history-clear-active-filters').addEventListener('click', clearFilters);
   byId('history-resume').addEventListener('click', () => {
     if (!selected) return;
     const id = selected.id;
@@ -466,6 +522,10 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     totalRecords = 0;
     clearDetail();
     byId('history-filter-form').reset();
+    appliedFilters = {};
+    renderFilterState();
+    byId('history-filters').open = false;
+    byId('history-patterns').open = false;
     byId('history-list').replaceChildren();
     byId('patterns-summary').replaceChildren();
     byId('history-summary').textContent = '';

@@ -28,27 +28,36 @@
       </div>
     </header>
 
-    <aside id="workspace-sidebar" class="workspace-sidebar" aria-label="Seu espaço no RhythmMind" hidden>
-      <button id="workspace-home-link" class="workspace-brand" type="button" aria-label="RhythmMind, ir para seu espaço">
+    <header id="workspace-sidebar" class="workspace-topbar" aria-label="Seu espaço no RhythmMind" hidden>
+      <div class="workspace-topbar-inner">
+        <button id="workspace-home-link" class="workspace-brand" type="button" aria-label="RhythmMind, ir para seu espaço">
         <svg class="brand-symbol" width="38" height="38" viewBox="0 0 40 40" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="12" fill="#131F3A"/><path d="M11 18v4m6-10v16m6-12v8m6-6v4" stroke="#00C2CB" stroke-width="2.6" stroke-linecap="round"/></svg>
         <span>Rhythm<span class="brand-light">Mind</span></span>
       </button>
-      <section class="workspace-profile" aria-label="Resumo do seu espaço">
-        <div class="profile-top"><span id="workspace-avatar" class="workspace-avatar" aria-hidden="true"></span><div><strong id="account-name"></strong><span class="profile-label">Seu espaço pessoal</span></div></div>
-        <dl class="profile-stats"><div><dt>Sessões registradas</dt><dd id="profile-sessions">—</dd></div><div><dt>Última finalidade</dt><dd id="profile-last-purpose">—</dd></div><div><dt>Catálogo</dt><dd id="profile-catalog">—</dd></div></dl>
-      </section>
-      <nav class="workspace-nav" aria-label="Navegação principal">
+        <nav class="workspace-nav" aria-label="Navegação principal">
         <button id="nav-home" class="nav-button active" type="button" aria-current="page"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3zM9 20v-6h6v6"/></svg><span>Seu espaço</span></button>
         <button id="nav-session" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span>Sua sessão</span></button>
         <button id="nav-history" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5zM9 7h6M9 11h6M9 15h4"/></svg><span>Meu diário</span></button>
-        <button id="nav-catalog" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13M9 8l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></svg><span>Meu catálogo</span></button>
+        <button id="nav-catalog" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13M9 8l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></svg><span>Minhas músicas</span></button>
       </nav>
-      <div class="workspace-sidebar-bottom">
-        <button id="about-button" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>Sobre o RhythmMind</span></button>
-        <button id="logout-button" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H4v16h6M14 8l4 4-4 4M8 12h10"/></svg><span>Sair</span></button>
-        <div class="sidebar-tools"><button id="workspace-export" class="button button-secondary" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg><span>Exportar meus dados</span></button><button id="appearance-button" class="button button-secondary" type="button" aria-label="Preferências visuais"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2.2 1.3L3.8 6l-2 3.5 1.8 1.7v2.6l-1.8 1.7 2 3.5 2.4-.7 2.2 1.3L9 22h4l.6-2.4 2.2-1.3 2.4.7 2-3.5-1.8-1.7v-2.6l1.8-1.7-2-3.5-2.4.7-2.2-1.3L13 3z"/><circle cx="11" cy="12.5" r="3"/></svg></button></div>
+        <details id="account-menu" class="account-menu">
+          <summary id="account-menu-toggle" aria-label="Opções da sua conta"><span id="workspace-avatar" class="workspace-avatar" aria-hidden="true"></span><span class="account-menu-label">Sua conta</span><svg class="nav-icon account-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></summary>
+          <div class="account-menu-panel">
+            <section class="workspace-profile" aria-label="Resumo do seu espaço">
+        <div class="profile-top"><div><strong id="account-name"></strong><span class="profile-label">Seu espaço pessoal</span></div></div>
+        <dl class="profile-stats"><div><dt>Sessões registradas</dt><dd id="profile-sessions">—</dd></div><div><dt>Última finalidade</dt><dd id="profile-last-purpose">—</dd></div><div><dt>Catálogo</dt><dd id="profile-catalog">—</dd></div></dl>
+      </section>
+            <div class="account-actions">
+              <button id="workspace-export" class="account-action" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg><span>Exportar meus dados</span></button>
+              <button id="appearance-button" class="account-action" type="button" aria-label="Preferências visuais"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2.2 1.3L3.8 6l-2 3.5 1.8 1.7v2.6l-1.8 1.7 2 3.5 2.4-.7 2.2 1.3L9 22h4l.6-2.4 2.2-1.3 2.4.7 2-3.5-1.8-1.7v-2.6l1.8-1.7-2-3.5-2.4.7-2.2-1.3L13 3z"/><circle cx="11" cy="12.5" r="3"/></svg><span>Preferências visuais</span></button>
+              <button id="about-button" class="account-action" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>Sobre o RhythmMind</span></button>
+              <button id="logout-button" class="account-action" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4H4v16h6M14 8l4 4-4 4M8 12h10"/></svg><span>Sair</span></button>
+            </div>
+            <div class="home-environment"><span class="home-environment-badge">Protótipo · dados fictícios</span><span id="workspace-storage-label" class="home-storage-label">desenvolvimento local</span><details class="storage-info"><summary aria-label="Sobre o armazenamento dos registros"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg></summary><p id="workspace-storage-description">Use dados fictícios durante os testes deste ambiente.</p></details></div>
+          </div>
+        </details>
       </div>
-    </aside>
+    </header>
 
     <main id="main-content" class="page-wrap" tabindex="-1">
       <noscript><p class="notice notice-warning">Ative o JavaScript do navegador para usar os formulários e acessar suas sessões.</p></noscript>
@@ -105,19 +114,15 @@
 
       <div id="app-shell" hidden>
         <section id="view-home" class="workspace-view" aria-labelledby="home-heading">
-          <header class="home-topbar"><div class="home-heading"><p id="home-greeting" class="eyebrow"></p><h1 id="home-heading" tabindex="-1">Seu espaço, <span>no seu ritmo.</span></h1></div><div class="home-environment"><span class="home-environment-badge">Protótipo · dados fictícios</span><span id="workspace-storage-label" class="home-storage-label">desenvolvimento local</span><details class="storage-info"><summary aria-label="Sobre o armazenamento dos registros">i</summary><p id="workspace-storage-description">Use dados fictícios durante os testes deste ambiente.</p></details></div></header>
           <div id="home-status" class="notice" role="status" aria-live="polite" hidden></div>
           <button id="home-retry" class="button button-secondary" type="button" hidden>Tentar carregar novamente</button>
-          <section class="home-metrics" aria-label="Resumo dos seus registros">
-            <article class="home-metric"><svg class="metric-icon" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12"/><path d="M11 16l3 3 7-7"/></svg><div class="metric-content"><h2 class="metric-label">Sessões registradas</h2><strong id="home-total-sessions">—</strong></div></article>
-            <article class="home-metric"><svg class="metric-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M2 17h7l3-9 5 17 3-8h10"/></svg><div class="metric-content"><h2 class="metric-label">Último estado confirmado</h2><strong id="home-last-state">—</strong><small id="home-last-state-date">Data não informada</small></div></article>
-            <article class="home-metric"><svg class="metric-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M12 24V7l15-3v17M12 11l15-3"/><ellipse cx="8" cy="24" rx="4" ry="3"/><ellipse cx="23" cy="21" rx="4" ry="3"/></svg><div class="metric-content"><h2 class="metric-label">Escutas informadas</h2><strong id="home-total-listens">—</strong><small>Faixas que você informou ter ouvido</small></div></article>
-            <article class="home-metric"><svg class="metric-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M8 4h18v21H8zM4 8v21h18"/><circle cx="17" cy="14" r="5"/><circle cx="17" cy="14" r="1"/></svg><div class="metric-content"><h2 class="metric-label">Faixas no catálogo</h2><strong id="home-total-tracks">—</strong></div></article>
-          </section>
-          <section class="home-hero" aria-labelledby="home-hero-heading">
-            <div class="home-hero-copy"><span class="home-kicker">Nova sessão de escuta</span><h2 id="home-hero-heading">Como está seu momento?</h2><p>Conte com suas palavras. Você poderá revisar a interpretação antes de escolher sua escuta.</p><ol class="home-steps" aria-label="Como funciona uma sessão"><li>1. Relato livre</li><li>2. Sua revisão</li><li>3. Escuta e percepção</li></ol><button id="home-new-session" class="button button-primary" type="button">Começar um relato <span aria-hidden="true">→</span></button></div>
-
-<svg class="home-wave" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <section class="home-hero" aria-labelledby="home-heading">
+            <div class="home-hero-copy">
+              <p id="home-greeting" class="home-greeting"></p>
+              <h1 id="home-heading" tabindex="-1">Seu espaço, <span>no seu ritmo.</span></h1>
+              <div class="home-invitation"><h2 id="home-hero-heading">Como está seu momento?</h2><p>Conte com suas palavras. Você poderá revisar a interpretação antes de escolher sua escuta.</p><button id="home-new-session" class="button button-primary" type="button">Começar um relato <span aria-hidden="true">→</span></button><ol class="home-steps" aria-label="Como funciona uma sessão"><li>Seu relato</li><li>Sua revisão</li><li>Sua escuta</li></ol></div>
+            </div>
+            <svg class="home-wave" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
   <defs>
     <linearGradient id="rm-wave-spectrum" x1="0" y1="0" x2="1" y2="0">
       <stop class="wave-stop-a" offset="0" stop-color="#818CF8"/>
@@ -159,19 +164,35 @@
   <path class="wave-fine" d="M24 158C58 158 66 155 83 141S103 169 114 168 131 108 143 103 159 210 174 205 195 127 208 126 224 193 242 189 269 59 282 52 299 268 315 259 332 90 344 83 360 216 376 210 395 135 411 130 431 185 448 179 466 149 480 148 511 158 539 155" fill="none" stroke="url(#rm-wave-spectrum)" stroke-width="1.2" opacity=".9"/>
   <path class="wave-fine" d="M26 158C57 160 69 149 86 147 99 144 103 175 115 173 128 171 134 122 145 120 157 117 164 213 176 210 190 207 197 141 211 140 226 138 228 196 244 193 265 189 273 76 283 72 298 67 304 271 318 262 332 253 337 103 347 101 358 99 365 219 379 215 391 211 398 143 414 140 428 137 434 188 450 184 465 180 468 156 482 154 501 151 516 158 538 156" fill="none" stroke="url(#rm-wave-fade)" stroke-width=".8" opacity=".45"/>
 </svg>
-
           </section>
-          <div class="home-columns"><section class="home-section" aria-labelledby="home-pending-heading">
-            <div class="home-section-heading"><h2 id="home-pending-heading">Continue de onde parou</h2></div>
-            <div id="home-pending-list" class="home-pending-grid"></div>
-            <div id="home-pending-empty" class="home-empty" hidden><svg class="home-empty-icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18"/><path d="M24 13v12l9 5"/></svg><div><h3>No seu tempo.</h3><p>Você não tem etapas pendentes. Pode começar um novo relato quando quiser.</p><button id="home-open-catalog" class="button-link" type="button">Conhecer ou adicionar faixas ao catálogo <span aria-hidden="true">→</span></button></div></div>
+          <div class="home-columns">
+            <div class="home-main-column">
+              <section class="home-section" aria-labelledby="home-pending-heading">
+                <div class="home-section-heading"><h2 id="home-pending-heading">Continue de onde parou</h2></div>
+                <div id="home-pending-list" class="home-pending-grid"></div>
+                <div id="home-pending-empty" class="home-empty" hidden><svg class="home-empty-icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18"/><path d="M24 13v12l9 5"/></svg><div><h3>No seu tempo.</h3><p>Você não tem etapas pendentes. Comece um relato quando quiser.</p></div></div>
+              </section>
+              <section class="home-section" aria-labelledby="home-recent-heading">
+                <div class="home-section-heading"><h2 id="home-recent-heading">Seu diário recente</h2><button id="home-open-history" class="button-link" type="button">Ver meu diário <span aria-hidden="true">→</span></button></div>
+                <div id="home-recent-list" class="home-recent-list"></div>
+                <div id="home-recent-empty" class="home-empty" hidden><svg class="home-empty-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M9 7h29v34H9a5 5 0 0 1-5-5V12a5 5 0 0 1 5-5zM9 7v34M20 7v17l5-3 5 3V7"/></svg><div><h3>Seu diário começa com um relato.</h3><p>Suas palavras, escolhas e percepções aparecerão aqui.</p></div></div>
+              </section>
+            </div>
+            <aside class="home-explore" aria-labelledby="home-explore-heading">
+              <h2 id="home-explore-heading">Explore seu espaço</h2>
+              <div class="home-explore-row"><svg class="home-explore-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5zM9 7h6M9 11h6M9 15h4"/></svg><div><h3>Meu diário</h3><p>Revisite seus relatos, escolhas e percepções.</p><button id="home-explore-history" class="button-link" type="button">Abrir diário <span aria-hidden="true">→</span></button></div></div>
+              <div class="home-explore-row"><svg class="home-explore-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13M9 8l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></svg><div><h3>Minhas músicas</h3><p id="home-catalog-description">Organize as faixas disponíveis para suas próximas escutas.</p><button id="home-open-catalog" class="button-link" type="button">Explorar minhas músicas <span aria-hidden="true">→</span></button></div></div>
+              <div class="home-support"><h3>Você decide o que faz sentido.</h3><p>As interpretações são sugestões. Você pode ajustar ou seguir sem categoria.</p></div>
+            </aside>
+          </div>
+          <details id="home-summary" class="home-summary"><summary>Resumo dos meus registros</summary>
+            <section class="home-metrics" aria-label="Resumo dos seus registros">
+            <article class="home-metric"><svg class="metric-icon" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12"/><path d="M11 16l3 3 7-7"/></svg><div class="metric-content"><h3 class="metric-label">Sessões registradas</h3><strong id="home-total-sessions">—</strong></div></article>
+            <article class="home-metric"><svg class="metric-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M2 17h7l3-9 5 17 3-8h10"/></svg><div class="metric-content"><h3 class="metric-label">Último estado confirmado</h3><strong id="home-last-state">—</strong><small id="home-last-state-date">Data não informada</small></div></article>
+            <article class="home-metric"><svg class="metric-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M12 24V7l15-3v17M12 11l15-3"/><ellipse cx="8" cy="24" rx="4" ry="3"/><ellipse cx="23" cy="21" rx="4" ry="3"/></svg><div class="metric-content"><h3 class="metric-label">Escutas informadas</h3><strong id="home-total-listens">—</strong><small>Faixas que você informou ter ouvido</small></div></article>
+            <article class="home-metric"><svg class="metric-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M8 4h18v21H8zM4 8v21h18"/><circle cx="17" cy="14" r="5"/><circle cx="17" cy="14" r="1"/></svg><div class="metric-content"><h3 class="metric-label">Faixas no catálogo</h3><strong id="home-total-tracks">—</strong></div></article>
           </section>
-          <section class="home-section" aria-labelledby="home-recent-heading">
-            <div class="home-section-heading"><h2 id="home-recent-heading">Seu diário recente</h2><button id="home-open-history" class="button-link" type="button">Ver meu diário <span aria-hidden="true">→</span></button></div>
-            <div id="home-recent-list" class="home-recent-list"></div>
-            <div id="home-recent-empty" class="home-empty" hidden><svg class="home-empty-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M9 7h29v34H9a5 5 0 0 1-5-5V12a5 5 0 0 1 5-5zM9 7v34M20 7v17l5-3 5 3V7"/></svg><div><h3>Seu diário começa com um relato.</h3><p>Seus registros aparecerão aqui depois que você começar uma sessão.</p></div></div>
-          </section></div>
-          <aside class="home-support"><h2>Você decide o que faz sentido.</h2><p>As interpretações são sugestões. Você pode ajustar, seguir sem categoria e registrar seu retorno quando quiser.</p></aside>
+          </details>
         </section>
 
         <section id="view-session" class="workspace-view" aria-labelledby="session-heading" hidden>
@@ -231,11 +252,27 @@
         </section>
 
         <section id="view-history" class="workspace-view" aria-labelledby="history-heading" hidden>
-          <div class="page-heading"><div><p class="eyebrow">SEU DIÁRIO DE ESCUTA</p><h1 id="history-heading" tabindex="-1">Histórico e percepções.</h1><p>Revisite seus relatos, escolhas e retornos, sempre no contexto de cada sessão.</p></div><button id="history-export" class="button button-secondary" type="button">Exportar meus dados</button></div>
+          <div class="page-heading"><div><h1 id="history-heading" tabindex="-1">Meu diário</h1><p>Revisite seus relatos, escolhas e percepções, no contexto de cada sessão.</p></div><button id="history-export" class="button button-secondary" type="button">Exportar meus dados</button></div>
           <div id="history-status" class="notice" role="status" aria-live="polite"></div>
-          <section class="card patterns-card" aria-labelledby="patterns-heading"><div class="section-heading"><div><p class="eyebrow">OLHANDO COM CALMA</p><h2 id="patterns-heading">O que aparece nos seus registros</h2></div></div><div id="patterns-summary" class="patterns-summary"><p class="empty-copy">O resumo aparecerá quando houver registros.</p></div><p class="field-help">Este resumo considera suas sessões. Associações observadas não demonstram que uma faixa causou uma mudança.</p></section>
-          <div class="history-layout"><div class="history-browser"><form method="post" id="history-filter-form" class="card filters-card"><h2>Encontrar registros</h2><div class="filter-grid"><div class="field"><label for="history-date-start">De</label><input id="history-date-start" type="date" name="data_inicio"></div><div class="field"><label for="history-date-end">Até</label><input id="history-date-end" type="date" name="data_fim"></div><div class="field"><label for="history-purpose-filter">Finalidade</label><input id="history-purpose-filter" name="finalidade" maxlength="200" placeholder="Por exemplo: estudar"></div><div class="field"><label for="history-context-filter">Contexto</label><input id="history-context-filter" name="contexto" maxlength="500" placeholder="Por exemplo: em casa"></div><div class="field filter-feedback"><label for="history-feedback-filter">Retorno</label><select id="history-feedback-filter" name="avaliacao"><option value="">Todos os registros</option><option value="positivo">Com ajuda relatada</option><option value="negativo">Sem ajuda relatada</option><option value="nao_registrado">Sem retorno registrado</option></select></div></div><div class="button-row"><button class="button button-primary" type="submit">Filtrar histórico</button><button id="history-clear-filters" class="button-link" type="button">Limpar filtros</button></div></form><div class="list-heading"><h2>Seus registros</h2><p id="history-summary" class="small-label"></p></div><div id="history-list" class="history-list"></div><div id="history-empty" class="card empty-state" hidden><span class="empty-icon" aria-hidden="true">≋</span><h3>Nenhum registro por aqui.</h3><p>Uma nova sessão é um ponto de partida. Se usou filtros, tente ampliar sua busca.</p></div></div>
-          <section id="history-detail" class="card history-detail" aria-labelledby="history-detail-title" hidden><div class="section-heading"><div><p class="eyebrow">UM REGISTRO DO SEU DIÁRIO</p><h2 id="history-detail-title" tabindex="-1">Detalhes da sessão</h2></div></div><div id="history-detail-content" class="history-detail-content"></div><div class="button-row detail-actions"><button id="history-resume" class="button button-primary" type="button">Abrir esta sessão</button><button id="history-export-one" class="button button-secondary" type="button">Exportar registro</button></div><form method="post" id="history-correction-form" class="stack-form correction-form"><div class="form-intro"><h3>Corrigir informações do registro</h3><p>Você pode ajustar a finalidade, o contexto e suas observações. O relato original permanece preservado.</p></div><div class="field"><label for="correction-purpose">Finalidade</label><input id="correction-purpose" maxlength="200"></div><div class="field"><label for="correction-context">Contexto</label><textarea id="correction-context" rows="2" maxlength="500"></textarea></div><div class="field"><label for="correction-notes">Observações</label><textarea id="correction-notes" rows="3" maxlength="4000"></textarea></div><div class="field"><label for="correction-reason">Motivo da correção <span class="optional">Opcional</span></label><input id="correction-reason" maxlength="500" placeholder="Para lembrar o que foi ajustado"></div><button id="save-correction" class="button button-secondary" type="submit">Salvar correção</button><small>As alterações e os valores anteriores ficam registrados nesta sessão até sua exclusão.</small></form><div class="single-delete"><button id="history-delete-one" class="button button-danger-outline" type="button">Excluir esta sessão</button></div></section></div>
+          <div class="history-layout">
+            <div class="history-browser">
+              <div class="list-heading"><h2>Seus registros recentes</h2><p id="history-summary" class="small-label" role="status"></p></div>
+              <div class="history-tools">
+                <details id="history-filters" class="history-disclosure">
+                  <summary id="history-filters-summary"><span>Filtrar registros</span><span id="history-filter-count" hidden></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+                  <form method="post" id="history-filter-form" class="history-filter-form"><div class="filter-grid"><div class="field"><label for="history-date-start">De</label><input id="history-date-start" type="date" name="data_inicio"></div><div class="field"><label for="history-date-end">Até</label><input id="history-date-end" type="date" name="data_fim"></div><div class="field"><label for="history-purpose-filter">Finalidade</label><input id="history-purpose-filter" name="finalidade" maxlength="200" placeholder="Por exemplo: estudar"></div><div class="field"><label for="history-context-filter">Contexto</label><input id="history-context-filter" name="contexto" maxlength="500" placeholder="Por exemplo: em casa"></div><div class="field filter-feedback"><label for="history-feedback-filter">Retorno</label><select id="history-feedback-filter" name="avaliacao"><option value="">Todos os registros</option><option value="positivo">Com ajuda relatada</option><option value="negativo">Sem ajuda ou sem mudança</option><option value="nao_registrado">Sem retorno registrado</option></select></div></div><div class="button-row"><button class="button button-primary" type="submit">Filtrar histórico</button><button id="history-clear-filters" class="button-link" type="button">Limpar filtros</button></div></form>
+                </details>
+                <div id="history-active-filters" class="history-active-filters" hidden><p id="history-active-filter-text" aria-live="polite"></p><button id="history-clear-active-filters" class="button-link" type="button">Limpar filtros aplicados</button></div>
+              </div>
+              <div id="history-list" class="history-list"></div>
+              <div id="history-empty" class="empty-state" hidden><h3>Nenhum registro por aqui.</h3><p>Uma nova sessão é um ponto de partida. Se usou filtros, tente ampliar sua busca.</p></div>
+            </div>
+            <section id="history-detail" class="card history-detail" aria-labelledby="history-detail-title" hidden><div class="section-heading"><div><h2 id="history-detail-title" tabindex="-1">Detalhes da sessão</h2></div></div><div id="history-detail-content" class="history-detail-content"></div><div class="button-row detail-actions"><button id="history-resume" class="button button-primary" type="button">Abrir esta sessão</button><button id="history-export-one" class="button button-secondary" type="button">Exportar registro</button></div><form method="post" id="history-correction-form" class="stack-form correction-form"><div class="form-intro"><h3>Corrigir informações do registro</h3><p>Você pode ajustar a finalidade, o contexto e suas observações. O relato original permanece preservado.</p></div><div class="field"><label for="correction-purpose">Finalidade</label><input id="correction-purpose" maxlength="200"></div><div class="field"><label for="correction-context">Contexto</label><textarea id="correction-context" rows="2" maxlength="500"></textarea></div><div class="field"><label for="correction-notes">Observações</label><textarea id="correction-notes" rows="3" maxlength="4000"></textarea></div><div class="field"><label for="correction-reason">Motivo da correção <span class="optional">Opcional</span></label><input id="correction-reason" maxlength="500" placeholder="Para lembrar o que foi ajustado"></div><button id="save-correction" class="button button-secondary" type="submit">Salvar correção</button><small>As alterações e os valores anteriores ficam registrados nesta sessão até sua exclusão.</small></form><div class="single-delete"><button id="history-delete-one" class="button button-danger-outline" type="button">Excluir esta sessão</button></div></section>
+          </div>
+          <details id="history-patterns" class="history-disclosure history-patterns">
+            <summary id="patterns-heading"><span>Ver padrões dos meus registros</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <div class="history-disclosure-content"><div id="patterns-summary" class="patterns-summary"><p class="empty-copy">O resumo aparecerá quando houver registros.</p></div></div>
+          </details>
           <section class="rights-footer card" aria-labelledby="rights-heading"><div><h2 id="rights-heading">Seus registros, suas escolhas.</h2><p>Você pode exportar seus registros e excluir uma sessão ou todo o histórico. A exclusão do histórico preserva sua conta e seu catálogo.</p><p class="small-label">Arquivos de exportação já baixados ficam sob seu controle.</p></div><button id="history-delete-all" class="button button-danger-outline" type="button">Excluir todo o meu histórico</button></section>
         </section>
 

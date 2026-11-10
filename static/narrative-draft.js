@@ -26,8 +26,8 @@ export function createNarrativeDraft(form, { confirm }) {
     capture: () => capture(),
     // Passe o snapshot do início do envio para preservar edições feitas durante a espera.
     markSaved(snapshot = capture()) { baseline = snapshot; },
-    // Chamado depois de form.reset(), inclusive ao encerrar a identidade atual.
-    reset() { baseline = capture(); },
+    // Se a versão salva for excluída, o conteúdo em elaboração volta a ser não enviado.
+    reset({ toDefaults = false } = {}) { baseline = capture(toDefaults); },
     confirmDiscard({
       title = 'Começar outro relato?',
       message = 'Há alterações neste relato que ainda não foram enviadas. Você pode continuar escrevendo ou descartar esse texto para começar outro. Seus registros já salvos serão mantidos.',

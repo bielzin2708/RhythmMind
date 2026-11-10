@@ -47,6 +47,7 @@ historico*.json.*
 musicas_usuario*.json
 *history*
 !/static/history.js
+!/tests/js/test_history_presentation.mjs
 *.log
 *.tmp
 *.temp

@@ -96,6 +96,19 @@ test('sucesso de um envio anterior não apaga a proteção de uma edição feita
   assert.equal(guard.hasChanges(), false);
 });
 
+test('excluir a versão salva invalida a referência sem descartar o texto em elaboração', async () => {
+  const { guard, text } = fixture(async () => false);
+  text.value = 'Versão salva fictícia';
+  guard.markSaved();
+  text.value = 'Versão mais recente ainda não enviada';
+  guard.reset({ toDefaults: true });
+  assert.equal(text.value, 'Versão mais recente ainda não enviada');
+  assert.equal(await guard.confirmDiscard(), false);
+  // Voltar ao texto do registro excluído também não equivale a salvá-lo novamente.
+  text.value = 'Versão salva fictícia';
+  assert.equal(guard.hasChanges(), true);
+});
+
 test('dois pedidos simultâneos compartilham uma confirmação e uma decisão', async () => {
   let calls = 0;
   let decide;

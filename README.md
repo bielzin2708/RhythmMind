@@ -26,15 +26,20 @@ Veja o [guia de configuração e teste do login Google](docs/login_google.md).
 
 Depois de entrar, a página **Seu espaço** apresenta as etapas pendentes e os
 registros recentes da própria conta. **Começar um relato** inicia uma sessão;
-**Sua sessão** permite voltar à etapa aberta. O menu também oferece **Meu diário**,
-**Meu catálogo**, informações sobre o projeto e saída da conta. As áreas usam
-a mesma identidade marinho/ciano do acesso e se adaptam ao celular.
+**Sua sessão** permite voltar à etapa aberta. A navegação no topo também oferece
+**Meu diário** e **Minhas músicas**. A home reúne a saudação e o início do relato
+em um destaque, seguidos de continuidade, registros recentes e acessos rápidos.
+As áreas usam a mesma identidade marinho/ciano do acesso e se adaptam ao celular.
 
-O painel lateral resume os dados da conta. Os indicadores mostram sessões
-registradas, o último estado confirmado com sua data, escutas informadas pela
-pessoa e faixas no catálogo. A engrenagem abre as preferências visuais para
-pausar a ambientação em menta, ciano e índigo; a preferência de movimento
-reduzido do dispositivo é respeitada. A exportação também está disponível no menu.
+**Sua conta** abre perfil, exportação, preferências visuais, informações sobre
+o projeto e saída. **Resumo dos meus registros** expande os indicadores de
+sessões, último estado confirmado, escutas informadas e faixas no catálogo.
+Nas preferências, a ambientação em menta, ciano e índigo pode ser pausada;
+a preferência de movimento reduzido do dispositivo é respeitada.
+
+O diário mostra os registros primeiro. Filtros e padrões ficam em expansões;
+os filtros aplicados continuam indicados mesmo recolhidos. Detalhes, correção,
+exportação e exclusão permanecem restritos à própria conta.
 
 Os cartões consultam a API autenticada. Uma escuta não informada, a escolha
 de nenhuma faixa e um retorno negativo continuam sendo situações distintas.

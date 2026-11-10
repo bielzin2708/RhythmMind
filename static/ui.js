@@ -55,8 +55,10 @@ export function formatDate(value) {
 }
 
 let closeConfirmation = null;
+let confirmationVersion = 0;
 export function dismissConfirmation() { if (closeConfirmation) closeConfirmation(false); }
 export function confirmAction({ title, message, label = 'Confirmar', cancelLabel = 'Cancelar' }) {
+  const version = ++confirmationVersion;
   dismissConfirmation();
   const dialog = $('#confirm-dialog');
   const form = $('#confirm-form');
@@ -67,6 +69,22 @@ export function confirmAction({ title, message, label = 'Confirmar', cancelLabel
   $('#confirm-text').textContent = message;
   button.textContent = label;
   cancel.textContent = cancelLabel;
+  const restoreFocus = () => {
+    if (version !== confirmationVersion || document.querySelector('dialog[open]')) return;
+    const available = node => {
+      if (!node?.isConnected || node === document.body || node === document.documentElement
+        || node.matches(':disabled') || node.closest('[hidden], [inert]') || !node.getClientRects().length) return false;
+      const disclosure = node.closest('details:not([open])');
+      return !disclosure || disclosure.querySelector(':scope > summary')?.contains(node);
+    };
+    const active = document.activeElement;
+    // The caller may have moved focus after closing, for example back to its draft.
+    if (!dialog.contains(active) && available(active)) return;
+    const disclosure = previousFocus.closest('details:not([open])');
+    const target = [previousFocus, disclosure?.querySelector(':scope > summary'),
+      document.querySelector('.workspace-view:not([hidden]) h1[tabindex="-1"]')].find(available);
+    target?.focus({ preventScroll: true });
+  };
   return new Promise(resolve => {
     const finish = value => {
       form.removeEventListener('submit', submit);
@@ -74,8 +92,12 @@ export function confirmAction({ title, message, label = 'Confirmar', cancelLabel
       dialog.removeEventListener('cancel', cancellation);
       if (dialog.open) dialog.close();
       closeConfirmation = null;
-      if (previousFocus?.isConnected) previousFocus.focus();
       resolve(value);
+      // Let withBusy re-enable its trigger before attempting to restore focus.
+      if (previousFocus) {
+        if (typeof requestAnimationFrame === 'function') requestAnimationFrame(restoreFocus);
+        else setTimeout(restoreFocus, 0);
+      }
     };
     const submit = event => { event.preventDefault(); finish(true); };
     const cancellation = event => { event.preventDefault(); finish(false); };

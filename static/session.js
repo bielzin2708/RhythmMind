@@ -92,7 +92,7 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     });
   }
 
-  function reset() {
+  function reset({ preserveNarrative = false } = {}) {
     epoch += 1;
     draftsEpoch += 1;
     catalogEpoch += 1;
@@ -104,8 +104,10 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     fallback = false;
     guidanceRequest += 1;
     catalogState = 'unknown';
-    ['narrative-form', 'review-form', 'listening-form', 'feedback-form', 'catalog-form'].forEach((id) => $(`#${id}`).reset());
-    narrativeDraft.reset();
+    ['narrative-form', 'review-form', 'listening-form', 'feedback-form', 'catalog-form'].forEach((id) => {
+      if (id !== 'narrative-form' || !preserveNarrative) $(`#${id}`).reset();
+    });
+    narrativeDraft.reset({ toDefaults: preserveNarrative });
     ['review-original', 'review-reflection', 'review-origin', 'review-references', 'review-clarification', 'strategy-summary', 'recommendation-list', 'draft-list', 'catalog-list'].forEach((id) => $(`#${id}`).replaceChildren());
     $('#current-tags').replaceChildren();
     $('#desired-tags').replaceChildren();
@@ -115,7 +117,7 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     $('#session-retry').hidden = true;
     $('#fallback-local-button').hidden = true;
     $('#review-clarification').hidden = true;
-    $('#llm-options').hidden = true;
+    $('#llm-options').hidden = $('#interpretation-engine').value !== 'llm';
     $('#draft-count').textContent = '0';
     $('#catalog-status').textContent = '';
     $('#feedback-status').textContent = '';
@@ -630,7 +632,10 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
   return {
     open, reset, newSession, loadDrafts, loadCatalog, refreshCatalogGuidance, confirmLeave,
     invalidateDeleted(ids) {
-      if (sessionId && Array.isArray(ids) && ids.includes(sessionId)) reset();
+      if (!sessionId || !Array.isArray(ids) || !ids.includes(sessionId)) return;
+      const preserveNarrative = narrativeDraft.hasChanges();
+      reset({ preserveNarrative });
+      if (preserveNarrative) status('O registro salvo foi excluído. Suas alterações ainda não enviadas continuam neste formulário.');
     },
   };
 }

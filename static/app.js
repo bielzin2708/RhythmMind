@@ -16,6 +16,24 @@ let googleAvailable = false;
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 let ambientEnabled = !reducedMotion.matches;
 
+function closeAccountMenu({ restoreFocus = false } = {}) {
+  const menu = $('#account-menu');
+  if (!menu.open) return;
+  menu.open = false;
+  if (restoreFocus) $('#account-menu-toggle').focus();
+}
+
+document.addEventListener('pointerdown', event => {
+  const menu = $('#account-menu');
+  if (menu.open && !menu.contains(event.target) && !document.querySelector('dialog[open]')) closeAccountMenu();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && $('#account-menu').open && !document.querySelector('dialog[open]')) {
+    event.preventDefault();
+    closeAccountMenu({ restoreFocus: true });
+  }
+});
+
 function isStale(error) { return error instanceof StaleRequestError || error.name === 'StaleRequestError'; }
 
 function updateAmbientAppearance() {
@@ -125,12 +143,15 @@ for (const button of document.querySelectorAll('[data-toggle-password]')) {
 function focusContent(target) {
   if (!target || !target.getClientRects().length) return;
   target.focus({ preventScroll: true });
-  target.scrollIntoView({ block: 'start', behavior: 'auto' });
+  // O título da home fica dentro do destaque; a saudação deve chegar inteira.
+  if (target.id === 'home-heading') window.scrollTo({ top: 0, behavior: 'auto' });
+  else target.scrollIntoView({ block: 'start', behavior: 'auto' });
 }
 
 function showView(next, { load = true, focus = true } = {}) {
   const names = ['home', 'session', 'history', 'catalog'];
   if (!user || !names.includes(next)) return;
+  closeAccountMenu();
   activeView = next;
   navigationVersion += 1;
   for (const name of names) {
@@ -197,6 +218,8 @@ function clearIdentity() {
   navigationVersion += 1;
   user = null;
   setToken(null);
+  closeAccountMenu();
+  $('#home-summary').open = false;
   dismissConfirmation();
   session.reset();
   history.reset();
@@ -263,6 +286,7 @@ $('#workspace-export').addEventListener('click', () => {
       const data = await api('/api/historico/exportacao');
       if (!user || attempt !== accessEpoch) return;
       downloadJSON(data, 'rhythmmind-registros.json');
+      closeAccountMenu({ restoreFocus: true });
       notify('Exportação dos seus registros preparada.', 'success');
     } catch (error) {
       if (!isStale(error) && user && attempt === accessEpoch) notify(error.message, 'error');
@@ -384,11 +408,19 @@ for (const [id, register] of [['auth-login-form', false], ['auth-register-form',
 
 $('#logout-button').addEventListener('click', async () => {
   const attempt = accessEpoch;
-  if (!user || !await session.confirmLeave({
+  if (!user || $('#logout-button').disabled) return;
+  const allowed = await session.confirmLeave({
     title: 'Sair e descartar o texto não enviado?',
     message: 'Há alterações no relato que ainda não foram enviadas. Ao sair, esse texto será descartado. Seus registros já salvos serão mantidos.',
     label: 'Sair e descartar',
-  }) || attempt !== accessEpoch || !user || $('#logout-button').disabled) return;
+  });
+  if (attempt !== accessEpoch || !user || $('#logout-button').disabled) return;
+  closeAccountMenu();
+  if (!allowed) {
+    showView('session', { load: false, focus: false });
+    focusContent($('#narrative-text'));
+    return;
+  }
   void withBusy($('#logout-button'), async () => {
     let confirmed = false;
     try { await api('/api/auth/sair', { method: 'POST' }); confirmed = true; }

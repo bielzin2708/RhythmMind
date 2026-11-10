@@ -145,6 +145,8 @@ export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog 
   function clearCatalogMetrics() {
     $('#profile-catalog').textContent = '—';
     $('#home-total-tracks').textContent = '—';
+    $('#home-catalog-description').textContent = 'Organize as faixas disponíveis para suas próximas escutas.';
+    $('#home-open-catalog').textContent = 'Explorar músicas →';
   }
 
   function renderHistoryMetrics(records) {
@@ -165,6 +167,10 @@ export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog 
     const total = catalogTotal(response);
     $('#home-total-tracks').textContent = total.toLocaleString('pt-BR');
     $('#profile-catalog').textContent = `${total.toLocaleString('pt-BR')} ${total === 1 ? 'faixa' : 'faixas'}`;
+    $('#home-catalog-description').textContent = total === 0
+      ? 'Prepare seu catálogo para receber sugestões musicais. Você também pode escrever sem escolher uma faixa.'
+      : 'Organize as faixas disponíveis para suas próximas escutas.';
+    $('#home-open-catalog').textContent = total === 0 ? 'Adicionar músicas →' : 'Explorar músicas →';
   }
 
   function clear() {
@@ -257,6 +263,7 @@ export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog 
 
   $('#home-new-session').addEventListener('click', () => { if (activeUser) onNew(); });
   $('#home-open-history').addEventListener('click', () => { if (activeUser) onHistory(); });
+  $('#home-explore-history').addEventListener('click', () => { if (activeUser) onHistory(); });
   $('#home-open-catalog').addEventListener('click', () => { if (activeUser) onCatalog(); });
   $('#home-retry').addEventListener('click', () => { void load(); });
   reset();
