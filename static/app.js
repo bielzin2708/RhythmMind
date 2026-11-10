@@ -1,5 +1,5 @@
 import { api, setToken, onUnauthorized, StaleRequestError } from './api.js';
-import { $, notify, withBusy, dismissConfirmation } from './ui.js';
+import { $, notify, withBusy, dismissConfirmation, downloadJSON } from './ui.js';
 import { initSession } from './session.js';
 import { initHistory } from './history.js';
 import { initHome } from './home.js';
@@ -13,8 +13,38 @@ let activeView = 'home';
 let navigationVersion = 0;
 let accessBusy = false;
 let googleAvailable = false;
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+let ambientEnabled = !reducedMotion.matches;
 
 function isStale(error) { return error instanceof StaleRequestError || error.name === 'StaleRequestError'; }
+
+function updateAmbientAppearance() {
+  const reduced = reducedMotion.matches;
+  const enabled = ambientEnabled && !reduced;
+  document.body.classList.toggle('ambient-paused', !enabled);
+  $('#ambient-toggle').checked = enabled;
+  $('#ambient-toggle').disabled = reduced;
+  $('#ambient-help').textContent = reduced
+    ? 'A transição está desativada para respeitar a preferência de movimento reduzido do seu dispositivo.'
+    : 'Você pode pausar ou retomar a ambientação quando quiser. Os textos e controles mantêm cores de leitura estáveis.';
+}
+
+function updateStorageAppearance(mode) {
+  const persistent = mode === 'persistente';
+  const temporary = mode === 'temporario';
+  $('#workspace-storage-label').textContent = persistent ? 'dados locais' : temporary ? 'dados temporários' : 'desenvolvimento local';
+  $('#workspace-storage-description').textContent = persistent
+    ? 'Os registros ficam salvos neste computador entre reinicializações. Use dados fictícios durante os testes.'
+    : temporary
+      ? 'Os registros deste ambiente são temporários e descartados ao encerrar o servidor. Use dados fictícios durante os testes.'
+      : 'Não foi possível confirmar o modo de armazenamento. Use dados fictícios durante os testes.';
+}
+
+updateAmbientAppearance();
+reducedMotion.addEventListener('change', () => {
+  if (reducedMotion.matches) ambientEnabled = false;
+  updateAmbientAppearance();
+});
 
 function setAccessAppearance(access) {
   document.body.classList.toggle('auth-screen', access);
@@ -62,6 +92,7 @@ function accessStatus(message, error = false) {
 async function configureGoogle() {
   try {
     const config = await api('/api/auth/google/config');
+    updateStorageAppearance(config.armazenamento);
     const persistent = config.armazenamento === 'persistente';
     $('#environment-label').textContent = persistent ? 'Protótipo · dados locais' : 'Protótipo · dados fictícios';
     $('#development-note-text').textContent = persistent
@@ -74,6 +105,7 @@ async function configureGoogle() {
   } catch (error) {
     if (isStale(error)) return;
     googleAvailable = false;
+    updateStorageAppearance(null);
     $('#development-note-text').textContent = 'Ambiente local de desenvolvimento. Use dados fictícios.';
     $('#google-access-help').textContent = 'Não foi possível conferir o acesso com Google. Você pode entrar com sua senha.';
   } finally { updateGoogleButton(); }
@@ -152,7 +184,7 @@ function onChanged(change = {}) {
   if (!user) return;
   if (change.deletedIds?.length) session.invalidateDeleted(change.deletedIds);
   home.setUser(user);
-  if (activeView === 'home') void home.load();
+  void home.load();
   void session.loadDrafts();
 }
 
@@ -166,6 +198,8 @@ function clearIdentity() {
   history.reset();
   home.reset();
   $('#about-dialog').close();
+  $('#appearance-dialog').close();
+  $('.storage-info').open = false;
   $('#account-name').textContent = '';
   $('#workspace-avatar').textContent = '';
   document.title = 'RhythmMind — seu momento, sua escuta';
@@ -207,6 +241,30 @@ $('#about-button').addEventListener('click', () => {
   if (user) $('#about-dialog').showModal();
 });
 $('#about-close').addEventListener('click', () => $('#about-dialog').close());
+$('#appearance-button').addEventListener('click', () => {
+  if (!user) return;
+  updateAmbientAppearance();
+  $('#appearance-dialog').showModal();
+});
+$('#appearance-close').addEventListener('click', () => $('#appearance-dialog').close());
+$('#ambient-toggle').addEventListener('change', event => {
+  ambientEnabled = event.currentTarget.checked;
+  updateAmbientAppearance();
+});
+$('#workspace-export').addEventListener('click', () => {
+  if (!user) return;
+  const attempt = accessEpoch;
+  void withBusy($('#workspace-export'), async () => {
+    try {
+      const data = await api('/api/historico/exportacao');
+      if (!user || attempt !== accessEpoch) return;
+      downloadJSON(data, 'rhythmmind-registros.json');
+      notify('Exportação dos seus registros preparada.', 'success');
+    } catch (error) {
+      if (!isStale(error) && user && attempt === accessEpoch) notify(error.message, 'error');
+    }
+  });
+});
 
 $('#show-register').addEventListener('click', () => {
   clearPasswords();
@@ -223,7 +281,7 @@ $('#show-login').addEventListener('click', () => {
   $('#login-name').focus();
 });
 
-async function activateAccess(access, attempt, message) {
+async function activateAccess(access, attempt) {
   if (attempt !== accessEpoch) return;
   setToken(access.token_acesso);
   const profile = await api('/api/auth/eu');
@@ -242,7 +300,7 @@ async function activateAccess(access, attempt, message) {
   history.reset();
   home.setUser(profile);
   showView('home');
-  notify(message, 'success');
+  notify('');
 }
 
 async function authenticate(form, register) {
@@ -255,9 +313,7 @@ async function authenticate(form, register) {
     try {
       if (register) await api('/api/auth/registrar', { method: 'POST', body: credentials });
       const access = await api('/api/auth/entrar', { method: 'POST', body: credentials });
-      await activateAccess(access, attempt, register
-        ? 'Seu espaço está pronto. Comece um relato ou adicione faixas ao catálogo.'
-        : 'Acesso confirmado. Você pode começar ou retomar uma sessão.');
+      await activateAccess(access, attempt);
     } catch (error) {
       if (!isStale(error) && attempt === accessEpoch) {
         $('#auth-status').textContent = error.message;
@@ -293,7 +349,7 @@ async function completeGoogle() {
     accessStatus('Concluindo seu acesso com Google…');
     try {
       const access = await api('/api/auth/google/concluir', { method: 'POST' });
-      await activateAccess(access, attempt, 'Acesso com Google confirmado. Você pode começar ou retomar uma sessão.');
+      await activateAccess(access, attempt);
     } catch (error) {
       if (!isStale(error) && attempt === accessEpoch) {
         accessStatus(error.status === 401
@@ -323,7 +379,7 @@ for (const [id, register] of [['auth-login-form', false], ['auth-register-form',
 }
 
 $('#logout-button').addEventListener('click', () => {
-  void withBusy($('#logout-button').parentElement, async () => {
+  void withBusy($('#logout-button'), async () => {
     let confirmed = false;
     try { await api('/api/auth/sair', { method: 'POST' }); confirmed = true; }
     catch (error) { if (isStale(error)) return; }

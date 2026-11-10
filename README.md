@@ -30,6 +30,12 @@ registros recentes da própria conta. **Começar um relato** inicia uma sessão;
 **Meu catálogo**, informações sobre o projeto e saída da conta. As áreas usam
 a mesma identidade marinho/ciano do acesso e se adaptam ao celular.
 
+O painel lateral resume os dados da conta. Os indicadores mostram sessões
+registradas, o último estado confirmado com sua data, escutas informadas pela
+pessoa e faixas no catálogo. A engrenagem abre as preferências visuais para
+pausar a ambientação em menta, ciano e índigo; a preferência de movimento
+reduzido do dispositivo é respeitada. A exportação também está disponível no menu.
+
 Os cartões consultam a API autenticada. Uma escuta não informada, a escolha
 de nenhuma faixa e um retorno negativo continuam sendo situações distintas.
 Para verificar essa classificação no frontend, execute

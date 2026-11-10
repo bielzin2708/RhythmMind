@@ -1,4 +1,4 @@
-import { $, el, formatDate } from './ui.js';
+import { $, el, formatDate, CATEGORIAS, categoriaLabel } from './ui.js';
 
 const STAGES = {
   revisao: { kind: 'revisao', label: 'Revisão pendente', action: 'Continuar sessão' },
@@ -52,21 +52,65 @@ function summary(value) {
   return characters.length > 80 ? `${characters.slice(0, 79).join('')}…` : text;
 }
 
-export function recordsForHome(records) {
+function orderedRecords(records) {
   if (!records || typeof records !== 'object' || Array.isArray(records)) throw new TypeError('Histórico inválido.');
-  const entries = Object.entries(records).map(([id, record]) => {
+  const entries = Object.entries(records).map(([id, record], order) => {
     if (!record || typeof record !== 'object' || Array.isArray(record)) throw new TypeError('Registro inválido.');
     const savedDate = timestamp(record.data_hora) !== null ? record.data_hora : timestamp(id) !== null ? id : null;
     return {
       id,
-      title: summary(record.finalidade) || summary(record.texto_usuario) || 'Sessão de escuta',
+      record,
       date: savedDate ? formatDate(savedDate) : 'Data não informada',
       instant: timestamp(savedDate),
-      stage: sessionPending(record),
+      order,
     };
   });
-  entries.sort((a, b) => (b.instant ?? -Infinity) - (a.instant ?? -Infinity));
+  entries.sort((a, b) => a.instant !== null && a.instant === b.instant
+    ? b.order - a.order
+    : (b.instant ?? -Infinity) - (a.instant ?? -Infinity));
+  return entries;
+}
+
+export function recordsForHome(records) {
+  const entries = orderedRecords(records).map(({ id, record, date, instant }) => ({
+    id, date, instant,
+    title: summary(record.finalidade) || summary(record.texto_usuario) || 'Sessão de escuta',
+    stage: sessionPending(record),
+  }));
   return { pending: entries.filter(entry => entry.stage).slice(0, 3), recent: entries.slice(0, 4) };
+}
+
+export function summarizeHome(records) {
+  const entries = orderedRecords(records);
+  const confirmed = entries.find(({ record }) => {
+    const categories = record.analise?.emocoes;
+    if (!Array.isArray(categories) || !categories.every(category => CATEGORIAS.includes(category))) return false;
+    if (record.progresso == null) return categories.length > 0;
+    return record.progresso.emocoes_confirmadas === true;
+  });
+  const categories = confirmed ? [...new Set(confirmed.record.analise.emocoes)] : [];
+  const lastState = !confirmed ? 'Não informado' : categories.length === 0 ? 'Sem categoria'
+    : categories.slice(0, 2).map(categoriaLabel).join(', ') + (categories.length > 2 ? ` +${categories.length - 2}` : '');
+  const purpose = entries.find(({ record }) => summary(record.finalidade));
+  const totalListens = entries.reduce((total, { record }) => {
+    const tracks = record.escuta?.faixas;
+    return total + (Array.isArray(tracks) ? tracks.filter(track => track?.ouvida === true).length : 0);
+  }, 0);
+  return {
+    totalSessions: entries.length,
+    totalListens,
+    lastPurpose: purpose ? summary(purpose.record.finalidade) : 'Não informado',
+    lastState,
+    lastStateDate: confirmed ? confirmed.date : '—',
+    lastStateCategories: categories,
+  };
+}
+
+export function catalogTotal(response) {
+  if (!response || typeof response !== 'object' || Array.isArray(response)) throw new TypeError('Catálogo inválido.');
+  if (Number.isSafeInteger(response.total) && response.total >= 0) return response.total;
+  if (Array.isArray(response.musicas)) return response.musicas.length;
+  throw new TypeError('Catálogo inválido.');
 }
 
 export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog }) {
@@ -85,6 +129,42 @@ export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog 
 
   function loading(busy) {
     for (const list of [pendingList, recentList]) list.setAttribute('aria-busy', String(busy));
+    for (const id of ['profile-sessions', 'profile-last-purpose', 'profile-catalog', 'home-total-sessions',
+      'home-last-state', 'home-last-state-date', 'home-total-listens', 'home-total-tracks']) {
+      $(`#${id}`).setAttribute('aria-busy', String(busy));
+    }
+  }
+
+  function clearHistoryMetrics() {
+    for (const id of ['profile-sessions', 'profile-last-purpose', 'home-total-sessions',
+      'home-last-state-date', 'home-total-listens']) $(`#${id}`).textContent = '—';
+    $('#home-last-state').textContent = 'Não informado';
+    $('#home-last-state').removeAttribute('title');
+  }
+
+  function clearCatalogMetrics() {
+    $('#profile-catalog').textContent = '—';
+    $('#home-total-tracks').textContent = '—';
+  }
+
+  function renderHistoryMetrics(records) {
+    const result = summarizeHome(records);
+    const sessions = result.totalSessions.toLocaleString('pt-BR');
+    $('#profile-sessions').textContent = sessions;
+    $('#home-total-sessions').textContent = sessions;
+    $('#profile-last-purpose').textContent = result.lastPurpose;
+    $('#home-total-listens').textContent = result.totalListens.toLocaleString('pt-BR');
+    $('#home-last-state').textContent = result.lastState;
+    $('#home-last-state-date').textContent = result.lastStateDate;
+    $('#home-last-state').title = result.lastStateCategories.length
+      ? `${result.lastStateCategories.map(categoriaLabel).join(', ')} · ${result.lastStateDate}`
+      : `${result.lastState} · ${result.lastStateDate}`;
+  }
+
+  function renderCatalogMetrics(response) {
+    const total = catalogTotal(response);
+    $('#home-total-tracks').textContent = total.toLocaleString('pt-BR');
+    $('#profile-catalog').textContent = `${total.toLocaleString('pt-BR')} ${total === 1 ? 'faixa' : 'faixas'}`;
   }
 
   function clear() {
@@ -93,6 +173,8 @@ export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog 
     $('#home-pending-empty').hidden = true;
     $('#home-recent-empty').hidden = true;
     $('#home-retry').hidden = true;
+    clearHistoryMetrics();
+    clearCatalogMetrics();
   }
 
   function reset() {
@@ -138,16 +220,31 @@ export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog 
     const requestVersion = ++version;
     clear();
     loading(true);
-    status('Buscando seus registros…');
+    status('Buscando seus registros e catálogo…');
     try {
-      const response = await api('/api/historico');
+      const [history, catalog] = await Promise.allSettled([api('/api/historico'), api('/api/musicas')]);
       if (requestVersion !== version || !activeUser) return;
-      const records = recordsForHome(response.registros);
-      records.pending.forEach(entry => pendingList.append(pendingCard(entry, requestVersion)));
-      records.recent.forEach(entry => recentList.append(recentRow(entry, requestVersion)));
-      $('#home-pending-empty').hidden = records.pending.length > 0;
-      $('#home-recent-empty').hidden = records.recent.length > 0;
-      status();
+      const unavailable = [];
+      if (history.status === 'fulfilled') {
+        try {
+          const records = recordsForHome(history.value.registros);
+          renderHistoryMetrics(history.value.registros);
+          records.pending.forEach(entry => pendingList.append(pendingCard(entry, requestVersion)));
+          records.recent.forEach(entry => recentList.append(recentRow(entry, requestVersion)));
+          $('#home-pending-empty').hidden = records.pending.length > 0;
+          $('#home-recent-empty').hidden = records.recent.length > 0;
+        } catch { unavailable.push('histórico'); }
+      } else if (!['StaleRequestError', 'AbortError'].includes(history.reason?.name)) unavailable.push('histórico');
+      if (catalog.status === 'fulfilled') {
+        try { renderCatalogMetrics(catalog.value); }
+        catch { unavailable.push('catálogo'); }
+      } else if (!['StaleRequestError', 'AbortError'].includes(catalog.reason?.name)) unavailable.push('catálogo');
+      if (unavailable.length) {
+        status(unavailable.length === 2
+          ? 'Não foi possível carregar seu histórico e catálogo agora. Tente novamente.'
+          : `Não foi possível carregar seu ${unavailable[0]} agora. As outras informações disponíveis foram preservadas.`, true);
+        $('#home-retry').hidden = false;
+      } else status();
     } catch (error) {
       if (requestVersion !== version || !activeUser || ['StaleRequestError', 'AbortError'].includes(error?.name)) return;
       clear();

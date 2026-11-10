@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { recordsForHome, sessionPending } from '../../static/home.js';
+import { recordsForHome, sessionPending, summarizeHome, catalogTotal } from '../../static/home.js';
 
 const complete = () => ({
   progresso: { emocoes_confirmadas: true, estado_desejado_informado: true, recomendacoes_geradas: true },
@@ -109,5 +109,104 @@ test('histórico vazio é distinto de uma estrutura inválida', () => {
   assert.deepEqual(recordsForHome({}), { pending: [], recent: [] });
   for (const invalid of [null, [], 'registros inválidos', { quebrado: null }]) {
     assert.throws(() => recordsForHome(invalid), TypeError);
+  }
+});
+
+test('sessões criadas no mesmo segundo usam a inclusão mais recente para desempatar', () => {
+  const records = {
+    anterior: { ...complete(), data_hora: '09/11/2026 20:00:00', finalidade: 'Primeira', analise: { emocoes: ['calmo'] } },
+    recente: { ...complete(), data_hora: '09/11/2026 20:00:00', finalidade: 'Segunda', analise: { emocoes: ['cansado'] } },
+  };
+  assert.deepEqual(recordsForHome(records).recent.map(item => item.id), ['recente', 'anterior']);
+  assert.equal(summarizeHome(records).lastPurpose, 'Segunda');
+  assert.equal(summarizeHome(records).lastState, 'Cansado');
+});
+
+test('indicadores vazios mostram zero e não inventam um estado confirmado', () => {
+  assert.deepEqual(summarizeHome({}), {
+    totalSessions: 0, totalListens: 0, lastPurpose: 'Não informado',
+    lastState: 'Não informado', lastStateDate: '—', lastStateCategories: [],
+  });
+});
+
+test('último estado usa confirmação humana e ignora a sugestão de uma sessão mais recente', () => {
+  const records = {
+    anterior: { ...complete(), data_hora: '01/11/2026 10:00:00', analise: { emocoes: ['calmo'] } },
+    recente: {
+      ...complete(), data_hora: '02/11/2026 10:00:00',
+      progresso: { emocoes_confirmadas: false, recomendacoes_geradas: false },
+      analise: { emocoes: ['triste'], estado_desejado: ['foco'] },
+      interpretacao: { proposta: { estado_atual: { sugestoes: [{ categoria: 'triste' }] } } },
+    },
+  };
+  const result = summarizeHome(records);
+  assert.equal(result.totalSessions, 2);
+  assert.equal(result.lastState, 'Calmo');
+  assert.equal(result.lastStateDate, '01/11/2026 10:00:00');
+  assert.deepEqual(result.lastStateCategories, ['calmo']);
+});
+
+test('seguir sem categoria é uma confirmação explícita; lista legada vazia não basta', () => {
+  const records = {
+    anterior: { ...complete(), data_hora: '01/11/2026 10:00:00', analise: { emocoes: ['triste'] } },
+    recente: { ...complete(), data_hora: '02/11/2026 10:00:00', analise: { emocoes: [] } },
+  };
+  assert.equal(summarizeHome(records).lastState, 'Sem categoria');
+  delete records.recente.progresso;
+  assert.equal(summarizeHome(records).lastState, 'Triste');
+});
+
+test('legados só apresentam categorias conhecidas, sem transformar intenções em estado atual', () => {
+  const records = {
+    legado: { data_hora: '01/11/2026 10:00:00', analise: { emocoes: ['cansado'] } },
+    invalido: { ...complete(), data_hora: '03/11/2026 10:00:00', analise: { emocoes: ['diagnostico_inventado'] } },
+    intencao: { ...complete(), data_hora: '02/11/2026 10:00:00', analise: { estado_desejado: ['calmo'] } },
+  };
+  assert.equal(summarizeHome(records).lastState, 'Cansado');
+  assert.equal(summarizeHome({ invalido: records.invalido, intencao: records.intencao }).lastState, 'Não informado');
+});
+
+test('sentimentos coexistentes são preservados, com resumo curto e sem duplicatas', () => {
+  const record = { ...complete(), analise: { emocoes: ['calmo', 'reflexivo', 'amor', 'calmo'] } };
+  const result = summarizeHome({ sessao: record });
+  assert.equal(result.lastState, 'Calmo, Reflexivo +1');
+  assert.deepEqual(result.lastStateCategories, ['calmo', 'reflexivo', 'amor']);
+  assert.equal(result.lastStateDate, 'Data não informada');
+});
+
+test('escutas contam ocorrências informadas como true, inclusive a mesma faixa em duas sessões', () => {
+  const records = {
+    primeira: { ...complete(), escuta: { faixas: [
+      { indice_recomendacao: 1, ouvida: true }, { indice_recomendacao: 2, ouvida: false },
+      { indice_recomendacao: 3, ouvida: null }, { indice_recomendacao: 4, ouvida: 'true' }, null,
+    ] } },
+    segunda: { ...complete(), escuta: { faixas: [{ indice_recomendacao: 1, ouvida: true }] } },
+    nenhuma: { ...complete(), escuta: { faixas: [] } },
+    ausente: { ...complete(), escuta: null },
+  };
+  assert.equal(summarizeHome(records).totalListens, 2);
+  assert.equal(summarizeHome(records).totalSessions, 4);
+});
+
+test('última finalidade usa a mais recente que foi informada e não assume gênero ou emoção', () => {
+  const records = {
+    primeira: { ...complete(), data_hora: '01/11/2026 10:00:00', finalidade: 'Treinar' },
+    segunda: { ...complete(), data_hora: '02/11/2026 10:00:00', finalidade: '  Estudar  ' },
+    terceira: { ...complete(), data_hora: '03/11/2026 10:00:00', finalidade: null, analise: { emocoes: ['calmo'] } },
+  };
+  const before = structuredClone(records);
+  assert.equal(summarizeHome(records).lastPurpose, 'Estudar');
+  assert.deepEqual(records, before);
+});
+
+test('catálogo usa total válido e distingue ausência de dados de catálogo vazio', () => {
+  assert.equal(catalogTotal({ total: 0, musicas: [] }), 0);
+  assert.equal(catalogTotal({ total: 18, musicas: [] }), 18);
+  assert.equal(catalogTotal({ musicas: [{ nome: 'Uma faixa fictícia' }] }), 1);
+  for (const total of [null, '18', -1, NaN, Infinity, 1.5]) {
+    assert.equal(catalogTotal({ total, musicas: [{ nome: 'Uma faixa fictícia' }] }), 1);
+  }
+  for (const invalid of [null, [], {}, { total: '18' }, { total: -1 }, { musicas: null }]) {
+    assert.throws(() => catalogTotal(invalid), TypeError);
   }
 });
