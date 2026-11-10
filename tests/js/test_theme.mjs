@@ -100,7 +100,7 @@ test('primeira pintura preserva o escuro atual sem escrever storage ou depender 
 test('preferência clara salva é aplicada no bootstrap e atualiza metadados', () => {
   const f = fixture({ stored: 'light', darkSystem: true });
   assert.equal(f.document.documentElement.dataset.theme, 'light');
-  assert.equal(f.metas['meta[name="color-scheme"]'].content, 'light');
+  assert.equal(f.metas['meta[name="color-scheme"]'].content, 'only light');
   assert.equal(f.metas['meta[name="theme-color"]'].content, '#f4f7fb');
   f.ready();
   assert.equal(f.select.value, 'light');

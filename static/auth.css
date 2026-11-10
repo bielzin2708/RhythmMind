@@ -50,7 +50,7 @@ body.auth-screen .welcome-intro { max-width: 560px; }
 body.auth-screen .welcome-intro > .eyebrow {
   color: var(--auth-blue);
   margin-bottom: 1.55rem;
-  font-size: .76rem;
+  font-size: .8rem;
   letter-spacing: .1em;
 }
 body.auth-screen .welcome-panel h1 {
@@ -101,8 +101,8 @@ body.auth-screen .access-card {
   box-shadow: 0 18px 48px rgb(0 5 17 / 12%);
 }
 body.auth-screen .card-topline { margin-bottom: 1.6rem; }
-body.auth-screen .card-topline .eyebrow { color: var(--auth-blue); font-size: .75rem; }
-body.auth-screen .card-topline .small-label { color: var(--muted); }
+body.auth-screen .card-topline .eyebrow { color: var(--auth-blue); font-size: .8rem; }
+body.auth-screen .card-topline .small-label { color: var(--muted); font-size: .87rem; }
 body.auth-screen .access-card .stack-form { gap: 1.4rem; }
 body.auth-screen .form-intro { margin-bottom: .5rem; }
 body.auth-screen .form-intro h2 { color: #ffffff; font-size: clamp(1.75rem, 2.2vw, 2.13rem); line-height: 1.22; letter-spacing: -.035em; }
@@ -196,6 +196,7 @@ body.auth-screen .note-icon { border-color: #9ab3ce; color: var(--muted); }
 body.auth-screen .site-footer { width: calc(100% - 52px); color: var(--muted); border-color: var(--line); }
 body.auth-screen .site-footer > span:first-child { color: var(--auth-cyan); }
 body.auth-screen .site-footer .small-label { color: var(--muted); }
+body.auth-screen .site-footer :is(p, .small-label) { font-size: 14px; }
 body.auth-screen .notice { background: #102b40; border-color: #47748b; color: #d6e9f3; }
 body.auth-screen .notice[data-type="error"],
 body.auth-screen .notice[data-kind="error"],
@@ -217,7 +218,7 @@ body.auth-screen .notice[data-type="success"] { background: #112e3a; border-colo
   body.auth-screen .auth-layout { display: flex; flex-direction: column; align-items: stretch; min-height: auto; max-width: 530px; padding: 32px 0 40px; gap: 0; }
   body.auth-screen .welcome-panel { display: contents; }
   body.auth-screen .welcome-intro { order: 0; margin-bottom: 26px; }
-  body.auth-screen .welcome-intro > .eyebrow { margin-bottom: .8rem; font-size: .68rem; }
+  body.auth-screen .welcome-intro > .eyebrow { margin-bottom: .8rem; }
   body.auth-screen .welcome-panel h1 { font-size: 2.4rem; line-height: 1.18; max-width: 490px; }
   body.auth-screen .welcome-panel h1 br { display: none; }
   body.auth-screen .welcome-panel h1 > span { margin-left: .1em; }
@@ -238,7 +239,6 @@ body.auth-screen .notice[data-type="success"] { background: #112e3a; border-colo
   body.auth-screen .welcome-description { font-size: 1rem; }
   body.auth-screen .access-card { padding: 26px 22px; border-radius: 18px; }
   body.auth-screen .card-topline { margin-bottom: 1.45rem; }
-  body.auth-screen .card-topline .small-label { font-size: .73rem; }
   body.auth-screen .form-intro h2 { font-size: 1.8rem; }
   body.auth-screen .access-card .stack-form { gap: 1.35rem; }
   body.auth-screen .field label { font-size: .93rem; }

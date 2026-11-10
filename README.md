@@ -43,6 +43,13 @@ sistema** e suavizar os brilhos decorativos. Tema, suavização e transição de
 são controles independentes. O tema e a suavização ficam salvos neste navegador;
 somente essas preferências visuais são armazenadas, sem relatos ou credenciais.
 Se o armazenamento estiver bloqueado, os controles continuam funcionando na aba.
+O escuro conserva o marinho original; o claro usa superfícies claras e texto escuro.
+No claro, `color-scheme: only light` solicita ao navegador que preserve a paleta
+em vez de escurecê-la automaticamente. Esse ajuste não desativa o modo de alto
+contraste (`forced-colors`) do dispositivo.
+Algumas configurações que forçam Auto Dark mesmo com o sistema claro podem
+ignorar essa proteção. Se o tema **Claro** aparecer cinza/preto, confira o filtro
+de escurecimento do navegador. A paleta clara da aplicação não usa esses fundos.
 
 O diário mostra os registros primeiro. Filtros e padrões ficam em expansões;
 os filtros aplicados continuam indicados mesmo recolhidos. Detalhes, correção,
