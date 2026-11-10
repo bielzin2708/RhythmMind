@@ -38,9 +38,17 @@ reduzido do dispositivo é respeitada. A exportação também está disponível 
 
 Os cartões consultam a API autenticada. Uma escuta não informada, a escolha
 de nenhuma faixa e um retorno negativo continuam sendo situações distintas.
-Para verificar essa classificação no frontend, execute
-`node --test tests/js/test_home_records.mjs` (Node.js 24 ou posterior), além
-da suíte Python descrita abaixo.
+O texto ainda não enviado permanece no formulário durante a navegação interna.
+Antes de iniciar outro relato, abrir outro registro ou sair, a interface pede
+confirmação se isso descartar alterações. O rascunho não é gravado no armazenamento
+do navegador; o salvamento no servidor ocorre ao enviar o relato.
+
+Na revisão, as categorias sugeridas aparecem primeiro e as demais podem ser
+expandidas por dimensão, sem perder seleções. Registros sem sugestões explicam
+a ausência de critério ou de faixas sugeridas, sem criar uma pendência de escuta.
+Para verificar as regras e proteções do frontend, execute
+`node --test tests/js/*.mjs` (Node.js 24 ou posterior), além da suíte Python
+descrita abaixo.
 
 ## Negação e expressões compostas
 

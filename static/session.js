@@ -1,4 +1,7 @@
-import { $, el, categoriaLabel, strategyLabel, CATEGORIAS, withBusy } from './ui.js';
+import { $, el, strategyLabel, withBusy, confirmAction } from './ui.js';
+import { createNarrativeDraft } from './narrative-draft.js';
+import { renderCategories, clearCategories } from './review-categories.js';
+import { recommendationState, currentCatalogState } from './listening-state.js';
 
 const REFERENCIAS = {
   RM01: 'Estado atual, intenção e atividade são informações distintas.',
@@ -38,6 +41,15 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
   let legacyPartial = false;
   let engine = 'dicionario';
   let fallback = false;
+  let guidanceRequest = 0;
+  let catalogState = 'unknown';
+  const narrativeDraft = createNarrativeDraft($('#narrative-form'), { confirm: confirmAction });
+
+  window.addEventListener('beforeunload', event => {
+    if (!narrativeDraft.hasChanges()) return;
+    event.preventDefault();
+    event.returnValue = '';
+  });
 
   const own = (version) => epoch === version;
   const changed = () => { if (onChanged) onChanged(); };
@@ -51,6 +63,7 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
 
   async function action(container, callback) {
     const version = epoch;
+    notify('');
     try {
       await withBusy(container, () => callback(version));
     } catch (error) {
@@ -68,6 +81,7 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     $('#session-entry').hidden = number !== 1;
     $('#session-review').hidden = number !== 2;
     $('#session-listening').hidden = number !== 3;
+    if (number !== 3) $('#step-escuta').lastChild.textContent = 'Escolha e retorno';
     ['relato', 'revisao', 'escuta'].forEach((name, index) => {
       const item = $(`#step-${name}`);
       if (index + 1 === number) item.setAttribute('aria-current', 'step');
@@ -88,7 +102,10 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     legacyPartial = false;
     engine = 'dicionario';
     fallback = false;
+    guidanceRequest += 1;
+    catalogState = 'unknown';
     ['narrative-form', 'review-form', 'listening-form', 'feedback-form', 'catalog-form'].forEach((id) => $(`#${id}`).reset());
+    narrativeDraft.reset();
     ['review-original', 'review-reflection', 'review-origin', 'review-references', 'review-clarification', 'strategy-summary', 'recommendation-list', 'draft-list', 'catalog-list'].forEach((id) => $(`#${id}`).replaceChildren());
     $('#current-tags').replaceChildren();
     $('#desired-tags').replaceChildren();
@@ -104,25 +121,31 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     $('#feedback-status').textContent = '';
     status('');
     stage(1);
+    renderCatalogGuidance();
   }
 
-  function newSession() {
+  async function confirmLeave(options) {
+    const version = epoch;
+    const allowed = await narrativeDraft.confirmDiscard(options);
+    return allowed && own(version);
+  }
+
+  async function newSession() {
+    const version = epoch;
+    if (!await confirmLeave() || !own(version)) {
+      if ($('#session-entry').getClientRects().length) $('#narrative-text').focus();
+      return false;
+    }
     reset();
-    loadDrafts();
+    notify('');
+    void loadDrafts();
+    void refreshCatalogGuidance();
     $('#narrative-text').focus();
+    return true;
   }
 
   function categories(targetId, name, selected, disabled = false) {
-    const target = $(`#${targetId}`);
-    target.disabled = disabled;
-    const legend = el('legend', {}, name === 'current' ? 'Estado atual' : 'Estado desejado · intenção');
-    const grid = el('div', { class: 'tag-grid' });
-    CATEGORIAS.forEach((category) => {
-      const input = el('input', { type: 'checkbox', name, value: category, id: `${name}-${category}` });
-      input.checked = selected.includes(category);
-      grid.append(el('label', { class: 'tag-option', for: input.id }, input, el('span', {}, categoriaLabel(category))));
-    });
-    target.replaceChildren(legend, grid);
+    renderCategories($(`#${targetId}`), { name, selected, disabled });
   }
 
   function selected(targetId) {
@@ -130,7 +153,44 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
   }
 
   function clear(targetId) {
-    $(`#${targetId}`).querySelectorAll('input').forEach((input) => { if (!input.disabled) input.checked = false; });
+    clearCategories($(`#${targetId}`));
+  }
+
+  function renderCatalogGuidance() {
+    const empty = catalogState === 'empty';
+    const failed = catalogState === 'error';
+    const checking = catalogState === 'loading';
+    $('#session-catalog-guidance').hidden = !empty && !failed && !checking;
+    $('#session-catalog-message').textContent = empty
+      ? 'Seu catálogo está vazio. As sugestões usam as faixas que você cadastrar. Você pode prepará-lo agora ou escrever sem receber sugestões de músicas.'
+      : failed ? 'Não foi possível conferir seu catálogo agora. Você pode tentar novamente ou continuar escrevendo; seu relato pode ser salvo normalmente.'
+        : 'Conferindo as faixas do seu catálogo…';
+    $('#entry-open-catalog').hidden = !empty;
+    $('#entry-retry-catalog').hidden = !failed;
+    const hasNoMatches = record && recommendationState(record) === 'no-matches';
+    $('#listening-catalog-message').hidden = !hasNoMatches;
+    $('#listening-catalog-message').textContent = empty
+      ? 'Seu catálogo está vazio agora. Cadastre faixas para as próximas sessões; este registro conserva o resultado já salvo.'
+      : failed ? 'Não foi possível conferir seu catálogo agora. Isso não altera o resultado já salvo nesta sessão.'
+        : checking ? 'Conferindo seu catálogo atual…'
+          : catalogState === 'ready' ? 'Seu catálogo tem faixas cadastradas agora. Você pode rever seus cadastros para as próximas sessões; este registro conserva o resultado já salvo.' : '';
+    $('#listening-retry-catalog').hidden = !hasNoMatches || !failed;
+  }
+
+  async function refreshCatalogGuidance() {
+    const request = ++guidanceRequest;
+    const version = epoch;
+    catalogState = 'loading';
+    renderCatalogGuidance();
+    try {
+      const response = await api('/api/musicas');
+      if (!own(version) || request !== guidanceRequest) return;
+      catalogState = currentCatalogState(response);
+    } catch (error) {
+      if (!own(version) || request !== guidanceRequest || stale(error)) return;
+      catalogState = 'error';
+    }
+    renderCatalogGuidance();
   }
 
   function referenceList(ids) {
@@ -250,7 +310,14 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
   }
 
   async function open(id) {
+    const previousVersion = epoch;
+    if (!await confirmLeave({
+      title: 'Abrir outro registro?',
+      message: 'Há alterações no relato que ainda não foram enviadas. Para abrir outro registro, descarte esse texto ou continue escrevendo. Os registros já salvos serão mantidos.',
+      label: 'Descartar e abrir registro',
+    }) || !own(previousVersion)) return false;
     reset();
+    notify('');
     sessionId = id;
     const version = epoch;
     showPending('Carregando a última etapa salva…');
@@ -313,7 +380,13 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
   function showListening() {
     stage(3);
     legacyPartial = false;
-    $('#session-heading').textContent = 'Uma proposta de escuta para o seu momento';
+    const state = recommendationState(record);
+    const hasSuggestions = state === 'suggestions';
+    $('#step-escuta').lastChild.textContent = hasSuggestions ? 'Escolha e retorno' : 'Registro concluído';
+    $('#session-heading').textContent = hasSuggestions ? 'Uma proposta de escuta para o seu momento' : 'Seu relato está registrado';
+    $('#listening-heading').textContent = hasSuggestions ? 'Uma escolha para sua escuta.' : 'Seu momento ficou salvo.';
+    $('#listening-intro').textContent = hasSuggestions
+      ? 'Veja as sugestões e escolha o que faz sentido agora.' : 'Você pode consultar este registro no diário quando quiser.';
     $('#session-retry').hidden = true;
     $('#fallback-local-button').hidden = true;
     $('#strategy-summary').replaceChildren(
@@ -323,11 +396,25 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
         ? 'A escuta também pode distrair, dependendo da tarefa. Observe como ela funciona para você.'
         : 'Esta é uma possibilidade de escuta, sem garantia de mudança. Sua percepção pode ser diferente.'),
     );
+    $('#strategy-summary').hidden = !hasSuggestions;
     const musicas = record.recomendacoes || [];
     const choices = new Map((record.escuta?.faixas || []).map((choice) => [choice.indice_recomendacao, choice]));
     const list = $('#recommendation-list');
     list.replaceChildren();
-    $('#recommendation-empty').hidden = musicas.length > 0;
+    $('#recommendation-empty').hidden = hasSuggestions;
+    $('#recommendation-empty-title').textContent = state === 'no-criteria'
+      ? 'Sem sugestões automáticas nesta sessão.' : 'Nenhuma faixa foi sugerida com os critérios desta sessão.';
+    $('#recommendation-empty-message').textContent = state === 'no-criteria'
+      ? 'Sua revisão não definiu um critério para selecionar músicas. O relato e as escolhas que você confirmou estão salvos. Você pode encerrar por aqui ou começar outro relato quando quiser.'
+      : 'O relato e a revisão estão salvos. Você pode consultar o diário ou preparar seu catálogo para novas sugestões em outra sessão.';
+    $('#open-catalog-button').hidden = state !== 'no-matches';
+    $('#listening-actions').hidden = !hasSuggestions;
+    $('#listening-help').hidden = !hasSuggestions;
+    // Um registro sem faixas oferecidas não cria uma etapa de escuta ou retorno.
+    // Retornos legados já existentes continuam acessíveis.
+    $('#feedback-card').hidden = !hasSuggestions && !record.feedback;
+    renderCatalogGuidance();
+    if (state === 'no-matches') void refreshCatalogGuidance();
     $('#save-listening').disabled = !musicas.length;
     musicas.forEach((music, index) => {
       const number = index + 1;
@@ -358,7 +445,7 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     $('#feedback-improvement').value = feedback?.melhoria || '';
     $('#feedback-later').textContent = typeof feedback?.ajudou === 'boolean' ? 'Manter retorno atual' : 'Responder depois';
     $('#feedback-status').textContent = typeof feedback?.ajudou === 'boolean' ? 'Esta sessão já tem um retorno registrado. Você pode mantê-lo ou atualizá-lo.' : 'O retorno ainda não foi informado.';
-    status(record.escuta?.faixas?.length === 0
+    status(!hasSuggestions ? 'Relato e revisão salvos. Não há uma escuta pendente nesta sessão.' : record.escuta?.faixas?.length === 0
       ? 'Você registrou a decisão de não escolher uma faixa nesta sessão.'
       : record.escuta ? 'Sua escolha de faixa e a informação de escuta estão salvas.'
         : 'Escolher uma faixa e informar que a ouviu são decisões separadas.');
@@ -414,6 +501,7 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
   $('#narrative-form').addEventListener('submit', (event) => {
     event.preventDefault();
     action($('#narrative-form'), async (version) => {
+      const submitted = narrativeDraft.capture();
       engine = $('#interpretation-engine').value;
       fallback = $('#allow-fallback').checked;
       status('Salvando seu relato…', 'loading');
@@ -424,8 +512,14 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
         limite_recomendacoes: Number($('#session-limit').value),
       } });
       if (!own(version)) return;
+      narrativeDraft.markSaved(submitted);
       sessionId = response.sessao_id;
       record = { ...response, texto_desejado: null };
+      if (narrativeDraft.hasChanges()) {
+        changed();
+        status('A versão enviada foi salva. Suas alterações mais recentes continuam neste formulário e ainda não foram enviadas.', 'success');
+        return;
+      }
       showPending();
       changed();
       await fetchRecord(sessionId, version);
@@ -436,11 +530,13 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
   $('#fallback-local-button').addEventListener('click', () => action($('#session-review'), (version) => generate(version, 'dicionario')));
   $('#review-form').addEventListener('submit', (event) => { event.preventDefault(); action($('#review-form'), (version) => submitReview(version)); });
   $('#review-without-category').addEventListener('click', () => action($('#review-form'), (version) => submitReview(version, true)));
-  $('#review-adjust').addEventListener('click', () => $('#current-tags').querySelector('input:not(:disabled)')?.focus());
   $('#clear-current-tags').addEventListener('click', () => clear('current-tags'));
   $('#clear-desired-tags').addEventListener('click', () => clear('desired-tags'));
   $('#refresh-drafts').addEventListener('click', () => loadDrafts());
   $('#open-catalog-button').addEventListener('click', () => onCatalog());
+  $('#entry-open-catalog').addEventListener('click', () => onCatalog());
+  $('#entry-retry-catalog').addEventListener('click', () => void refreshCatalogGuidance());
+  $('#listening-retry-catalog').addEventListener('click', () => void refreshCatalogGuidance());
   $('#session-to-history').addEventListener('click', () => onHistory());
   $('#start-another').addEventListener('click', () => newSession());
   $('#new-session-button')?.addEventListener('click', () => newSession());
@@ -532,7 +628,7 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
 
   reset();
   return {
-    open, reset, newSession, loadDrafts, loadCatalog,
+    open, reset, newSession, loadDrafts, loadCatalog, refreshCatalogGuidance, confirmLeave,
     invalidateDeleted(ids) {
       if (sessionId && Array.isArray(ids) && ids.includes(sessionId)) reset();
     },

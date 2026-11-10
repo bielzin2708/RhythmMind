@@ -146,14 +146,17 @@ function showView(next, { load = true, focus = true } = {}) {
   if (load && next === 'home') void home.load();
   if (load && next === 'history') void history.load();
   if (load && next === 'catalog') void session.loadCatalog();
-  if (load && next === 'session') void session.loadDrafts();
+  if (load && next === 'session') {
+    void session.loadDrafts();
+    void session.refreshCatalogGuidance();
+  }
   if (focus) focusContent(heading);
 }
 
 function startNewSession() {
   if (!user) return;
   showView('session', { load: false, focus: false });
-  session.newSession();
+  void session.newSession();
 }
 
 async function resumeSession(id, kind) {
@@ -161,7 +164,8 @@ async function resumeSession(id, kind) {
   const attempt = accessEpoch;
   showView('session', { load: false, focus: false });
   const navigation = navigationVersion;
-  await session.open(id);
+  const opened = await session.open(id);
+  if (opened === false) return;
   if (attempt !== accessEpoch || navigation !== navigationVersion || !user) return;
   focusContent(kind === 'retorno' ? $('#feedback-answer') : $('#session-heading'));
 }
@@ -378,7 +382,13 @@ for (const [id, register] of [['auth-login-form', false], ['auth-register-form',
   $(id).addEventListener('submit', event => { event.preventDefault(); void authenticate(event.currentTarget, register); });
 }
 
-$('#logout-button').addEventListener('click', () => {
+$('#logout-button').addEventListener('click', async () => {
+  const attempt = accessEpoch;
+  if (!user || !await session.confirmLeave({
+    title: 'Sair e descartar o texto não enviado?',
+    message: 'Há alterações no relato que ainda não foram enviadas. Ao sair, esse texto será descartado. Seus registros já salvos serão mantidos.',
+    label: 'Sair e descartar',
+  }) || attempt !== accessEpoch || !user || $('#logout-button').disabled) return;
   void withBusy($('#logout-button'), async () => {
     let confirmed = false;
     try { await api('/api/auth/sair', { method: 'POST' }); confirmed = true; }

@@ -56,7 +56,7 @@ export function formatDate(value) {
 
 let closeConfirmation = null;
 export function dismissConfirmation() { if (closeConfirmation) closeConfirmation(false); }
-export function confirmAction({ title, message, label = 'Confirmar' }) {
+export function confirmAction({ title, message, label = 'Confirmar', cancelLabel = 'Cancelar' }) {
   dismissConfirmation();
   const dialog = $('#confirm-dialog');
   const form = $('#confirm-form');
@@ -66,6 +66,7 @@ export function confirmAction({ title, message, label = 'Confirmar' }) {
   $('#confirm-title').textContent = title;
   $('#confirm-text').textContent = message;
   button.textContent = label;
+  cancel.textContent = cancelLabel;
   return new Promise(resolve => {
     const finish = value => {
       form.removeEventListener('submit', submit);
