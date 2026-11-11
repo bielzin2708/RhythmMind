@@ -29,12 +29,12 @@ registros recentes da própria conta. **Começar um relato** inicia uma sessão;
 **Sua sessão** permite voltar à etapa aberta. A navegação no topo também oferece
 **Meu diário** e **Minhas músicas**. A home reúne a saudação e o início do relato
 em um destaque, seguidos de continuidade, registros recentes e acessos rápidos.
-As áreas usam a mesma identidade marinho/ciano do acesso e se adaptam ao celular.
+As áreas compartilham a identidade do acesso e se adaptam ao celular.
 
 **Sua conta** abre perfil, exportação, preferências visuais, informações sobre
 o projeto e saída. **Resumo dos meus registros** expande os indicadores de
 sessões, último estado confirmado, escutas informadas e faixas no catálogo.
-Nas preferências, a ambientação em menta, ciano e índigo pode ser pausada;
+Nas preferências, a variação sutil dos tons da onda pode ser pausada;
 a preferência de movimento reduzido do dispositivo é respeitada.
 
 O botão de sol/lua no cabeçalho alterna entre claro e escuro, inclusive no acesso.
@@ -43,7 +43,9 @@ sistema** e suavizar os brilhos decorativos. Tema, suavização e transição de
 são controles independentes. O tema e a suavização ficam salvos neste navegador;
 somente essas preferências visuais são armazenadas, sem relatos ou credenciais.
 Se o armazenamento estiver bloqueado, os controles continuam funcionando na aba.
-O escuro conserva o marinho original; o claro usa superfícies claras e texto escuro.
+O escuro usa carvão quente, texto marfim e areia nas ações, com a onda sem halos
+luminosos. O claro usa superfícies claras e texto escuro.
+As [referências e os papéis das cores](docs/temas_visuais.md) documentam essa direção.
 No claro, `color-scheme: only light` solicita ao navegador que preserve a paleta
 em vez de escurecê-la automaticamente. Esse ajuste não desativa o modo de alto
 contraste (`forced-colors`) do dispositivo.

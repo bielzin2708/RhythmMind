@@ -54,7 +54,7 @@
     const themeColor = document.querySelector('meta[name="theme-color"]');
     // O claro já foi desenhado pela aplicação; não deve sofrer a inversão do navegador.
     if (colorScheme) colorScheme.content = theme === 'light' ? 'only light' : 'dark';
-    if (themeColor) themeColor.content = theme === 'dark' ? '#0b1329' : '#f4f7fb';
+    if (themeColor) themeColor.content = theme === 'dark' ? '#11100f' : '#f4f7fb';
 
     const action = theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro';
     document.querySelectorAll('button[data-theme-toggle]').forEach(button => {

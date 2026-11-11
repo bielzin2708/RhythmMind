@@ -73,7 +73,7 @@ def main():
                     passed = actual["theme"] == mode and (
                         actual["meta"] == "only light" and min(pixel) >= 220
                         if mode == "light" else
-                        actual["background"] == "rgb(11, 19, 41)" and pixel == (11, 19, 41)
+                        actual["background"] == "rgb(17, 16, 15)" and pixel == (17, 16, 15)
                     )
                     results.append({**actual, "auto_dark": auto_dark, "pixel": pixel,
                                     "system_preference": args.system_preference,

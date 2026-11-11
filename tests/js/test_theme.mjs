@@ -18,7 +18,7 @@ function fixture({ stored = null, softStored = null, darkSystem = false, storage
   const document = { documentElement: { dataset: {} }, readyState: ready };
   const metas = {
     'meta[name="color-scheme"]': { content: 'dark' },
-    'meta[name="theme-color"]': { content: '#0B1329' },
+    'meta[name="theme-color"]': { content: '#11100f' },
   };
   const status = { textContent: '' };
 
@@ -93,7 +93,7 @@ test('primeira pintura preserva o escuro atual sem escrever storage ou depender 
   assert.equal(f.document.documentElement.dataset.themePreference, 'dark');
   assert.equal(f.document.documentElement.dataset.softEffects, 'false');
   assert.equal(f.metas['meta[name="color-scheme"]'].content, 'dark');
-  assert.equal(f.metas['meta[name="theme-color"]'].content, '#0b1329');
+  assert.equal(f.metas['meta[name="theme-color"]'].content, '#11100f');
   assert.deepEqual(f.writes, []);
 });
 
