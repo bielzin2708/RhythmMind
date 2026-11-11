@@ -18,7 +18,7 @@ function fixture({ stored = null, softStored = null, darkSystem = false, storage
   const document = { documentElement: { dataset: {} }, readyState: ready };
   const metas = {
     'meta[name="color-scheme"]': { content: 'dark' },
-    'meta[name="theme-color"]': { content: '#11100f' },
+    'meta[name="theme-color"]': { content: '#0b1320' },
   };
   const status = { textContent: '' };
 
@@ -93,7 +93,7 @@ test('primeira pintura preserva o escuro atual sem escrever storage ou depender 
   assert.equal(f.document.documentElement.dataset.themePreference, 'dark');
   assert.equal(f.document.documentElement.dataset.softEffects, 'false');
   assert.equal(f.metas['meta[name="color-scheme"]'].content, 'dark');
-  assert.equal(f.metas['meta[name="theme-color"]'].content, '#11100f');
+  assert.equal(f.metas['meta[name="theme-color"]'].content, '#0b1320');
   assert.deepEqual(f.writes, []);
 });
 
@@ -101,7 +101,7 @@ test('preferência clara salva é aplicada no bootstrap e atualiza metadados', (
   const f = fixture({ stored: 'light', darkSystem: true });
   assert.equal(f.document.documentElement.dataset.theme, 'light');
   assert.equal(f.metas['meta[name="color-scheme"]'].content, 'only light');
-  assert.equal(f.metas['meta[name="theme-color"]'].content, '#f4f7fb');
+  assert.equal(f.metas['meta[name="theme-color"]'].content, '#e7e2d8');
   f.ready();
   assert.equal(f.select.value, 'light');
 });

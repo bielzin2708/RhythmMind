@@ -71,9 +71,9 @@ def main():
                     filename = f"{mode}-auto-dark-{str(auto_dark).lower()}.png"
                     (output / filename).write_bytes(png)
                     passed = actual["theme"] == mode and (
-                        actual["meta"] == "only light" and min(pixel) >= 220
+                        actual["meta"] == "only light" and pixel == (231, 226, 216)
                         if mode == "light" else
-                        actual["background"] == "rgb(17, 16, 15)" and pixel == (17, 16, 15)
+                        actual["background"] == "rgb(11, 19, 32)" and pixel == (11, 19, 32)
                     )
                     results.append({**actual, "auto_dark": auto_dark, "pixel": pixel,
                                     "system_preference": args.system_preference,

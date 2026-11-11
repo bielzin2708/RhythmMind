@@ -43,8 +43,9 @@ sistema** e suavizar os brilhos decorativos. Tema, suavização e transição de
 são controles independentes. O tema e a suavização ficam salvos neste navegador;
 somente essas preferências visuais são armazenadas, sem relatos ou credenciais.
 Se o armazenamento estiver bloqueado, os controles continuam funcionando na aba.
-O escuro usa carvão quente, texto marfim e areia nas ações, com a onda sem halos
-luminosos. O claro usa superfícies claras e texto escuro.
+O escuro usa marinho profundo e acentos azuis dessaturados, com a onda sem halos
+luminosos. O claro usa fundo de papel/bege suave, cartões sem branco puro e ações
+azuis, mantendo o texto escuro legível.
 As [referências e os papéis das cores](docs/temas_visuais.md) documentam essa direção.
 No claro, `color-scheme: only light` solicita ao navegador que preserve a paleta
 em vez de escurecê-la automaticamente. Esse ajuste não desativa o modo de alto
