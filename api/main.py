@@ -29,6 +29,7 @@ from api.autenticacao import router as router_autenticacao, usuario_autenticado
 from api.google_auth import router as router_google
 from api.interpretacao import router as router_interpretacao
 from api.titular import router as router_titular
+from api.catalogo import router as router_catalogo
 from api.web import STATIC_DIR, router as router_web
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
@@ -651,5 +652,6 @@ app.include_router(router_google)
 app.include_router(router)
 app.include_router(router_interpretacao)
 app.include_router(router_titular)
+app.include_router(router_catalogo)
 app.include_router(router_web)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")

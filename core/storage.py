@@ -1,6 +1,7 @@
 import json
 import os
 import tempfile
+from threading import RLock
 
 from core.caracterizacao import preparar_musica
 from core.contexto import resolver_caminho
@@ -9,6 +10,7 @@ from core.contexto import resolver_caminho
 ARQ_MUSICAS = 'data/musicas_usuario.json'
 ARQ_HISTORICO = 'data/historico.json'
 ARQ_DICIONARIO = 'data/dicionario_emocional.json'  # <-- estava faltando (causa do seu erro original)
+LOCK_MUSICAS = RLock()
 
 def carregar_json(caminho, default=None, *, estrito=False):
     """Lê um arquivo JSON e retorna seu conteúdo.
@@ -63,7 +65,8 @@ def carregar_musicas_usuario():
 def salvar_musica_usuario(nova_musica):
     """Adiciona uma nova música à lista e salva no arquivo."""
     preparada = preparar_musica(nova_musica)
-    musicas = carregar_todas_musicas()
-    musicas.append(preparada)
-    salvar_json(ARQ_MUSICAS, musicas)
+    with LOCK_MUSICAS:
+        musicas = carregar_todas_musicas()
+        musicas.append(preparada)
+        salvar_json(ARQ_MUSICAS, musicas)
     return preparada

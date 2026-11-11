@@ -42,6 +42,7 @@ secrets.*
 !/data/casos_avaliacao_interpretacao.json
 !/data/musicas_base.json
 !/data/musicas_exemplo.json
+!/data/catalogo_referencia.json
 historico*.json
 historico*.json.*
 musicas_usuario*.json

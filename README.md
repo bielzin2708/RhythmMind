@@ -125,6 +125,19 @@ As explicações usam as anotações do catálogo, sem atribuir efeitos emociona
 comprovados às músicas. Listas já salvas mantêm sua ordem, índices e motivos.
 Veja [contrato e limites](docs/escolha_musical_explicada.md).
 
+## Seleção inicial de músicas reais
+
+Em **Minhas músicas → Adicionar seleção ao meu catálogo**, uma requisição copia
+a seleção de [66 faixas reais](data/catalogo_referencia.json) para a própria conta.
+A prévia mostra as músicas, álbuns e fontes antes da importação. Repetir a ação
+evita duplicatas e preserva os cadastros existentes; outras contas continuam
+com seus próprios catálogos. Os exemplos fictícios permanecem em uma ação separada.
+
+Os metadados foram consultados em páginas públicas do Spotify e na Apple iTunes
+Search API. As associações emocionais são editoriais e provisórias, identificadas
+como tal; BPM, energia e valência não foram medidos ou inventados. Consulte
+[fontes, limites e contrato de importação](docs/catalogo_referencia.md).
+
 ## Caracterização musical opcional
 
 O bloco opcional `caracterizacao` separa características acústicas, anotações

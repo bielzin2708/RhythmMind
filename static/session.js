@@ -2,6 +2,7 @@ import { $, el, strategyLabel, withBusy, confirmAction } from './ui.js';
 import { createNarrativeDraft } from './narrative-draft.js';
 import { renderCategories, clearCategories } from './review-categories.js';
 import { recommendationState, currentCatalogState } from './listening-state.js';
+import { createCatalogReference, renderCatalogCard } from './catalog-reference.js';
 
 const REFERENCIAS = {
   RM01: 'Estado atual, intenção e atividade são informações distintas.',
@@ -44,6 +45,19 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
   let guidanceRequest = 0;
   let catalogState = 'unknown';
   const narrativeDraft = createNarrativeDraft($('#narrative-form'), { confirm: confirmAction });
+  const catalogReference = createCatalogReference({
+    api, button: $('#catalog-reference-import'), status: $('#catalog-reference-status'),
+    count: $('#catalog-reference-count'), list: $('#catalog-reference-list'), container: $('#catalog-reference'),
+    describeError: readableError,
+    onStart: () => notify(''),
+    onError: error => notify(readableError(error), 'error'),
+    onImported: async isCurrent => {
+      await loadCatalog({ loadReference: false });
+      if (!isCurrent()) return;
+      changed();
+      void refreshCatalogGuidance();
+    },
+  });
 
   window.addEventListener('beforeunload', event => {
     if (!narrativeDraft.hasChanges()) return;
@@ -96,6 +110,7 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     epoch += 1;
     draftsEpoch += 1;
     catalogEpoch += 1;
+    catalogReference.reset();
     sessionId = null;
     record = null;
     interpretation = null;
@@ -164,7 +179,7 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     const checking = catalogState === 'loading';
     $('#session-catalog-guidance').hidden = !empty && !failed && !checking;
     $('#session-catalog-message').textContent = empty
-      ? 'Seu catálogo está vazio. As sugestões usam as faixas que você cadastrar. Você pode prepará-lo agora ou escrever sem receber sugestões de músicas.'
+      ? 'Seu catálogo está vazio. Você pode adicionar a seleção inicial de músicas reais ou cadastrar suas faixas. Você pode prepará-lo agora ou escrever sem receber sugestões de músicas.'
       : failed ? 'Não foi possível conferir seu catálogo agora. Você pode tentar novamente ou continuar escrevendo; seu relato pode ser salvo normalmente.'
         : 'Conferindo as faixas do seu catálogo…';
     $('#entry-open-catalog').hidden = !empty;
@@ -172,7 +187,7 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     const hasNoMatches = record && recommendationState(record) === 'no-matches';
     $('#listening-catalog-message').hidden = !hasNoMatches;
     $('#listening-catalog-message').textContent = empty
-      ? 'Seu catálogo está vazio agora. Cadastre faixas para as próximas sessões; este registro conserva o resultado já salvo.'
+      ? 'Seu catálogo está vazio agora. Adicione músicas reais da seleção inicial ou cadastre suas faixas para as próximas sessões; este registro conserva o resultado já salvo.'
       : failed ? 'Não foi possível conferir seu catálogo agora. Isso não altera o resultado já salvo nesta sessão.'
         : checking ? 'Conferindo seu catálogo atual…'
           : catalogState === 'ready' ? 'Seu catálogo tem faixas cadastradas agora. Você pode rever seus cadastros para as próximas sessões; este registro conserva o resultado já salvo.' : '';
@@ -479,18 +494,17 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     changed();
   }
 
-  async function loadCatalog() {
+  async function loadCatalog({ loadReference = true } = {}) {
     const version = ++catalogEpoch;
+    if (loadReference) void catalogReference.load();
     try {
       const result = await api('/api/musicas');
       if (version !== catalogEpoch) return;
       const list = $('#catalog-list');
       list.replaceChildren();
       const songs = result.musicas || [];
-      if (!songs.length) list.append(el('p', { class: 'empty-state' }, 'Seu catálogo ainda está vazio. Adicione uma faixa ou use as faixas fictícias para experimentar o fluxo.'));
-      songs.forEach((song) => list.append(el('article', { class: 'music-card' },
-        el('h3', {}, song.nome || 'Faixa cadastrada'),
-        el('p', { class: 'hint' }, `${song.artista || 'Artista não informado'} · ${song.duracao || 'Duração não informada'}`))));
+      if (!songs.length) list.append(el('p', { class: 'empty-state' }, 'Seu catálogo ainda está vazio. Adicione a seleção inicial de músicas reais, cadastre uma faixa ou use os exemplos fictícios para experimentar o fluxo.'));
+      songs.forEach((song) => list.append(renderCatalogCard(song)));
     } catch (error) {
       if (version !== catalogEpoch || stale(error)) return;
       $('#catalog-status').textContent = readableError(error);
