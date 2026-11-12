@@ -3,6 +3,7 @@ import { createNarrativeDraft } from './narrative-draft.js';
 import { renderCategories, clearCategories } from './review-categories.js';
 import { recommendationState, currentCatalogState } from './listening-state.js';
 import { createCatalogReference, renderCatalogCard } from './catalog-reference.js';
+import { createCatalogBrowser, createCatalogAssociations } from './catalog-browser.js';
 
 const REFERENCIAS = {
   RM01: 'Estado atual, intenção e atividade são informações distintas.',
@@ -48,6 +49,8 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
   const catalogReference = createCatalogReference({
     api, button: $('#catalog-reference-import'), status: $('#catalog-reference-status'),
     count: $('#catalog-reference-count'), list: $('#catalog-reference-list'), container: $('#catalog-reference'),
+    search: $('#catalog-reference-search'), pageCount: $('#catalog-reference-page-count'),
+    more: $('#catalog-reference-more'), disclosure: $('#catalog-reference-preview'),
     describeError: readableError,
     onStart: () => notify(''),
     onError: error => notify(readableError(error), 'error'),
@@ -57,6 +60,26 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
       changed();
       void refreshCatalogGuidance();
     },
+  });
+  const catalogAssociations = createCatalogAssociations({
+    api, dialog: $('#catalog-associations-dialog'), form: $('#catalog-associations-form'),
+    title: $('#catalog-associations-title'), categories: $('#catalog-associations-categories'),
+    status: $('#catalog-associations-status'), save: $('#catalog-associations-save'), cancel: $('#catalog-associations-cancel'),
+    describeError: readableError,
+    onError: error => notify(readableError(error), 'error'),
+    onSaved: async (_song, isCurrent) => {
+      await loadCatalog({ loadReference: false });
+      if (!isCurrent()) return;
+      $('#catalog-status').textContent = 'Sensações salvas. As faixas com associações participam das próximas sugestões.';
+      $('#catalog-status').dataset.type = 'success';
+      changed();
+      void refreshCatalogGuidance();
+    },
+  });
+  const catalogBrowser = createCatalogBrowser({
+    list: $('#catalog-list'), search: $('#catalog-search'), count: $('#catalog-page-count'), more: $('#catalog-more'),
+    emptyMessage: 'Seu catálogo ainda está vazio. Adicione a seleção inicial de músicas reais, cadastre uma faixa ou use os exemplos fictícios para experimentar o fluxo.',
+    renderCard: song => renderCatalogCard(song, { onEdit: (item, trigger) => catalogAssociations.open(item, trigger) }),
   });
 
   window.addEventListener('beforeunload', event => {
@@ -111,6 +134,8 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     draftsEpoch += 1;
     catalogEpoch += 1;
     catalogReference.reset();
+    catalogAssociations.reset();
+    catalogBrowser.reset();
     sessionId = null;
     record = null;
     interpretation = null;
@@ -497,17 +522,19 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
   async function loadCatalog({ loadReference = true } = {}) {
     const version = ++catalogEpoch;
     if (loadReference) void catalogReference.load();
+    catalogBrowser.setBusy(true);
     try {
       const result = await api('/api/musicas');
       if (version !== catalogEpoch) return;
-      const list = $('#catalog-list');
-      list.replaceChildren();
-      const songs = result.musicas || [];
-      if (!songs.length) list.append(el('p', { class: 'empty-state' }, 'Seu catálogo ainda está vazio. Adicione a seleção inicial de músicas reais, cadastre uma faixa ou use os exemplos fictícios para experimentar o fluxo.'));
-      songs.forEach((song) => list.append(renderCatalogCard(song)));
+      catalogBrowser.setSongs(result.musicas);
+      if ($('#catalog-status').dataset.type === 'error') $('#catalog-status').textContent = '';
     } catch (error) {
       if (version !== catalogEpoch || stale(error)) return;
       $('#catalog-status').textContent = readableError(error);
+      $('#catalog-status').dataset.type = 'error';
+      catalogBrowser.setError('Não foi possível carregar suas faixas. Abra Minhas músicas novamente para tentar.');
+    } finally {
+      if (version === catalogEpoch) catalogBrowser.setBusy(false);
     }
   }
 

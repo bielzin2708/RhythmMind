@@ -1,113 +1,112 @@
 # Catálogo de referência — músicas reais
 
-Versão inicial `2026-11-11.1`, consultada em 11/11/2026. O artefato distribuído é
-[`data/catalogo_referencia.json`](../data/catalogo_referencia.json), com 66 faixas:
-60 selecionadas entre cinco playlists fornecidas pelo autor e seis alternativas
-instrumentais. Não é uma cópia completa das playlists.
+Versão `2026-11-12.1`. O artefato distribuído é
+[`data/catalogo_referencia.json`](../data/catalogo_referencia.json), com 96 faixas:
 
-## Fontes e alcance da consulta
+- 66 faixas da seleção anterior: 60 de cinco playlists fornecidas pelo autor e
+  seis alternativas instrumentais de Ludovico Einaudi e Yiruma;
+- 30 faixas adicionais, distribuídas entre quatro playlists mais recentes
+  fornecidas pelo autor (oito, oito, sete e sete faixas).
 
-As páginas públicas do Spotify permitiram consultar faixas de “Excuse me”,
-“Funk”, “sertanejola”, “Rap” e “Internacional”. Foram selecionadas 12 faixas
-distintas por lista, evitando repetir gravações que aparecem em mais de uma.
-Uma sexta URL não disponibilizou os metadados da playlist, inclusive com o link
-de convite fornecido. Não se inferiu seu conteúdo.
+Não é uma cópia completa das playlists nem representa acesso à conta do Spotify.
 
-As páginas principais expuseram os primeiros 30 itens; os players incorporados
-de algumas listas expuseram até 100. A consulta não usou paginação autenticada
-nem representa acesso à conta ou análise integral das listas maiores.
+## Fontes e limites da consulta
 
-Cada faixa registra URL pública, identificador da gravação, título, crédito de
-artistas, álbum, data da consulta e duração original em milissegundos. O nome
-preserva indicações como “Ao Vivo”, “Acústico” e “Sped Up Version”; essas edições
-não são intercambiáveis com outras gravações de mesmo título. A duração visível
-`m:ss` é arredondada; o valor original e a observação de duração conservam a precisão.
+Os dados do Spotify vieram das páginas e players públicos: identificador da
+gravação, título, crédito de artistas, duração e álbum quando exposto. Os links
+públicos maiores podem mostrar somente os primeiros 100 itens; links indisponíveis
+ou que não expuseram faixas não foram usados. Não houve paginação autenticada,
+aceite de convite, reprodução, download de áudio ou leitura de playlists privadas.
 
-As seis faixas complementares são de Ludovico Einaudi e Yiruma. Foram consultadas
-na Apple iTunes Search API e vinculadas às respectivas edições na Apple Music.
-As URLs por faixa estão no próprio JSON e aparecem na interface. Disponibilidade
-de reprodução depende do serviço e da região; os links são fontes de metadados.
+As seis faixas instrumentais foram consultadas na Apple iTunes Search API e
+vinculadas às respectivas edições na Apple Music. A disponibilidade de reprodução
+depende do serviço e da região; os links são fontes de metadados.
 
-O artefato não contém URLs de playlists pessoais, proprietários, cookies, tokens,
-parâmetros de convite ou arquivos de áudio. Não existe sincronização automática
-com o Spotify.
+O artefato não contém URLs de playlists pessoais, nomes de proprietários, cookies,
+tokens ou parâmetros de convite. Cada faixa mantém somente sua URL pública de
+referência e a data da consulta.
 
-## Separação entre metadados e curadoria
+## Metadados, associações e recomendações
 
-- `proveniencia` contém os dados consultados na fonte pública. `id` recebe prefixo
-  do provedor, sem alterar o identificador original em `id_fonte`.
-- `curadoria` identifica o status **provisório**, método, versão e justificativa
-  das associações propostas pelo projeto. São pontos de partida exploratórios,
-  não preferências já confirmadas pelo titular ou rótulos fornecidos pelo Spotify.
-- `sentimentos_associados` e `estrategias` são associações editoriais utilizadas
-  pelo motor determinístico existente. Não comprovam uma resposta emocional.
-- `bpm` fica `null`. Energia, valência e intensidade não foram preenchidas.
-  `caracterizacao` contém apenas duração obtida nos metadados; listas de anotações
-  emocionais e de estimativas de sistema ficam vazias.
-- As músicas não entram no contexto da LLM. Interpretação e recomendação mantêm
-  suas responsabilidades existentes. Nenhum efeito fisiológico/clínico é prometido.
+- `proveniencia` guarda os dados consultados. Álbum desconhecido permanece `null`.
+- As 66 faixas anteriores mantêm `curadoria.status = "provisoria"` e suas
+  associações editoriais exploratórias.
+- As 30 novas usam `curadoria.status = "pendente"`, sem sentimentos, estratégias
+  ou contextos inferidos a partir de título, artista, gênero ou playlist.
+- `bpm` permanece `null`; energia, valência e intensidade não são inventadas.
+- Uma faixa pendente não participa das recomendações. Ela passa a participar
+  somente depois que o titular indica ao menos uma sensação no catálogo pessoal.
+- Salvar a lista de sensações vazia remove a faixa das próximas recomendações sem
+  apagar a música. Sessões já registradas preservam suas escolhas.
+- As músicas não entram no contexto da LLM, e nenhum efeito fisiológico ou clínico
+  é prometido.
 
-O retorno sobre a experiência continua sendo individual e registrado por sessão;
-ele não reclassifica globalmente as faixas. Os exemplos fictícios anteriores não
-foram substituídos por títulos reais nos testes.
+Alterar as sensações modifica somente a cópia pessoal do usuário autenticado. A
+referência compartilhada, as outras contas e o histórico continuam intactos. O
+registro pessoal conserva revisões anteriores das associações para rastreabilidade.
 
 ## Como usar na interface
 
-1. Entre na conta do RhythmMind e abra **Minhas músicas**.
-2. Em **Seleção inicial de músicas reais**, expanda a lista para consultar faixas,
-   álbuns, links das fontes e associações provisórias.
-3. Clique em **Adicionar seleção ao meu catálogo**. O resultado mostra quantas
-   faixas entraram e quantas já existiam. Suas faixas anteriores são preservadas.
+1. Entre na conta e abra **Minhas músicas**.
+2. Expanda **Adicionar seleção ao meu catálogo**. A prévia fechada não cria os
+   cartões; ao abrir, são mostradas 25 faixas por vez, com busca sem distinção de
+   maiúsculas ou acentos.
+3. Clique em **Adicionar seleção ao meu catálogo**. Faixas já existentes são
+   preservadas e contabilizadas, sem duplicação.
+4. Nas faixas pendentes, use **Indicar sensações**. As sugestões seguintes só
+   considerarão a faixa depois dessa confirmação pessoal.
 
-Não há seed automático em todas as contas. O catálogo compartilhado é uma
-referência somente leitura; a ação explícita cria cópias pessoais, que passam a
-participar das próximas recomendações. Sessões antigas conservam suas escolhas.
-O arquivo pessoal é ignorado pelo Git; atualizar o código não importa nem
-sobrescreve dados na máquina do usuário.
+Não existe seed automático em todas as contas. O arquivo pessoal é ignorado pelo
+Git; atualizar o código não importa nem sobrescreve dados na máquina do usuário.
 
 ## HTTP
 
-As duas rotas exigem o mesmo Bearer token das demais APIs pessoais e usam
+As rotas exigem o mesmo Bearer token das demais APIs pessoais e usam
 `Cache-Control: no-store`.
 
-`GET /api/catalogo-referencia` retorna:
+`GET /api/catalogo-referencia` não grava dados e retorna, de forma abreviada:
 
 ```json
-{"versao":"2026-11-11.1","total":66,"descricao":"…","musicas":[]}
+{
+  "versao": "2026-11-12.1",
+  "total": 96,
+  "pronta_para_recomendar": 66,
+  "pendentes_associacao": 30,
+  "descricao": "…",
+  "musicas": []
+}
 ```
 
-No exemplo acima, `musicas` foi abreviado; a resposta real contém as 66 faixas.
-A consulta não grava no catálogo da conta.
+`POST /api/catalogo-referencia/importar` aceita `{}` ou `{"ids":null}` para o
+lote completo, `{"ids":["identificador_da_faixa"]}` para uma seleção e
+`{"ids":[]}` para nenhuma faixa. O limite defensivo é 300 identificadores;
+IDs desconhecidos invalidam o lote inteiro antes de qualquer escrita.
 
-`POST /api/catalogo-referencia/importar` aceita `{}` ou `{"ids":null}` para o lote
-completo, `{"ids":["identificador_da_faixa"]}` para uma seleção e `{"ids":[]}`
-para nenhuma faixa. O limite de seleção é 300 identificadores. Exemplo de resposta
-para uma conta inicialmente vazia:
+Para uma conta inicialmente vazia, a importação completa responde:
 
 ```json
-{"versao":"2026-11-11.1","importadas":66,"ja_existentes":0,"total":66}
+{"versao":"2026-11-12.1","importadas":96,"ja_existentes":0,"total":96}
 ```
 
-Não são aceitos usuário, caminho de arquivo ou lote arbitrário na requisição.
-ID desconhecido produz 422 antes de qualquer escrita; referência inválida ou
-indisponível produz 503. Falha de substituição do arquivo preserva o anterior.
-Sem autenticação, ambas as rotas retornam 401.
+`PATCH /api/musicas/{musica_id}/associacoes` recebe somente categorias válidas:
 
-## Integridade e manutenção
+```json
+{"sentimentos_associados":["calmo","foco"]}
+```
 
-O serviço lê o JSON pelo caminho absoluto do módulo, pois o desenvolvimento local
-usa outro diretório de dados. Valida o lote inteiro antes da importação, prepara
-cópias independentes e deduplica por ID e nome/artista normalizados. Em caso de
-duplicata, o cadastro pessoal prevalece sem receber alterações da referência.
-Uma repetição sem novas faixas não regrava o arquivo.
+A resposta é `{"musica": {...}}`. Lista vazia é válida. Faixa inexistente retorna
+404, ocorrência ambígua retorna 409 e corpo inválido retorna 422. Sem autenticação,
+as rotas retornam 401; uma conta não consegue consultar nem alterar a cópia de outra.
 
-O lock de músicas cobre a leitura/mescla/escrita da importação e o cadastro manual
-no mesmo processo. A escrita usa temporário, `fsync` e `os.replace`. Isso não cria
-uma garantia de coordenação entre múltiplos processos; o inicializador local
-permanece com seu modelo de execução existente.
+## Integridade e testes
 
-Testes novos cobrem autenticação, isolamento entre contas, validação/proveniência,
-seleção parcial, idempotência, falha de gravação, concorrência com cadastro manual
-e preservação do histórico/catálogo legado. O controlador web também verifica
-cliques duplicados, respostas atrasadas e reset de sessão. Todas as gravações de
-teste usam contas/diretórios temporários próprios.
+O serviço valida o arquivo inteiro antes da importação, deduplica por ID e por
+nome/artista normalizados e faz a escrita pessoal por temporário, `fsync` e
+`os.replace`. O lock cobre importação, cadastro manual e edição de associações no
+mesmo processo. Em duplicatas, a versão pessoal prevalece sem ser sobrescrita.
+
+Os testes cobrem autenticação, isolamento entre contas, origem e esquema dos dados,
+seleção parcial, idempotência, concorrência, falha de gravação, histórico,
+recomendação de faixas classificadas e exclusão das pendentes. No navegador,
+cobrem busca, paginação, prévia recolhida, edição, lista vazia, repetição de cliques,
+respostas atrasadas e troca de sessão. Os testes usam diretórios e contas temporários.

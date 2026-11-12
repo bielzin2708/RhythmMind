@@ -154,6 +154,13 @@ def recomendar_musicas(emocoes_atuais, estado_desejado=None, ajuste_aprendizagem
     
     # Avaliar cada música
     for musica in todas_musicas:
+        # Metadados públicos e associações retiradas precisam de uma associação
+        # pessoal antes de voltar ao ranking, inclusive quando existe feedback.
+        curadoria = musica.get("curadoria") or {}
+        if (isinstance(curadoria, dict)
+                and curadoria.get("status") in {"pendente", "informada_pelo_usuario"}
+                and not musica.get("sentimentos_associados") and not musica.get("estrategias")):
+            continue
         score, _criterios = _pontuar_musica(
             musica, emocoes_atuais, nome_estrategia, ajuste_aprendizagem,
         )

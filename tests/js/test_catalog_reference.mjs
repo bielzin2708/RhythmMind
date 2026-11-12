@@ -93,7 +93,8 @@ function controller(t, api, options = {}) {
   return { reference, button, status, count, list, container };
 }
 
-const response = () => ({ versao: 'ficticia-1', total: 3, descricao: 'Seleção fictícia.',
+const response = () => ({ versao: 'ficticia-1', total: 3, pronta_para_recomendar: 2,
+  pendentes_associacao: 1, descricao: 'Seleção fictícia.',
   musicas: [song(), { ...song(), id: 'referencia-ficticia-2' }, { ...song(), id: 'referencia-ficticia-3' }] });
 
 function descendants(node) { return node.children.flatMap(child => [child, ...descendants(child)]); }
@@ -147,6 +148,21 @@ test('fonte inválida não vira link e cadastro pessoal não ganha rótulo de cu
   assert.doesNotMatch(renderCatalogCard(fixture).textContent, /provisóri/i);
 });
 
+test('faixa pendente pede sensações sem inventar classificação e prévia não tem botão de edição', t => {
+  domFixture(t);
+  const fixture = { ...song(), sentimentos_associados: [], estrategias: [], curadoria: { status: 'pendente' } };
+  const preview = renderCatalogCard(fixture);
+  assert.match(preview.textContent, /Sensações ainda não indicadas; complete para participar das sugestões/);
+  assert.doesNotMatch(preview.textContent, /provisóri|calmo|reflexivo/i);
+  assert.equal(preview.querySelectorAll('button, input[type="submit"]').length, 0);
+  let editing;
+  const personal = renderCatalogCard(fixture, { onEdit: (value, trigger) => { editing = [value, trigger]; } });
+  const button = personal.querySelectorAll('button, input[type="submit"]')[0];
+  assert.equal(button.textContent, 'Indicar sensações');
+  button.dispatch('click');
+  assert.deepEqual(editing, [fixture, button]);
+});
+
 test('consulta usa total recebido e renderiza músicas sem escrever catálogo pessoal', async t => {
   const requests = [];
   const { reference, count, list } = controller(t, async (path, options) => {
@@ -157,6 +173,8 @@ test('consulta usa total recebido e renderiza músicas sem escrever catálogo pe
   assert.deepEqual(requests.map(([path]) => path), ['/api/catalogo-referencia']);
   assert.equal(requests[0][1]?.method ?? 'GET', 'GET');
   assert.match(count.textContent, /3/);
+  assert.match(count.textContent, /2 com associações iniciais/);
+  assert.match(count.textContent, /1 aguardam suas sensações/);
   assert.equal(list.children.length, 3);
 });
 
@@ -254,7 +272,8 @@ test('falha da prévia não bloqueia uma importação posterior', async t => {
     return { versao: 'ficticia-1', importadas: 3, ja_existentes: 0, total: 3 };
   }, { onImported: async () => { imported += 1; } });
   await reference.load();
-  assert.equal(list.children.length, 0);
+  assert.equal(list.children.filter(node => node.tagName === 'ARTICLE').length, 0);
+  assert.match(list.textContent, /Não foi possível carregar/i);
   assert.match(count.textContent, /indisponível/i);
   assert.equal(button.disabled, false);
   await reference.importAll();

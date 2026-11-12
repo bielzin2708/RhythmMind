@@ -1,6 +1,7 @@
 """Referência pública e importação explícita, sem análise de áudio ou inferências."""
 
-from datetime import date
+from copy import deepcopy
+from datetime import date, datetime, timezone
 import json
 from pathlib import Path
 import re
@@ -15,11 +16,26 @@ from core.interpretacao.contratos import CATEGORIAS
 
 
 ARQ_CATALOGO_REFERENCIA = Path(__file__).resolve().parents[1] / "data/catalogo_referencia.json"
+MAX_IDS_IMPORTACAO = 300
 _HOSTS_FONTES = {"music.apple.com", "itunes.apple.com", "open.spotify.com"}
+_CURADORIA_TITULAR = {
+    "status": "informada_pelo_usuario",
+    "metodo": "categorias_confirmadas_sem_analise_de_audio",
+    "versao": "1",
+    "justificativa": "Associações informadas pelo titular; sem análise de áudio.",
+}
 
 
 class CatalogoIndisponivel(RuntimeError):
     """O artefato público não pôde ser lido e validado integralmente."""
+
+
+class MusicaNaoEncontrada(LookupError):
+    """O identificador não pertence ao catálogo da conta atual."""
+
+
+class AssociacaoAmbigua(ValueError):
+    """Mais de um registro pessoal tem o mesmo identificador."""
 
 
 def _exigir(condicao, mensagem):
@@ -67,8 +83,8 @@ def validar_catalogo(catalogo):
     _exigir(_texto(catalogo.get("versao")), "Versão do catálogo ausente.")
     _exigir(_texto(catalogo.get("descricao")), "Descrição do catálogo ausente.")
     musicas = catalogo.get("musicas")
-    _exigir(isinstance(musicas, list) and len(musicas) <= 300,
-            "Catálogo deve conter uma lista de até 300 faixas.")
+    _exigir(isinstance(musicas, list) and len(musicas) <= MAX_IDS_IMPORTACAO,
+            f"Catálogo deve conter uma lista de até {MAX_IDS_IMPORTACAO} faixas.")
     ids, chaves = set(), set()
     for musica in musicas:
         _exigir(isinstance(musica, dict), "Faixa deve ser um objeto.")
@@ -95,7 +111,8 @@ def validar_catalogo(catalogo):
         _exigir(_texto(fonte.get("fonte")) and _url_publica(fonte.get("url")), "Fonte pública inválida.")
         _exigir(_texto(fonte.get("id_fonte")) or type(fonte.get("id_fonte")) is int,
                 "Identificador da fonte ausente.")
-        _exigir(_texto(fonte.get("album")), "Álbum da gravação ausente.")
+        _exigir(fonte.get("album") is None or _texto(fonte["album"]),
+                "Álbum deve ser texto não vazio ou desconhecido.")
         consultado = fonte.get("consultado_em")
         _exigir(_texto(consultado), "Data de consulta ausente.")
         date.fromisoformat(consultado)
@@ -107,10 +124,15 @@ def validar_catalogo(catalogo):
 
         curadoria = musica.get("curadoria")
         _exigir(isinstance(curadoria, dict), "Curadoria editorial ausente.")
-        _exigir(curadoria.get("status") == "provisoria"
-                and curadoria.get("metodo") == "associacao_editorial_sem_analise_de_audio"
-                and _texto(curadoria.get("versao")) and _texto(curadoria.get("justificativa")),
-                "Método editorial precisa ser explícito e provisório.")
+        editorial = (curadoria.get("status") == "provisoria"
+                     and curadoria.get("metodo") == "associacao_editorial_sem_analise_de_audio")
+        pendente = (curadoria.get("status") == "pendente"
+                    and curadoria.get("metodo") == "metadados_publicos_sem_classificacao")
+        _exigir((editorial or pendente) and _texto(curadoria.get("versao"))
+                and _texto(curadoria.get("justificativa")),
+                "Método de curadoria precisa ser explícito: editorial provisório ou pendente.")
+        _exigir(not pendente or (not musica["sentimentos_associados"] and not musica["estrategias"]),
+                "Faixa pendente não pode declarar categorias ou estratégias.")
         bloco = musica.get("caracterizacao")
         _exigir(isinstance(bloco, dict), "Caracterização da referência ausente.")
         validar_caracterizacao(bloco)
@@ -144,8 +166,8 @@ def importar_catalogo_referencia(ids=None):
     if ids is not None:
         if not isinstance(ids, list) or not all(isinstance(item, str) for item in ids):
             raise ValueError("Informe uma lista de identificadores de faixas.")
-        if len(ids) > 300 or set(ids) - disponiveis:
-            raise ValueError("A seleção contém identificador desconhecido ou excede 300 faixas.")
+        if len(ids) > MAX_IDS_IMPORTACAO or set(ids) - disponiveis:
+            raise ValueError(f"A seleção contém identificador desconhecido ou excede {MAX_IDS_IMPORTACAO} faixas.")
     selecionados = disponiveis if ids is None else set(ids)
     preparadas = [preparar_musica(musica) for musica in catalogo["musicas"]
                   if musica["id"] in selecionados]
@@ -167,3 +189,53 @@ def importar_catalogo_referencia(ids=None):
             storage.salvar_json(storage.ARQ_MUSICAS, existentes + novas)
         return {"versao": catalogo["versao"], "importadas": len(novas),
                 "ja_existentes": len(preparadas) - len(novas), "total": len(existentes) + len(novas)}
+
+
+def atualizar_associacoes_musica(musica_id, categorias):
+    """Altera somente associações pessoais; metadados e histórico são preservados."""
+    if usuario_atual() is None:
+        raise PermissionError("Associações exigem um contexto de conta autenticada.")
+    _exigir(_lista_textos(categorias, CATEGORIAS) and len(categorias) <= len(CATEGORIAS),
+            "Informe categorias válidas, sem repetições.")
+    # As regras relacionam apenas as categorias confirmadas. BPM e tags da gravação
+    # não servem como evidência para atribuir outras propriedades ou associações.
+    from main import inferir_estrategias_para_musica
+
+    estrategias = inferir_estrategias_para_musica(categorias, tags=[], bpm=None) if categorias else []
+    procedencia = {"fonte": "Titular", "metodo": _CURADORIA_TITULAR["metodo"], "versao": "1"}
+    with storage.LOCK_MUSICAS:
+        musicas = storage.carregar_json(storage.ARQ_MUSICAS, [], estrito=True)
+        _exigir(isinstance(musicas, list) and all(isinstance(m, dict) for m in musicas),
+                "Catálogo pessoal inválido; associações não alteradas.")
+        indices = [indice for indice, musica in enumerate(musicas) if musica.get("id") == musica_id]
+        if not indices:
+            raise MusicaNaoEncontrada("Faixa não encontrada no catálogo pessoal.")
+        if len(indices) != 1:
+            raise AssociacaoAmbigua("Identificador de faixa ambíguo no catálogo pessoal.")
+        indice = indices[0]
+        anterior = musicas[indice]
+        atualizada = deepcopy(anterior)
+        bloco = atualizada.get("caracterizacao")
+        if bloco is None:
+            bloco = atualizada["caracterizacao"] = {"versao_estrutura": 1}
+        validar_caracterizacao(bloco)
+        origens = bloco.setdefault("procedencia_legado", {})
+        atualizada["sentimentos_associados"] = list(categorias)
+        atualizada["estrategias"] = estrategias
+        atualizada["curadoria"] = deepcopy(_CURADORIA_TITULAR)
+        for campo in ("sentimentos_associados", "estrategias"):
+            origens[campo] = deepcopy(procedencia)
+        if atualizada == anterior:
+            return deepcopy(anterior)
+        revisoes = atualizada.setdefault("revisoes_associacoes", [])
+        _exigir(isinstance(revisoes, list), "Histórico de associações inválido; alterações não salvas.")
+        revisoes.append({
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "categorias_anteriores": deepcopy(anterior.get("sentimentos_associados", [])),
+            "estrategias_anteriores": deepcopy(anterior.get("estrategias", [])),
+            "curadoria_anterior": deepcopy(anterior.get("curadoria")),
+        })
+        validar_caracterizacao(bloco)
+        musicas[indice] = atualizada
+        storage.salvar_json(storage.ARQ_MUSICAS, musicas)
+        return deepcopy(atualizada)

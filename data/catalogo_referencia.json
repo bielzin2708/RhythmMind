@@ -1,6 +1,6 @@
 {
-  "versao": "2026-11-11.1",
-  "descricao": "Seleção inicial de músicas reais com metadados públicos e associações editoriais provisórias para revisão pessoal. Sem análise de áudio, BPM inferido ou efeito emocional garantido.",
+  "versao": "2026-11-12.1",
+  "descricao": "Catálogo com 66 faixas previamente curadas e 30 faixas adicionais de playlists fornecidas. Os metadados públicos têm fonte; as novas associações emocionais ficam pendentes de indicação pessoal.",
   "musicas": [
     {
       "id": "spotify_0M955bMOoilikPXwKLYpoi",
@@ -5598,6 +5598,1926 @@
             "fonte": "Curadoria editorial inicial RhythmMind",
             "metodo": "associacao_editorial_sem_analise_de_audio",
             "versao": "2026-11-11.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_4fMjqKYYsvtT6Fvca8lGFl",
+      "nome": "Sua Mãe Vai Me Amar",
+      "artista": "Turma do Pagode",
+      "duracao": "3:04",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/4fMjqKYYsvtT6Fvca8lGFl",
+        "id_fonte": "spotify:track:4fMjqKYYsvtT6Fvca8lGFl",
+        "consultado_em": "2026-11-11",
+        "album": "Sua Mãe Vai Me Amar",
+        "duracao_ms": 183758
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 183.758,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/4fMjqKYYsvtT6Fvca8lGFl",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/4fMjqKYYsvtT6Fvca8lGFl",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/4fMjqKYYsvtT6Fvca8lGFl",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/4fMjqKYYsvtT6Fvca8lGFl",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_2DllnWTQNjh5NDN1A2ZtnH",
+      "nome": "Serenata Existencialista",
+      "artista": "O Grilo",
+      "duracao": "2:43",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/2DllnWTQNjh5NDN1A2ZtnH",
+        "id_fonte": "spotify:track:2DllnWTQNjh5NDN1A2ZtnH",
+        "consultado_em": "2026-11-11",
+        "album": "Herói do Futuro",
+        "duracao_ms": 163209
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 163.209,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/2DllnWTQNjh5NDN1A2ZtnH",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/2DllnWTQNjh5NDN1A2ZtnH",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/2DllnWTQNjh5NDN1A2ZtnH",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/2DllnWTQNjh5NDN1A2ZtnH",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_2QjOHCTQ1Jl3zawyYOpxh6",
+      "nome": "Sweater Weather",
+      "artista": "The Neighbourhood",
+      "duracao": "4:00",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/2QjOHCTQ1Jl3zawyYOpxh6",
+        "id_fonte": "spotify:track:2QjOHCTQ1Jl3zawyYOpxh6",
+        "consultado_em": "2026-11-11",
+        "album": "I Love You.",
+        "duracao_ms": 240400
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 240.4,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/2QjOHCTQ1Jl3zawyYOpxh6",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/2QjOHCTQ1Jl3zawyYOpxh6",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/2QjOHCTQ1Jl3zawyYOpxh6",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/2QjOHCTQ1Jl3zawyYOpxh6",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_0dCwmf59BqqIAXvw9PRsGG",
+      "nome": "Dança da Motinha",
+      "artista": "Beth",
+      "duracao": "2:48",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/0dCwmf59BqqIAXvw9PRsGG",
+        "id_fonte": "spotify:track:0dCwmf59BqqIAXvw9PRsGG",
+        "consultado_em": "2026-11-11",
+        "album": "Tornado Muito Nervoso 2",
+        "duracao_ms": 168173
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 168.173,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/0dCwmf59BqqIAXvw9PRsGG",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/0dCwmf59BqqIAXvw9PRsGG",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/0dCwmf59BqqIAXvw9PRsGG",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/0dCwmf59BqqIAXvw9PRsGG",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_7vZsD9RGkN1BuPgv1UO3Ws",
+      "nome": "Camisa 10 (Ao Vivo)",
+      "artista": "Turma do Pagode",
+      "duracao": "2:57",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/7vZsD9RGkN1BuPgv1UO3Ws",
+        "id_fonte": "spotify:track:7vZsD9RGkN1BuPgv1UO3Ws",
+        "consultado_em": "2026-11-11",
+        "album": "O Som das Multidões",
+        "duracao_ms": 176586
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 176.586,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/7vZsD9RGkN1BuPgv1UO3Ws",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/7vZsD9RGkN1BuPgv1UO3Ws",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/7vZsD9RGkN1BuPgv1UO3Ws",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/7vZsD9RGkN1BuPgv1UO3Ws",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_6btBKvH1OlMbwW9lU1RGIo",
+      "nome": "Herói do Futuro",
+      "artista": "O Grilo",
+      "duracao": "3:52",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/6btBKvH1OlMbwW9lU1RGIo",
+        "id_fonte": "spotify:track:6btBKvH1OlMbwW9lU1RGIo",
+        "consultado_em": "2026-11-11",
+        "album": "Herói do Futuro",
+        "duracao_ms": 232373
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 232.373,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/6btBKvH1OlMbwW9lU1RGIo",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/6btBKvH1OlMbwW9lU1RGIo",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/6btBKvH1OlMbwW9lU1RGIo",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/6btBKvH1OlMbwW9lU1RGIo",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_5XeFesFbtLpXzIVDNQP22n",
+      "nome": "I Wanna Be Yours",
+      "artista": "Arctic Monkeys",
+      "duracao": "3:04",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/5XeFesFbtLpXzIVDNQP22n",
+        "id_fonte": "spotify:track:5XeFesFbtLpXzIVDNQP22n",
+        "consultado_em": "2026-11-11",
+        "album": "AM",
+        "duracao_ms": 183956
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 183.956,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/5XeFesFbtLpXzIVDNQP22n",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/5XeFesFbtLpXzIVDNQP22n",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/5XeFesFbtLpXzIVDNQP22n",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/5XeFesFbtLpXzIVDNQP22n",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_4loSpml4rzeFM1fDJb0Upe",
+      "nome": "Ela Só Pensa Em Beijar",
+      "artista": "MC Leozinho",
+      "duracao": "3:36",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/4loSpml4rzeFM1fDJb0Upe",
+        "id_fonte": "spotify:track:4loSpml4rzeFM1fDJb0Upe",
+        "consultado_em": "2026-11-11",
+        "album": "Samba Goal - Powered By R10",
+        "duracao_ms": 215546
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 215.546,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/4loSpml4rzeFM1fDJb0Upe",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/4loSpml4rzeFM1fDJb0Upe",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/4loSpml4rzeFM1fDJb0Upe",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/4loSpml4rzeFM1fDJb0Upe",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_5jqkHhc4elbWIqkPfuthZD",
+      "nome": "Pesou o Rolê",
+      "artista": "Di Propósito, XANDDY HARMONIA, Jojo Maronttinni",
+      "duracao": "2:56",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/5jqkHhc4elbWIqkPfuthZD",
+        "id_fonte": "spotify:track:5jqkHhc4elbWIqkPfuthZD",
+        "consultado_em": "2026-11-11",
+        "album": "Tudo Di Proposito",
+        "duracao_ms": 176082
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 176.082,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/5jqkHhc4elbWIqkPfuthZD",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/5jqkHhc4elbWIqkPfuthZD",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/5jqkHhc4elbWIqkPfuthZD",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/5jqkHhc4elbWIqkPfuthZD",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_4d0DpU7Odiv0ztvX2GxJlk",
+      "nome": "Exagerado",
+      "artista": "Cazuza",
+      "duracao": "3:43",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/4d0DpU7Odiv0ztvX2GxJlk",
+        "id_fonte": "spotify:track:4d0DpU7Odiv0ztvX2GxJlk",
+        "consultado_em": "2026-11-11",
+        "album": "Exagerado",
+        "duracao_ms": 222696
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 222.696,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/4d0DpU7Odiv0ztvX2GxJlk",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/4d0DpU7Odiv0ztvX2GxJlk",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/4d0DpU7Odiv0ztvX2GxJlk",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/4d0DpU7Odiv0ztvX2GxJlk",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_7AYP21Q4qnxw2WxETEvSRb",
+      "nome": "Memories",
+      "artista": "Conan Gray",
+      "duracao": "4:09",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/7AYP21Q4qnxw2WxETEvSRb",
+        "id_fonte": "spotify:track:7AYP21Q4qnxw2WxETEvSRb",
+        "consultado_em": "2026-11-11",
+        "album": "Memories",
+        "duracao_ms": 248818
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 248.818,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/7AYP21Q4qnxw2WxETEvSRb",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/7AYP21Q4qnxw2WxETEvSRb",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/7AYP21Q4qnxw2WxETEvSRb",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/7AYP21Q4qnxw2WxETEvSRb",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_43MjyvXLtVO0sY9Mv2X6vz",
+      "nome": "Ela Só Pensa em Beijar (Se Ela Dança Eu Danço)",
+      "artista": "MC Leozinho, DJ Marlboro",
+      "duracao": "4:05",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/43MjyvXLtVO0sY9Mv2X6vz",
+        "id_fonte": "spotify:track:43MjyvXLtVO0sY9Mv2X6vz",
+        "consultado_em": "2026-11-11",
+        "album": "Funk Brasil Bem Funk",
+        "duracao_ms": 245466
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 245.466,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/43MjyvXLtVO0sY9Mv2X6vz",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/43MjyvXLtVO0sY9Mv2X6vz",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/43MjyvXLtVO0sY9Mv2X6vz",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/43MjyvXLtVO0sY9Mv2X6vz",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_2BfbIbgrFXULyZ44mlSpbn",
+      "nome": "Deixa Tudo Como Tá - Ao Vivo",
+      "artista": "Thiaguinho",
+      "duracao": "3:32",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/2BfbIbgrFXULyZ44mlSpbn",
+        "id_fonte": "spotify:track:2BfbIbgrFXULyZ44mlSpbn",
+        "consultado_em": "2026-11-11",
+        "album": "Deixa Tudo Como Tá (ao Vivo)",
+        "duracao_ms": 211697
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 211.697,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/2BfbIbgrFXULyZ44mlSpbn",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/2BfbIbgrFXULyZ44mlSpbn",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/2BfbIbgrFXULyZ44mlSpbn",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/2BfbIbgrFXULyZ44mlSpbn",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_3bQmU3UGvZMsYZ13ffNyVf",
+      "nome": "Você Não Soube Me Amar",
+      "artista": "Blitz",
+      "duracao": "3:21",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/3bQmU3UGvZMsYZ13ffNyVf",
+        "id_fonte": "spotify:track:3bQmU3UGvZMsYZ13ffNyVf",
+        "consultado_em": "2026-11-11",
+        "album": "Com Você",
+        "duracao_ms": 201200
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 201.2,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/3bQmU3UGvZMsYZ13ffNyVf",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/3bQmU3UGvZMsYZ13ffNyVf",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/3bQmU3UGvZMsYZ13ffNyVf",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/3bQmU3UGvZMsYZ13ffNyVf",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_2GiJYvgVaD2HtM8GqD9EgQ",
+      "nome": "Electric Love",
+      "artista": "BØRNS",
+      "duracao": "3:38",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/2GiJYvgVaD2HtM8GqD9EgQ",
+        "id_fonte": "spotify:track:2GiJYvgVaD2HtM8GqD9EgQ",
+        "consultado_em": "2026-11-11",
+        "album": "Dopamine",
+        "duracao_ms": 218106
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 218.106,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/2GiJYvgVaD2HtM8GqD9EgQ",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/2GiJYvgVaD2HtM8GqD9EgQ",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/2GiJYvgVaD2HtM8GqD9EgQ",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/2GiJYvgVaD2HtM8GqD9EgQ",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_0FBMgXAy8H5PzhrjGJl8M8",
+      "nome": "Glamurosa",
+      "artista": "MC Marcinho",
+      "duracao": "3:30",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/0FBMgXAy8H5PzhrjGJl8M8",
+        "id_fonte": "spotify:track:0FBMgXAy8H5PzhrjGJl8M8",
+        "consultado_em": "2026-11-11",
+        "album": "Sonhos",
+        "duracao_ms": 209613
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 209.613,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/0FBMgXAy8H5PzhrjGJl8M8",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/0FBMgXAy8H5PzhrjGJl8M8",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/0FBMgXAy8H5PzhrjGJl8M8",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/0FBMgXAy8H5PzhrjGJl8M8",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_1TFqH3zKOiTZoVe0OQuJte",
+      "nome": "Até Que Durou / Tu Mandas No Meu Coração / Adorei / Supera - Ao Vivo",
+      "artista": "Grupo Menos É Mais",
+      "duracao": "7:33",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/1TFqH3zKOiTZoVe0OQuJte",
+        "id_fonte": "spotify:track:1TFqH3zKOiTZoVe0OQuJte",
+        "consultado_em": "2026-11-11",
+        "album": "Churrasquinho Menos É Mais, Vol. 2 (Ao Vivo)",
+        "duracao_ms": 453018
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 453.018,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/1TFqH3zKOiTZoVe0OQuJte",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/1TFqH3zKOiTZoVe0OQuJte",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/1TFqH3zKOiTZoVe0OQuJte",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/1TFqH3zKOiTZoVe0OQuJte",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_1UvWx2hgpxlF7HPbwLSmIY",
+      "nome": "Anjos (Pra quem tem fé)",
+      "artista": "O Rappa",
+      "duracao": "7:00",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/1UvWx2hgpxlF7HPbwLSmIY",
+        "id_fonte": "spotify:track:1UvWx2hgpxlF7HPbwLSmIY",
+        "consultado_em": "2026-11-11",
+        "album": "Nunca Tem Fim (Standard)",
+        "duracao_ms": 419520
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 419.52,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/1UvWx2hgpxlF7HPbwLSmIY",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/1UvWx2hgpxlF7HPbwLSmIY",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/1UvWx2hgpxlF7HPbwLSmIY",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/1UvWx2hgpxlF7HPbwLSmIY",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_2eAvDnpXP5W0cVtiI0PUxV",
+      "nome": "Dandelions",
+      "artista": "Ruth B.",
+      "duracao": "3:54",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/2eAvDnpXP5W0cVtiI0PUxV",
+        "id_fonte": "spotify:track:2eAvDnpXP5W0cVtiI0PUxV",
+        "consultado_em": "2026-11-11",
+        "album": "Safe Haven",
+        "duracao_ms": 233720
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 233.72,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/2eAvDnpXP5W0cVtiI0PUxV",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/2eAvDnpXP5W0cVtiI0PUxV",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/2eAvDnpXP5W0cVtiI0PUxV",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/2eAvDnpXP5W0cVtiI0PUxV",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_3i2lwh4ZwTFiVmDWDb9DnC",
+      "nome": "Atoladinha",
+      "artista": "Mc tati quebra baraco, Mc bola de fogo",
+      "duracao": "2:44",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/3i2lwh4ZwTFiVmDWDb9DnC",
+        "id_fonte": "spotify:track:3i2lwh4ZwTFiVmDWDb9DnC",
+        "consultado_em": "2026-11-11",
+        "album": "Rio super funk (Volume 1)",
+        "duracao_ms": 164226
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 164.226,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/3i2lwh4ZwTFiVmDWDb9DnC",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/3i2lwh4ZwTFiVmDWDb9DnC",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/3i2lwh4ZwTFiVmDWDb9DnC",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/3i2lwh4ZwTFiVmDWDb9DnC",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_6LQQGxRzNLsWQtwgLe5fAm",
+      "nome": "Insegurança - Ao Vivo",
+      "artista": "Pixote",
+      "duracao": "3:01",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/6LQQGxRzNLsWQtwgLe5fAm",
+        "id_fonte": "spotify:track:6LQQGxRzNLsWQtwgLe5fAm",
+        "consultado_em": "2026-11-11",
+        "album": "15 Anos (Ao Vivo)",
+        "duracao_ms": 180853
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 180.853,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/6LQQGxRzNLsWQtwgLe5fAm",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/6LQQGxRzNLsWQtwgLe5fAm",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/6LQQGxRzNLsWQtwgLe5fAm",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/6LQQGxRzNLsWQtwgLe5fAm",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_3nI0piSOxAik2RCpHGloB7",
+      "nome": "Só Os Loucos Sabem",
+      "artista": "Charlie Brown Jr.",
+      "duracao": "3:30",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/3nI0piSOxAik2RCpHGloB7",
+        "id_fonte": "spotify:track:3nI0piSOxAik2RCpHGloB7",
+        "consultado_em": "2026-11-11",
+        "album": "Camisa 10 joga bola até na chuva",
+        "duracao_ms": 210493
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 210.493,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/3nI0piSOxAik2RCpHGloB7",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/3nI0piSOxAik2RCpHGloB7",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/3nI0piSOxAik2RCpHGloB7",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/3nI0piSOxAik2RCpHGloB7",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_3JvKfv6T31zO0ini8iNItO",
+      "nome": "Another Love",
+      "artista": "Tom Odell",
+      "duracao": "4:04",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/3JvKfv6T31zO0ini8iNItO",
+        "id_fonte": "spotify:track:3JvKfv6T31zO0ini8iNItO",
+        "consultado_em": "2026-11-11",
+        "album": "Long Way Down (Deluxe)",
+        "duracao_ms": 244360
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 244.36,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/3JvKfv6T31zO0ini8iNItO",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/3JvKfv6T31zO0ini8iNItO",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/3JvKfv6T31zO0ini8iNItO",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/3JvKfv6T31zO0ini8iNItO",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_55Dt0kmkS2HOgKqk99CijE",
+      "nome": "Vai Lacraia",
+      "artista": "Serginho",
+      "duracao": "2:40",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/55Dt0kmkS2HOgKqk99CijE",
+        "id_fonte": "spotify:track:55Dt0kmkS2HOgKqk99CijE",
+        "consultado_em": "2026-11-11",
+        "album": "Twister, Vol. 1",
+        "duracao_ms": 159586
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 159.586,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/55Dt0kmkS2HOgKqk99CijE",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/55Dt0kmkS2HOgKqk99CijE",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/55Dt0kmkS2HOgKqk99CijE",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/55Dt0kmkS2HOgKqk99CijE",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_3eWHUE5D5R19q7BvOX7NSJ",
+      "nome": "Sinto sua falta - Ao vivo",
+      "artista": "Ferrugem",
+      "duracao": "3:25",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/3eWHUE5D5R19q7BvOX7NSJ",
+        "id_fonte": "spotify:track:3eWHUE5D5R19q7BvOX7NSJ",
+        "consultado_em": "2026-11-11",
+        "album": "Prazer, eu sou Ferrugem (Ao vivo)",
+        "duracao_ms": 204681
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 204.681,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/3eWHUE5D5R19q7BvOX7NSJ",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/3eWHUE5D5R19q7BvOX7NSJ",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/3eWHUE5D5R19q7BvOX7NSJ",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/3eWHUE5D5R19q7BvOX7NSJ",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_624ra5mDiibqvFYDK4yhmo",
+      "nome": "Mulher de fases",
+      "artista": "Raimundos",
+      "duracao": "3:33",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/624ra5mDiibqvFYDK4yhmo",
+        "id_fonte": "spotify:track:624ra5mDiibqvFYDK4yhmo",
+        "consultado_em": "2026-11-11",
+        "album": "Só No Forevis",
+        "duracao_ms": 213333
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 213.333,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/624ra5mDiibqvFYDK4yhmo",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/624ra5mDiibqvFYDK4yhmo",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/624ra5mDiibqvFYDK4yhmo",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/624ra5mDiibqvFYDK4yhmo",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_2Bs4jQEGMycglOfWPBqrVG",
+      "nome": "Steal My Girl",
+      "artista": "One Direction",
+      "duracao": "3:48",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/2Bs4jQEGMycglOfWPBqrVG",
+        "id_fonte": "spotify:track:2Bs4jQEGMycglOfWPBqrVG",
+        "consultado_em": "2026-11-11",
+        "album": "FOUR (Deluxe)",
+        "duracao_ms": 228138
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 228.138,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/2Bs4jQEGMycglOfWPBqrVG",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/2Bs4jQEGMycglOfWPBqrVG",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/2Bs4jQEGMycglOfWPBqrVG",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/2Bs4jQEGMycglOfWPBqrVG",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_0Qjv8p8vPKDBJKuB9aBmpN",
+      "nome": "Já É Sensação",
+      "artista": "Andinho",
+      "duracao": "3:02",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/0Qjv8p8vPKDBJKuB9aBmpN",
+        "id_fonte": "spotify:track:0Qjv8p8vPKDBJKuB9aBmpN",
+        "consultado_em": "2026-11-11",
+        "album": "Mania",
+        "duracao_ms": 181866
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 181.866,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/0Qjv8p8vPKDBJKuB9aBmpN",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/0Qjv8p8vPKDBJKuB9aBmpN",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/0Qjv8p8vPKDBJKuB9aBmpN",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/0Qjv8p8vPKDBJKuB9aBmpN",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_11Y1IGMIThaxu4ijcXRNYs",
+      "nome": "Nem de Graça",
+      "artista": "Pixote",
+      "duracao": "2:52",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/11Y1IGMIThaxu4ijcXRNYs",
+        "id_fonte": "spotify:track:11Y1IGMIThaxu4ijcXRNYs",
+        "consultado_em": "2026-11-11",
+        "album": "Nem de Graça",
+        "duracao_ms": 172202
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 172.202,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/11Y1IGMIThaxu4ijcXRNYs",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/11Y1IGMIThaxu4ijcXRNYs",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/11Y1IGMIThaxu4ijcXRNYs",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/11Y1IGMIThaxu4ijcXRNYs",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "spotify_0aASUtDb1N96NJDwmWj5Gf",
+      "nome": "Anna Júlia",
+      "artista": "Los Hermanos",
+      "duracao": "3:32",
+      "bpm": null,
+      "sentimentos_associados": [],
+      "estrategias": [],
+      "contextos": [],
+      "tags": [
+        "referencia_publica"
+      ],
+      "proveniencia": {
+        "fonte": "Spotify — metadados públicos de faixa",
+        "url": "https://open.spotify.com/track/0aASUtDb1N96NJDwmWj5Gf",
+        "id_fonte": "spotify:track:0aASUtDb1N96NJDwmWj5Gf",
+        "consultado_em": "2026-11-11",
+        "album": "Los Hermanos",
+        "duracao_ms": 212200
+      },
+      "curadoria": {
+        "status": "pendente",
+        "metodo": "metadados_publicos_sem_classificacao",
+        "versao": "2026-11-12.1",
+        "justificativa": "Metadados descritivos consultados na fonte pública. Sensações e estratégias aguardam indicação pessoal; não foram inferidas pelo gênero, título ou playlist."
+      },
+      "caracterizacao": {
+        "versao_estrutura": 1,
+        "caracteristicas_acusticas": [
+          {
+            "atributo": "duracao",
+            "valor": 212.2,
+            "unidade": "s",
+            "fonte": "https://open.spotify.com/track/0aASUtDb1N96NJDwmWj5Gf",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          }
+        ],
+        "anotacoes_emocionais": [],
+        "estimativas_sistema": [],
+        "procedencia_legado": {
+          "nome": {
+            "fonte": "https://open.spotify.com/track/0aASUtDb1N96NJDwmWj5Gf",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "artista": {
+            "fonte": "https://open.spotify.com/track/0aASUtDb1N96NJDwmWj5Gf",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "duracao": {
+            "fonte": "https://open.spotify.com/track/0aASUtDb1N96NJDwmWj5Gf",
+            "metodo": "consulta_de_metadados_publicos",
+            "versao": "2026-11-12.1"
+          },
+          "id": {
+            "fonte": "Identificador da fonte pública",
+            "metodo": "prefixo_de_fonte_e_id_de_faixa",
+            "versao": "2026-11-12.1"
           }
         }
       }

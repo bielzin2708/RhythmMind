@@ -42,6 +42,20 @@ def catalogo_ficticio():
     return {"versao": "ficticia-1", "descricao": "Referência fictícia para teste.", "musicas": musicas}
 
 
+def catalogo_ficticio_grande(total=512):
+    catalogo = catalogo_ficticio()
+    modelo = catalogo["musicas"][0]
+    catalogo["musicas"] = []
+    for numero in range(total):
+        musica = deepcopy(modelo)
+        musica.update(id=f"referencia_grande_{numero}", nome=f"Canção fictícia {numero}",
+                      sentimentos_associados=[], estrategias=[])
+        musica["proveniencia"].update(album=None, id_fonte=str(numero))
+        musica["curadoria"].update(status="pendente", metodo="metadados_publicos_sem_classificacao")
+        catalogo["musicas"].append(musica)
+    return catalogo
+
+
 class ValidacaoReferenciaTests(unittest.TestCase):
     def test_referencia_publicada_valida_independente_do_diretorio_pessoal(self):
         with dados_ficticios_temporarios():
@@ -81,6 +95,38 @@ class ValidacaoReferenciaTests(unittest.TestCase):
         catalogo["musicas"][1]["proveniencia"]["duracao_ms"] = 420000
         with self.assertRaises(ValueError):
             referencia.validar_catalogo(catalogo)
+
+    def test_album_desconhecido_pode_ser_nulo_ou_omitido(self):
+        for omitido in (False, True):
+            with self.subTest(omitido=omitido):
+                catalogo = catalogo_ficticio()
+                fonte = catalogo["musicas"][0]["proveniencia"]
+                if omitido:
+                    del fonte["album"]
+                else:
+                    fonte["album"] = None
+                referencia.validar_catalogo(catalogo)
+        for invalido in ("", "  ", 123, False, []):
+            with self.subTest(album=invalido):
+                catalogo = catalogo_ficticio()
+                catalogo["musicas"][0]["proveniencia"]["album"] = invalido
+                with self.assertRaises(ValueError):
+                    referencia.validar_catalogo(catalogo)
+
+    def test_curadoria_pendente_exige_listas_vazias_e_metodo_documentado(self):
+        for campo, valor in (("sentimentos_associados", ["calmo"]),
+                             ("estrategias", ["descompressao"]),
+                             ("curadoria", {"status": "pendente", "metodo": "outro", "versao": "1",
+                                            "justificativa": "Fictícia"}),
+                             ("curadoria", {"status": "pendente", "metodo": "metadados_publicos_sem_classificacao",
+                                            "versao": "", "justificativa": "Fictícia"}),
+                             ("curadoria", {"status": "pendente", "metodo": "metadados_publicos_sem_classificacao",
+                                            "versao": "1", "justificativa": " "})):
+            with self.subTest(campo=campo, valor=valor):
+                catalogo = catalogo_ficticio_grande(1)
+                catalogo["musicas"][0][campo] = valor
+                with self.assertRaises(ValueError):
+                    referencia.validar_catalogo(catalogo)
 
 
 class ImportacaoReferenciaTests(unittest.TestCase):
@@ -134,6 +180,8 @@ class ImportacaoReferenciaTests(unittest.TestCase):
         resposta = self.a.get("/api/catalogo-referencia")
         self.assertEqual(resposta.status_code, 200, resposta.text)
         self.assertEqual(resposta.json()["total"], 2)
+        self.assertEqual(resposta.json()["pronta_para_recomendar"], 2)
+        self.assertEqual(resposta.json()["pendentes_associacao"], 0)
         self.assertEqual(resposta.json()["musicas"], self.catalogo["musicas"])
         self.assertFalse(self.arquivo.exists())
         self.assertEqual(self.artefato.read_bytes(), antes)
@@ -200,11 +248,30 @@ class ImportacaoReferenciaTests(unittest.TestCase):
     def test_recusa_ids_desconhecidos_e_campos_de_outro_usuario_antes_de_gravar(self):
         for corpo in ({"ids": ["referencia_ficticia_1", "ausente"]},
                       {"usuario_id": "outro"}, {"caminho": "data/outro.json"},
-                      {"ids": ["referencia_ficticia_1"] * 301}, {"ids": [1]}, {"ids": [""]}):
+                      {"ids": ["referencia_ficticia_1"] * (referencia.MAX_IDS_IMPORTACAO + 1)},
+                      {"ids": [1]}, {"ids": [""]}):
             with self.subTest(corpo=corpo):
                 resposta = self.importar(**corpo)
                 self.assertEqual(resposta.status_code, 422, resposta.text)
                 self.assertFalse(self.arquivo.exists())
+
+    def test_importa_faixas_pendentes_sem_recomenda_las(self):
+        self.catalogo = catalogo_ficticio_grande(30)
+        self.gravar_referencia()
+        consulta = self.a.get("/api/catalogo-referencia")
+        self.assertEqual(consulta.status_code, 200, consulta.text)
+        self.assertEqual(consulta.json()["pronta_para_recomendar"], 0)
+        self.assertEqual(consulta.json()["pendentes_associacao"], 30)
+        ids = [musica["id"] for musica in self.catalogo["musicas"]]
+        resposta = self.importar(ids=ids)
+        self.assertEqual(resposta.status_code, 200, resposta.text)
+        self.assertEqual(resposta.json()["importadas"], 30)
+        self.assertEqual(len(json.loads(self.arquivo.read_text())), 30)
+        with contexto_usuario(self.perfil["usuario_id"], self.raiz):
+            self.assertEqual(recomendar_musicas(["calmo"], ["calmo"])[2], [])
+        antes = self.arquivo.read_bytes()
+        self.assertEqual(self.importar().json()["importadas"], 0)
+        self.assertEqual(self.arquivo.read_bytes(), antes)
 
     def test_lote_invalido_e_falha_de_substituicao_preservam_arquivo_anterior(self):
         self.cadastrar_pessoal()

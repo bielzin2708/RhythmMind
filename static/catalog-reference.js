@@ -1,4 +1,5 @@
 import { el, categoriaLabel, CATEGORIAS } from './ui.js';
+import { createCatalogBrowser } from './catalog-browser.js';
 
 const SOURCE_HOSTS = new Set(['music.apple.com', 'open.spotify.com']);
 
@@ -12,7 +13,7 @@ export function safeCatalogSource(value) {
   } catch { return null; }
 }
 
-export function renderCatalogCard(song) {
+export function renderCatalogCard(song, { onEdit } = {}) {
   const card = el('article', { class: 'music-card' },
     el('h3', {}, song.nome || 'Faixa cadastrada'),
     el('p', { class: 'hint' }, `${song.artista || 'Artista não informado'} · ${song.duracao || 'Duração não informada'}`));
@@ -25,23 +26,32 @@ export function renderCatalogCard(song) {
       ? el('p', { class: 'field-help' }, 'Fonte: ', el('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, label))
       : el('p', { class: 'field-help' }, `Fonte: ${label}`));
   }
-  if (song.curadoria?.status === 'provisoria') {
-    const categories = Array.isArray(song.sentimentos_associados)
-      ? song.sentimentos_associados.filter(value => CATEGORIAS.includes(value)).map(categoriaLabel) : [];
-    card.append(el('p', { class: 'field-help' }, categories.length
+  const categories = Array.isArray(song.sentimentos_associados)
+    ? song.sentimentos_associados.filter(value => CATEGORIAS.includes(value)).map(categoriaLabel) : [];
+  card.append(el('p', { class: 'field-help' }, !categories.length
+    ? 'Sensações ainda não indicadas; complete para participar das sugestões.'
+    : song.curadoria?.status === 'provisoria'
       ? `Associações iniciais provisórias: ${categories.join(', ')}.`
-      : 'Associações editoriais iniciais provisórias.'));
+      : `Sensações indicadas: ${categories.join(', ')}.`));
+  if (onEdit) {
+    const button = el('button', { type: 'button', class: 'button-link' }, categories.length ? 'Editar sensações' : 'Indicar sensações');
+    button.addEventListener('click', () => onEdit(song, button));
+    card.append(button);
   }
   return card;
 }
 
 export function createCatalogReference({ api, button, status, count, list, container,
+  search = el('input'), pageCount = el('p'), more = el('button'), disclosure,
   onImported = async () => {}, onError = () => {}, onStart = () => {}, describeError = error => error?.message || 'Não foi possível concluir agora.' }) {
   let generation = 0;
   let request = 0;
   let importTask = null;
   let previewError = false;
   let importVersion = 0;
+  const browser = createCatalogBrowser({ list, search, count: pageCount, more, renderCard: renderCatalogCard,
+    emptyMessage: 'Nenhuma faixa disponível nesta seleção.', isVisible: () => !disclosure || disclosure.open });
+  disclosure?.addEventListener('toggle', () => browser.render());
   const message = (text, type = 'info') => {
     status.textContent = text;
     status.dataset.type = type;
@@ -58,7 +68,8 @@ export function createCatalogReference({ api, button, status, count, list, conta
     previewError = false;
     busy(false);
     count.textContent = 'Confira as faixas e adicione a seleção ao seu catálogo.';
-    list.replaceChildren();
+    browser.reset();
+    if (disclosure) disclosure.open = false;
     message('');
   }
   async function load() {
@@ -70,8 +81,11 @@ export function createCatalogReference({ api, button, status, count, list, conta
       if (version !== generation || currentRequest !== request) return;
       const songs = Array.isArray(result.musicas) ? result.musicas : [];
       const total = Number.isSafeInteger(result.total) && result.total >= 0 ? result.total : songs.length;
-      count.textContent = `${total} músicas reais nesta seleção. Você pode conferir a lista antes de adicionar.`;
-      list.replaceChildren(...songs.map(renderCatalogCard));
+      const ready = Number.isSafeInteger(result.pronta_para_recomendar) ? result.pronta_para_recomendar : null;
+      const pending = Number.isSafeInteger(result.pendentes_associacao) ? result.pendentes_associacao : null;
+      count.textContent = `${total} músicas reais nesta seleção.${ready !== null && pending !== null
+        ? ` ${ready} com associações iniciais; ${pending} aguardam suas sensações.` : ''} Você pode conferir a lista antes de adicionar.`;
+      browser.setSongs(songs);
       if (previewError && !importTask) {
         message('');
         previewError = false;
@@ -79,6 +93,7 @@ export function createCatalogReference({ api, button, status, count, list, conta
     } catch (error) {
       if (version !== generation || currentRequest !== request || error?.name === 'StaleRequestError' || error?.name === 'AbortError') return;
       count.textContent = 'A prévia da seleção está indisponível agora. Seu catálogo pessoal continua disponível.';
+      browser.setError('Não foi possível carregar a seleção. Abra Minhas músicas novamente para tentar.');
       if (!importTask && noticeVersion === importVersion) {
         message('Você pode tentar adicionar a seleção novamente quando o serviço estiver disponível.', 'error');
         previewError = true;
