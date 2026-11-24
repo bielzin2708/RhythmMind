@@ -120,15 +120,23 @@
     if (canViewTransition) {
       clearSwitchingState();
       try {
+        document.documentElement.dataset.themeTransition = 'true';
         const transition = document.startViewTransition(() => apply());
         if (transition && transition.ready && typeof transition.ready.catch === 'function') {
           transition.ready.catch(() => {});
         }
-        if (transition && transition.finished && typeof transition.finished.catch === 'function') {
-          transition.finished.catch(() => {});
+        if (transition && transition.finished && typeof transition.finished.finally === 'function') {
+          transition.finished.catch(() => {}).finally(() => {
+            delete document.documentElement.dataset.themeTransition;
+          });
+        } else {
+          delete document.documentElement.dataset.themeTransition;
         }
         return;
-      } catch { /* Usa a transição por CSS quando startViewTransition não puder rodar. */ }
+      } catch {
+        delete document.documentElement.dataset.themeTransition;
+        /* Usa a transição por CSS quando startViewTransition não puder rodar. */
+      }
     }
 
     clearSwitchingState();

@@ -772,13 +772,60 @@ body.workspace-screen .home-hero .home-hero-actions .button {
   margin-top: 0;
 }
 
+/* Palco de ondas interativas em Canvas 2D (Login, Home e Sessão). */
+.wave-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+body.auth-screen .listening-art {
+  height: 92px;
+  max-width: 500px;
+  opacity: .95;
+}
+body.workspace-screen .home-wave-stage {
+  position: absolute;
+  z-index: 1;
+  right: -12px;
+  top: 50%;
+  width: 46%;
+  height: 310px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+body.workspace-screen .home-hero-copy {
+  width: 58%;
+  max-width: 680px;
+}
 .session-hero-banner {
   position: relative;
+  isolation: isolate;
   overflow: hidden;
-  padding: 22px 26px;
-  border-radius: 16px;
+  padding: 26px 30px;
+  border-radius: 22px;
   border: 1px solid var(--line);
   background: linear-gradient(130deg, var(--surface), var(--subtle));
+}
+.session-wave-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: .42;
+}
+.session-hero-banner > :not(canvas) {
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 900px) {
+  body.workspace-screen .home-hero-copy { width: 100%; }
+  body.workspace-screen .home-wave-stage {
+    inset: auto 0 0 0;
+    width: 100%;
+    height: 140px;
+    transform: none;
+    opacity: .32;
+  }
 }
 .session-hero-banner::before {
   content: "";

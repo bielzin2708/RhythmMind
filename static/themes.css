@@ -300,33 +300,54 @@ html[data-theme="light"] {
   stroke-linejoin: round;
 }
 
-/* Texto e fundo trocam juntos, sem uma transição com contraste intermediário baixo. */
-html[data-theme] .button { transition: none; }
+/* Curva elástica física (linear()) com fallback seguro para micro-interações táteis. */
+:root {
+  --rm-ease-out: cubic-bezier(.22, 1, .36, 1);
+  --rm-spring: cubic-bezier(.22, 1, .36, 1);
+}
+@supports (transition-timing-function: linear(0, 1)) {
+  :root {
+    --rm-spring: linear(
+      0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%,
+      1.017, 1.077, 1.121, 1.149 24.3%, 1.159, 1.163, 1.161, 1.154 29.9%,
+      1.129 32.8%, 1.051 39.6%, 1.017 43.1%, 0.991, 0.977 51%, 0.974 53.8%,
+      0.975 57.1%, 0.997 69.8%, 1.003 76.9%, 1.004 83.8%, 1
+    );
+  }
+}
 
-/* Transição suave anti-ofuscamento apenas em trocas interativas de tema. */
-::view-transition-group(root) {
-  animation-duration: 480ms;
+/* Transição rápida e espacial (190ms) para trocas de aba e etapa, sem travar a tela. */
+@keyframes rm-stage-out {
+  from { opacity: 1; scale: 1; }
+  to { opacity: 0; scale: .99; }
+}
+@keyframes rm-stage-in {
+  from { opacity: 0; translate: 0 8px; scale: .992; }
+  to { opacity: 1; translate: 0 0; scale: 1; }
+}
+html:not([data-theme-transition="true"])::view-transition-group(root) {
+  animation-duration: 190ms;
+  animation-timing-function: cubic-bezier(.22, 1, .36, 1);
+}
+html:not([data-theme-transition="true"])::view-transition-old(root) {
+  animation: rm-stage-out 130ms ease-out both;
+}
+html:not([data-theme-transition="true"])::view-transition-new(root) {
+  animation: rm-stage-in 210ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+/* Cortina suave anti-ofuscamento restrita exclusivamente à troca manual de tema. */
+html[data-theme-transition="true"]::view-transition-group(root) {
+  animation-duration: 420ms;
   animation-timing-function: cubic-bezier(.32, 0, .2, 1);
 }
-
-::view-transition-old(root) {
-  animation: rm-theme-hold 480ms linear both;
+html[data-theme-transition="true"]::view-transition-old(root) {
+  animation: rm-theme-hold 420ms linear both;
   mix-blend-mode: normal;
 }
-
-::view-transition-new(root) {
-  animation: rm-theme-curtain-in 480ms cubic-bezier(.32, 0, .2, 1) both;
+html[data-theme-transition="true"]::view-transition-new(root) {
+  animation: rm-theme-curtain-in 420ms cubic-bezier(.32, 0, .2, 1) both;
   mix-blend-mode: normal;
-}
-
-html[data-theme="light"]::view-transition-group(root),
-html[data-theme="light"]::view-transition-old(root) {
-  animation-duration: 500ms;
-}
-
-html[data-theme="light"]::view-transition-new(root) {
-  animation-duration: 500ms;
-  animation-timing-function: cubic-bezier(.42, 0, .2, 1);
 }
 
 @keyframes rm-theme-hold {
@@ -812,6 +833,255 @@ html[data-soft-effects="true"] body.auth-screen .listening-art { opacity: .25; }
   body.auth-screen .header-inner > .brand { grid-column: 1; grid-row: 1; }
   body.auth-screen .access-header-actions > .theme-toggle { grid-column: 2; grid-row: 1; }
   body.auth-screen .access-header-actions > .environment-badge { grid-column: 1 / -1; grid-row: 2; justify-self: start; font-size: 12px; }
+}
+
+/* === Camada moderna: Aurora atmosférica em oklab, cápsula de navegação e superfícies translúcidas === */
+body[data-session-mood="calm"], body[data-preview-mood="calm"] { --mood-glow: #22d3ee; --mood-secondary: #2dd4bf; }
+body[data-session-mood="focus"], body[data-preview-mood="focus"] { --mood-glow: #818cf8; --mood-secondary: #60a5fa; }
+body[data-session-mood="energy"], body[data-preview-mood="energy"] { --mood-glow: #34d399; --mood-secondary: #fbbf24; }
+body[data-session-mood="reflect"], body[data-preview-mood="reflect"] { --mood-glow: #c084fc; --mood-secondary: #f472b6; }
+body { --mood-glow: #22d3ee; --mood-secondary: #818cf8; }
+
+html[data-theme="dark"] {
+  background: #060b16;
+  --theme-canvas: #060b16;
+  --theme-surface: #0d1729;
+  --theme-subtle: #091222;
+  --theme-raised: #13223b;
+  --theme-ink: #f4f8ff;
+  --theme-text: #d5e2f2;
+  --theme-muted: #9eb3cc;
+  --theme-accent: #38d9ec;
+  --theme-accent-strong: #67e8f9;
+  --theme-action-ink: #041521;
+  --theme-tint: #132d46;
+  --theme-line: #233854;
+  --theme-control-line: #49678a;
+}
+
+html[data-theme="dark"][data-soft-effects="false"] body:is(.auth-screen, .workspace-screen) {
+  background-color: #060b16;
+  background-image:
+    radial-gradient(ellipse 68% 52% at 14% -6%, color-mix(in oklab, var(--mood-glow) 18%, transparent), transparent 68%),
+    radial-gradient(ellipse 58% 48% at 88% 12%, color-mix(in oklab, var(--mood-secondary) 15%, transparent), transparent 66%),
+    radial-gradient(ellipse 65% 55% at 50% 105%, color-mix(in oklab, #38bdf8 10%, transparent), transparent 70%);
+  background-attachment: fixed;
+}
+
+html[data-theme="light"] {
+  background: #f4f1ea;
+  --theme-canvas: #f4f1ea;
+  --theme-surface: #fcfaf5;
+  --theme-subtle: #ede8dd;
+  --theme-raised: #ffffff;
+  --theme-ink: #132634;
+  --theme-text: #243b4a;
+  --theme-muted: #516572;
+  --theme-accent: #0f5c73;
+  --theme-accent-strong: #094152;
+  --theme-tint: #dcecef;
+  --theme-line: #d4cfc3;
+  --theme-control-line: #7a8b94;
+}
+
+html[data-theme="light"][data-soft-effects="false"] body:is(.auth-screen, .workspace-screen) {
+  background-color: #f4f1ea;
+  background-image:
+    radial-gradient(ellipse 65% 50% at 15% 0%, color-mix(in oklab, var(--mood-glow) 13%, transparent), transparent 66%),
+    radial-gradient(ellipse 55% 46% at 88% 10%, color-mix(in oklab, var(--mood-secondary) 11%, transparent), transparent 65%);
+  background-attachment: fixed;
+}
+
+/* Barra superior em vidro fosco e navegação em cápsula iluminada. */
+html[data-theme="dark"] body:is(.auth-screen, .workspace-screen) :is(.site-header, .workspace-topbar) {
+  background: rgb(6 12 24 / 78%);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border-bottom: 1px solid rgb(120 165 215 / 16%);
+}
+html[data-theme="light"] body:is(.auth-screen, .workspace-screen) :is(.site-header, .workspace-topbar) {
+  background: rgb(246 243 236 / 82%);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border-bottom: 1px solid rgb(20 45 62 / 11%);
+}
+
+@media (min-width: 901px) {
+  body.workspace-screen .workspace-nav {
+    align-self: center;
+    padding: 5px;
+    gap: 4px;
+    border-radius: 999px;
+    border: 1px solid rgb(130 175 225 / 18%);
+    background: rgb(13 24 44 / 72%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
+  }
+  html[data-theme="light"] body.workspace-screen .workspace-nav {
+    border-color: rgb(18 65 84 / 14%);
+    background: rgb(233 228 217 / 78%);
+  }
+  body.workspace-screen .workspace-nav .nav-button {
+    min-height: 40px;
+    padding: 8px 18px;
+    border-bottom: 0;
+    border-radius: 999px;
+  }
+  html[data-theme="dark"] body.workspace-screen .workspace-nav .nav-button:is(.active, [aria-current="page"]) {
+    color: #f4fbff;
+    background: linear-gradient(135deg, rgb(56 217 236 / 24%), rgb(129 140 248 / 24%));
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 18%), 0 4px 14px rgb(0 0 0 / 28%);
+  }
+  html[data-theme="light"] body.workspace-screen .workspace-nav .nav-button:is(.active, [aria-current="page"]) {
+    color: #ffffff;
+    background: linear-gradient(135deg, #0f5c73, #1d6f86);
+    box-shadow: 0 4px 12px rgb(15 92 115 / 24%);
+  }
+}
+
+/* Cartões esculturais com profundidade real, aro especular e micro-física elástica. */
+html[data-theme="dark"] body:is(.auth-screen, .workspace-screen) :is(.access-card, .home-hero, .session-hero-banner, .stage-card, .home-explore, .sidebar-card, .history-detail, .catalog-reference-card) {
+  border-radius: 22px;
+  background: linear-gradient(150deg, rgb(16 28 50 / 84%) 0%, rgb(11 20 37 / 90%) 100%);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgb(120 170 225 / 20%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    0 22px 52px -14px rgb(0 0 0 / 55%);
+}
+html[data-theme="dark"] body.workspace-screen .home-hero {
+  background:
+    radial-gradient(circle at 82% 48%, color-mix(in oklab, var(--mood-glow) 22%, transparent), transparent 58%),
+    linear-gradient(130deg, rgb(12 25 46 / 92%) 0%, rgb(10 22 40 / 92%) 58%, rgb(12 34 50 / 92%) 100%);
+  border-color: rgb(90 185 225 / 28%);
+}
+html[data-theme="light"] body:is(.auth-screen, .workspace-screen) :is(.access-card, .home-hero, .session-hero-banner, .stage-card, .home-explore, .sidebar-card, .history-detail, .catalog-reference-card) {
+  border-radius: 22px;
+  background: rgb(255 253 249 / 86%);
+  backdrop-filter: blur(16px) saturate(130%);
+  -webkit-backdrop-filter: blur(16px) saturate(130%);
+  border: 1px solid rgb(18 65 84 / 14%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 90%),
+    0 18px 42px -14px rgb(19 38 52 / 11%);
+}
+html[data-theme="light"] body.workspace-screen .home-hero {
+  background:
+    radial-gradient(circle at 82% 50%, color-mix(in oklab, var(--mood-glow) 18%, transparent), transparent 58%),
+    linear-gradient(130deg, #ffffff 0%, #eef5f6 65%, #e4f1f2 100%);
+  border-color: rgb(15 92 115 / 22%);
+}
+
+/* Botões primários luminosos e responsivos ao toque/clique. */
+.button,
+.home-objective-pill,
+.objective-card,
+.quick-chip,
+.feedback-choice-btn,
+.music-card,
+.history-card {
+  transition:
+    transform .36s var(--rm-spring),
+    scale .32s var(--rm-spring),
+    background-color .18s ease,
+    border-color .18s ease,
+    box-shadow .22s ease,
+    color .18s ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  :is(.button, .home-objective-pill, .objective-card, .quick-chip, .feedback-choice-btn):active:not(:disabled) {
+    scale: .97;
+    transition-duration: .09s;
+  }
+  :is(.button-primary, button.primary):hover:not(:disabled) {
+    transform: translateY(-1.5px);
+  }
+}
+
+html[data-theme="dark"] body:is(.auth-screen, .workspace-screen) :is(.button-primary, button.primary, .home-hero .button-primary) {
+  color: #031520;
+  background: linear-gradient(135deg, #38d9ec 0%, #34d399 100%);
+  border-color: transparent;
+  border-radius: 12px;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 35%), 0 10px 26px -6px rgb(56 217 236 / 40%);
+}
+html[data-theme="dark"] body:is(.auth-screen, .workspace-screen) :is(.button-primary, button.primary, .home-hero .button-primary):hover:not(:disabled) {
+  color: #031520;
+  background: linear-gradient(135deg, #67e8f9 0%, #6ee7b7 100%);
+  border-color: transparent;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 45%), 0 14px 30px -6px rgb(56 217 236 / 52%);
+}
+html[data-theme="light"] body:is(.auth-screen, .workspace-screen) :is(.button-primary, button.primary, .home-hero .button-primary) {
+  color: #ffffff;
+  background: linear-gradient(135deg, #0f5c73 0%, #13747d 100%);
+  border-color: transparent;
+  border-radius: 12px;
+  font-weight: 680;
+  box-shadow: 0 10px 24px -6px rgb(15 92 115 / 32%);
+}
+html[data-theme="light"] body:is(.auth-screen, .workspace-screen) :is(.button-primary, button.primary, .home-hero .button-primary):hover:not(:disabled) {
+  color: #ffffff;
+  background: linear-gradient(135deg, #094152 0%, #0e5c63 100%);
+  border-color: transparent;
+}
+
+/* Assinatura cromática individual por objetivo (Relaxar, Focar, Ganhar energia, Acolher). */
+:is([data-objective="calmo"], [data-home-objective="calmo"]) { --card-aura: #22d3ee; }
+:is([data-objective="foco"], [data-home-objective="foco"]) { --card-aura: #818cf8; }
+:is([data-objective="disposto"], [data-home-objective="disposto"]) { --card-aura: #34d399; }
+[data-objective="espelhar"] { --card-aura: #c084fc; }
+
+html[data-theme="dark"] body.workspace-screen :is(.objective-card, .home-objective-pill) {
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgb(17 31 55 / 88%), rgb(11 21 38 / 92%));
+  border-color: color-mix(in oklab, var(--card-aura, #38bdf8) 28%, #253a56);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 7%), 0 8px 20px -8px rgb(0 0 0 / 40%);
+}
+html[data-theme="dark"] body.workspace-screen :is(.objective-card, .home-objective-pill):hover:not(:disabled) {
+  border-color: var(--card-aura, #38d9ec);
+  background: linear-gradient(145deg, color-mix(in oklab, var(--card-aura, #38d9ec) 16%, #132440), rgb(13 25 46 / 95%));
+  box-shadow: 0 14px 30px -8px color-mix(in oklab, var(--card-aura, #38d9ec) 34%, transparent);
+}
+html[data-theme="dark"] body.workspace-screen :is(.objective-card.active, .objective-card[aria-pressed="true"]) {
+  border-color: var(--card-aura, #38d9ec);
+  background: linear-gradient(145deg, color-mix(in oklab, var(--card-aura, #38d9ec) 24%, #10223c), rgb(12 26 46 / 95%));
+  box-shadow: 0 0 0 1px var(--card-aura, #38d9ec), 0 14px 32px -8px color-mix(in oklab, var(--card-aura, #38d9ec) 40%, transparent);
+}
+html[data-theme="dark"] body.workspace-screen :is(.objective-card-icon, .home-objective-icon) {
+  color: var(--card-aura, #67e8f9);
+  background: color-mix(in oklab, var(--card-aura, #38d9ec) 16%, #0c192e);
+  border-color: color-mix(in oklab, var(--card-aura, #38d9ec) 38%, transparent);
+}
+html[data-theme="dark"] body.workspace-screen :is(.objective-card.active, .objective-card[aria-pressed="true"]) .objective-card-icon {
+  color: #041521;
+  background: var(--card-aura, #38d9ec);
+  border-color: transparent;
+}
+
+html[data-theme="light"] body.workspace-screen :is(.objective-card, .home-objective-pill) {
+  border-radius: 16px;
+  background: #ffffff;
+  border-color: color-mix(in oklab, var(--card-aura, #0f5c73) 30%, #cbd5db);
+  box-shadow: 0 6px 18px -8px rgb(19 38 52 / 12%);
+}
+html[data-theme="light"] body.workspace-screen :is(.objective-card, .home-objective-pill):hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--card-aura, #0f5c73) 70%, #094152);
+  background: color-mix(in oklab, var(--card-aura, #0f5c73) 9%, #ffffff);
+  box-shadow: 0 12px 26px -8px rgb(15 92 115 / 20%);
+}
+
+html[data-theme="dark"] body.workspace-screen :is(.music-card, .history-card, .home-card, .home-pending-card, .home-recent-list, .home-empty) {
+  border-radius: 16px;
+  background: rgb(11 22 40 / 82%);
+  border-color: rgb(110 155 205 / 20%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%), 0 10px 26px -10px rgb(0 0 0 / 40%);
+}
+html[data-theme="light"] body.workspace-screen :is(.music-card, .history-card, .home-card, .home-pending-card, .home-recent-list, .home-empty) {
+  border-radius: 16px;
+  background: #ffffff;
+  border-color: rgb(18 65 84 / 14%);
+  box-shadow: 0 8px 22px -10px rgb(19 38 52 / 10%);
 }
 
 @media (forced-colors: active) {

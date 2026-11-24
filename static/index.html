@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="/static/auth.css">
     <link rel="stylesheet" href="/static/workspace.css">
     <link rel="stylesheet" href="/static/themes.css">
+    <script type="module" src="/static/immersive.js"></script>
     <script type="module" src="/static/app.js"></script>
   </head>
   <body class="auth-screen">
@@ -86,18 +87,12 @@
           <p class="welcome-description">Conte como está, revise o que faz sentido para você e registre sua experiência com a música.</p>
           </div>
           <div class="listening-art" aria-hidden="true">
-            <svg class="sound-wave" viewBox="0 0 640 100" fill="none" focusable="false">
-              <path d="M0 50C65 50 72 22 123 22S194 78 246 78 314 25 366 25 438 74 488 74 570 50 640 50"/>
-              <path d="M0 50C65 50 72 30 123 30S194 70 246 70 314 18 366 18 438 82 488 82 570 50 640 50"/>
-              <path d="M0 50C65 50 72 38 123 38S194 62 246 62 314 10 366 10 438 90 488 90 570 50 640 50"/>
-              <path d="M0 50C65 50 72 46 123 46S194 54 246 54 314 34 366 34 438 66 488 66 570 50 640 50"/>
-              <path d="M0 50C65 50 72 54 123 54S194 46 246 46 314 42 366 42 438 58 488 58 570 50 640 50"/>
-            </svg>
+            <canvas class="wave-canvas auth-wave-canvas" data-wave-canvas="auth"></canvas>
           </div>
           <ol class="welcome-steps" aria-label="Como funciona">
-            <li><span class="step-number" aria-hidden="true">01</span><div><strong>Conte do seu jeito</strong><p>Um relato, uma intenção, um contexto.</p></div></li>
-            <li><span class="step-number" aria-hidden="true">02</span><div><strong>Você revisa a interpretação</strong><p>Marque apenas o que faz sentido para você.</p></div></li>
-            <li><span class="step-number" aria-hidden="true">03</span><div><strong>Escolha sua escuta</strong><p>Registre como foi a sua experiência.</p></div></li>
+            <li><span class="step-number" aria-hidden="true">01</span><div><strong>Comece pelo seu objetivo</strong><p>Relaxar, focar ou ganhar energia em um toque — escrever é opcional.</p></div></li>
+            <li><span class="step-number" aria-hidden="true">02</span><div><strong>Até 3 faixas explicadas</strong><p>Veja o motivo real no seu catálogo e abra a música na hora.</p></div></li>
+            <li><span class="step-number" aria-hidden="true">03</span><div><strong>Guarde só quando pedir</strong><p>Explore sem deixar rastro ou salve no seu diário pessoal.</p></div></li>
           </ol>
         </div>
 
@@ -161,48 +156,9 @@
                 <ol class="home-steps" aria-label="Como funciona uma sessão"><li>Objetivo ou nota opcional</li><li>Até 3 faixas explicadas</li><li>Guardar só se quiser</li></ol>
               </div>
             </div>
-            <svg class="home-wave" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-  <defs>
-    <linearGradient id="rm-wave-spectrum" x1="0" y1="0" x2="1" y2="0">
-      <stop class="wave-stop-a" offset="0" stop-color="#818CF8"/>
-      <stop class="wave-stop-b" offset=".47" stop-color="#38D9EC"/>
-      <stop class="wave-stop-c" offset="1" stop-color="#70E9C0"/>
-    </linearGradient>
-    <linearGradient id="rm-wave-glass" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".88"/>
-      <stop offset=".32" stop-color="#FFFFFF" stop-opacity=".06"/>
-      <stop offset=".65" stop-color="#FFFFFF" stop-opacity=".28"/>
-      <stop offset="1" stop-color="#DFFAFF" stop-opacity=".76"/>
-    </linearGradient>
-    <linearGradient id="rm-wave-fade" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0"/>
-      <stop offset=".16" stop-color="#FFFFFF" stop-opacity=".68"/>
-      <stop offset=".5" stop-color="#FFFFFF" stop-opacity=".96"/>
-      <stop offset=".86" stop-color="#FFFFFF" stop-opacity=".64"/>
-      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
-    </linearGradient>
-    <filter id="rm-wave-halo" x="-8%" y="-12%" width="116%" height="124%" color-interpolation-filters="sRGB">
-      <feGaussianBlur stdDeviation="5"/>
-    </filter>
-  </defs>
-
-  <!-- Luz difusa atrás do volume; um único filtro leve. -->
-  <path class="wave-fine" d="M20 155C59 156 66 150 82 135S100 162 114 165 130 94 143 99 160 208 175 204 194 121 208 126 225 189 242 188 267 53 282 48 298 261 315 256 331 86 344 80 360 214 376 210 395 129 411 129 432 181 448 179 467 147 480 148 510 156 541 155" fill="none" stroke="url(#rm-wave-spectrum)" stroke-width="10" opacity=".4" filter="url(#rm-wave-halo)"/>
-
-  <!-- Banda posterior: a curva deslocada dá espessura à onda. -->
-  <path class="wave-ribbon" d="M22 157C51 154 67 163 82 161S102 127 115 134 132 191 146 191 163 112 177 116 197 190 212 185 233 95 247 101 269 211 284 211 304 60 320 58 339 207 355 204 374 121 391 123 413 175 430 171 449 141 466 145 503 160 540 155C504 165 483 157 466 155S442 182 429 183 405 138 391 137 372 220 354 219 332 83 320 83 304 223 284 227 260 121 247 121 230 200 212 201 188 134 177 134 163 206 146 207 123 151 115 150 99 177 82 170 48 161 22 157Z" fill="url(#rm-wave-spectrum)" fill-opacity=".24" stroke="none"/>
-
-  <!-- Superfície principal em vidro colorido. -->
-  <path class="wave-ribbon" d="M22 157C47 156 65 151 83 134 96 121 103 158 113 160 126 163 129 97 143 92 155 85 159 204 173 198 189 191 193 114 208 118 223 124 225 185 241 181 262 176 267 46 282 38 298 29 299 254 314 249 328 244 330 80 344 70 357 62 361 208 376 203 390 198 395 127 411 123 426 120 431 177 448 174 463 171 466 142 480 143 498 144 511 154 540 155C510 159 492 152 477 150 465 149 460 181 447 182 427 184 423 133 410 134 398 136 394 213 376 215 356 217 352 94 344 90 337 82 334 255 315 264 289 278 286 63 282 62 274 61 272 185 242 194 224 199 217 137 208 133 198 129 195 203 175 211 157 218 151 111 143 110 135 108 134 174 114 173 99 171 93 136 83 144 64 158 47 163 22 157Z" fill="url(#rm-wave-spectrum)" fill-opacity=".88" stroke="none"/>
-
-  <!-- Faces estreitas refletidas, como as bordas de uma fita translúcida. -->
-  <path class="wave-highlight" d="M113 160C126 163 129 97 143 92 155 85 159 204 173 198L175 211C158 216 150 108 143 110 135 108 134 174 114 173ZM241 181C262 176 267 46 282 38 298 29 299 254 314 249L315 264C296 268 289 66 282 62 274 61 272 185 242 194ZM314 249C328 244 330 80 344 70 357 62 361 208 376 203L376 215C359 218 351 92 344 90 337 82 334 255 315 264Z" fill="url(#rm-wave-glass)" fill-opacity=".66" stroke="none"/>
-
-  <!-- Filamentos de superfície: luminosidade sem uma borda grossa. -->
-  <path class="wave-highlight" d="M22 157C47 156 65 151 83 134 96 121 103 158 113 160 126 163 129 97 143 92 155 85 159 204 173 198 189 191 193 114 208 118 223 124 225 185 241 181 262 176 267 46 282 38 298 29 299 254 314 249 328 244 330 80 344 70 357 62 361 208 376 203 390 198 395 127 411 123 426 120 431 177 448 174 463 171 466 142 480 143 498 144 511 154 540 155" fill="none" stroke="url(#rm-wave-fade)" stroke-width="1.7" stroke-linecap="round" opacity=".9"/>
-  <path class="wave-fine" d="M24 158C58 158 66 155 83 141S103 169 114 168 131 108 143 103 159 210 174 205 195 127 208 126 224 193 242 189 269 59 282 52 299 268 315 259 332 90 344 83 360 216 376 210 395 135 411 130 431 185 448 179 466 149 480 148 511 158 539 155" fill="none" stroke="url(#rm-wave-spectrum)" stroke-width="1.2" opacity=".9"/>
-  <path class="wave-fine" d="M26 158C57 160 69 149 86 147 99 144 103 175 115 173 128 171 134 122 145 120 157 117 164 213 176 210 190 207 197 141 211 140 226 138 228 196 244 193 265 189 273 76 283 72 298 67 304 271 318 262 332 253 337 103 347 101 358 99 365 219 379 215 391 211 398 143 414 140 428 137 434 188 450 184 465 180 468 156 482 154 501 151 516 158 538 156" fill="none" stroke="url(#rm-wave-fade)" stroke-width=".8" opacity=".45"/>
-</svg>
+            <div class="home-wave-stage" aria-hidden="true">
+              <canvas class="wave-canvas home-wave-canvas" data-wave-canvas="home"></canvas>
+            </div>
           </section>
           <div class="home-columns">
             <div class="home-main-column">
@@ -242,6 +198,7 @@
             </ol>
           </nav>
           <div class="page-heading session-hero-banner">
+            <canvas class="wave-canvas session-wave-canvas" data-wave-canvas="session" aria-hidden="true"></canvas>
             <div class="session-hero-copy">
               <p class="eyebrow">NO SEU TEMPO · CONTROLE TOTAL DO DIÁRIO</p>
               <h1 id="session-heading" tabindex="-1">O que você busca na sua escuta?</h1>
