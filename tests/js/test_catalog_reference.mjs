@@ -132,10 +132,14 @@ test('card mostra texto literal, proveniência e categorias provisórias sem med
   assert.doesNotMatch(card.textContent, /120|bpm|valência|valencia/i);
   const links = card.querySelectorAll('a');
   assert.equal(links.length, 1);
+  assert.equal(links[0].className, 'music-source-link');
   assert.equal(links[0].getAttribute('href'), fixture.proveniencia.url);
   assert.equal(links[0].getAttribute('target'), '_blank');
   assert.ok(links[0].getAttribute('rel').split(/\s+/).includes('noreferrer'));
   assert.ok(links[0].getAttribute('rel').split(/\s+/).includes('noopener'));
+  const srOnly = descendants(links[0]).find(node => node.tagName === 'SPAN' && node.className === 'sr-only');
+  assert.ok(srOnly);
+  assert.match(srOnly.textContent, /abre em nova aba/i);
 });
 
 test('fonte inválida não vira link e cadastro pessoal não ganha rótulo de curadoria', t => {

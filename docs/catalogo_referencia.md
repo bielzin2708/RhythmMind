@@ -1,12 +1,15 @@
 # Catálogo de referência — músicas reais
 
-Versão `2026-11-12.1`. O artefato distribuído é
-[`data/catalogo_referencia.json`](../data/catalogo_referencia.json), com 96 faixas:
+Versão `2026-11-13.3`. O artefato distribuído é
+[`data/catalogo_referencia.json`](../data/catalogo_referencia.json), com 500 faixas:
 
-- 66 faixas da seleção anterior: 60 de cinco playlists fornecidas pelo autor e
+- 66 faixas da seleção inicial: 60 de cinco playlists fornecidas pelo autor e
   seis alternativas instrumentais de Ludovico Einaudi e Yiruma;
-- 30 faixas adicionais, distribuídas entre quatro playlists mais recentes
-  fornecidas pelo autor (oito, oito, sete e sete faixas).
+- 434 faixas adicionais, distribuídas entre cinco playlists públicas fornecidas
+  pelo autor (92, 92, 89, 90 e 71 faixas: 30 na primeira rodada, 50 na segunda,
+  100 na terceira e 254 nesta rodada — respectivamente 51, 51, 50, 51 e 51).
+  Links indisponíveis ou restritos por convite que não expuseram faixas
+  publicamente não foram usados.
 
 Não é uma cópia completa das playlists nem representa acesso à conta do Spotify.
 
@@ -31,7 +34,7 @@ referência e a data da consulta.
 - `proveniencia` guarda os dados consultados. Álbum desconhecido permanece `null`.
 - As 66 faixas anteriores mantêm `curadoria.status = "provisoria"` e suas
   associações editoriais exploratórias.
-- As 30 novas usam `curadoria.status = "pendente"`, sem sentimentos, estratégias
+- As 434 novas usam `curadoria.status = "pendente"`, sem sentimentos, estratégias
   ou contextos inferidos a partir de título, artista, gênero ou playlist.
 - `bpm` permanece `null`; energia, valência e intensidade não são inventadas.
 - Uma faixa pendente não participa das recomendações. Ela passa a participar
@@ -68,10 +71,10 @@ As rotas exigem o mesmo Bearer token das demais APIs pessoais e usam
 
 ```json
 {
-  "versao": "2026-11-12.1",
-  "total": 96,
+  "versao": "2026-11-13.3",
+  "total": 500,
   "pronta_para_recomendar": 66,
-  "pendentes_associacao": 30,
+  "pendentes_associacao": 434,
   "descricao": "…",
   "musicas": []
 }
@@ -79,13 +82,13 @@ As rotas exigem o mesmo Bearer token das demais APIs pessoais e usam
 
 `POST /api/catalogo-referencia/importar` aceita `{}` ou `{"ids":null}` para o
 lote completo, `{"ids":["identificador_da_faixa"]}` para uma seleção e
-`{"ids":[]}` para nenhuma faixa. O limite defensivo é 300 identificadores;
+`{"ids":[]}` para nenhuma faixa. O limite defensivo é 600 identificadores;
 IDs desconhecidos invalidam o lote inteiro antes de qualquer escrita.
 
 Para uma conta inicialmente vazia, a importação completa responde:
 
 ```json
-{"versao":"2026-11-12.1","importadas":96,"ja_existentes":0,"total":96}
+{"versao":"2026-11-13.3","importadas":500,"ja_existentes":0,"total":500}
 ```
 
 `PATCH /api/musicas/{musica_id}/associacoes` recebe somente categorias válidas:

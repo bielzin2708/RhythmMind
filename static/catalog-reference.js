@@ -14,27 +14,45 @@ export function safeCatalogSource(value) {
 }
 
 export function renderCatalogCard(song, { onEdit } = {}) {
-  const card = el('article', { class: 'music-card' },
-    el('h3', {}, song.nome || 'Faixa cadastrada'),
-    el('p', { class: 'hint' }, `${song.artista || 'Artista não informado'} · ${song.duracao || 'Duração não informada'}`));
+  const rawCategories = Array.isArray(song.sentimentos_associados)
+    ? song.sentimentos_associados.filter(value => CATEGORIAS.includes(value)) : [];
+  const categories = rawCategories.map(categoriaLabel);
+  const card = el('article', {
+    class: 'music-card catalog-track-card',
+    dataset: { categories: rawCategories.join(' '), pending: String(!categories.length) },
+  },
+    el('div', { class: 'music-card-header' },
+      el('div', { class: 'music-card-titles' },
+        el('h3', {}, song.nome || 'Faixa cadastrada'),
+        el('p', { class: 'hint music-card-subtitle' }, `${song.artista || 'Artista não informado'} · ${song.duracao || 'Duração não informada'}`)),
+      el('span', { class: 'music-duration-pill', 'aria-hidden': 'true' }, song.duracao || '—')));
   const source = song.proveniencia;
   if (source && typeof source === 'object') {
-    if (source.album) card.append(el('p', { class: 'field-help' }, `Álbum: ${source.album}`));
+    const metaRow = el('div', { class: 'music-source-meta' });
+    if (source.album) metaRow.append(el('p', { class: 'field-help music-album-badge' }, `Álbum: ${source.album}`));
     const url = safeCatalogSource(source.url);
     const label = typeof source.fonte === 'string' && source.fonte.trim() ? source.fonte : 'Fonte do catálogo';
-    card.append(url
-      ? el('p', { class: 'field-help' }, 'Fonte: ', el('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, label))
-      : el('p', { class: 'field-help' }, `Fonte: ${label}`));
+    metaRow.append(url
+      ? el('p', { class: 'field-help music-source-item' }, 'Fonte: ', el('a', { class: 'music-source-link', href: url, target: '_blank', rel: 'noopener noreferrer' }, label, el('span', { class: 'sr-only' }, ' (abre em nova aba)')))
+      : el('p', { class: 'field-help music-source-item' }, `Fonte: ${label}`));
+    card.append(metaRow);
   }
-  const categories = Array.isArray(song.sentimentos_associados)
-    ? song.sentimentos_associados.filter(value => CATEGORIAS.includes(value)).map(categoriaLabel) : [];
-  card.append(el('p', { class: 'field-help' }, !categories.length
+  if (categories.length) {
+    const tags = el('div', { class: 'tag-list catalog-tags' });
+    categories.forEach(label => tags.append(el('span', { class: 'tag' }, label)));
+    card.append(tags);
+  }
+  card.append(el('p', { class: 'field-help music-curation-note' }, !categories.length
     ? 'Sensações ainda não indicadas; complete para participar das sugestões.'
     : song.curadoria?.status === 'provisoria'
       ? `Associações iniciais provisórias: ${categories.join(', ')}.`
       : `Sensações indicadas: ${categories.join(', ')}.`));
   if (onEdit) {
-    const button = el('button', { type: 'button', class: 'button-link' }, categories.length ? 'Editar sensações' : 'Indicar sensações');
+    const button = el('button', {
+      type: 'button',
+      class: 'button-link catalog-edit-button',
+      dataset: song.id !== undefined && song.id !== null ? { songId: String(song.id) } : undefined,
+    }, categories.length ? 'Editar sensações' : 'Indicar sensações');
     button.addEventListener('click', () => onEdit(song, button));
     card.append(button);
   }
@@ -115,7 +133,9 @@ export function createCatalogReference({ api, button, status, count, list, conta
         if (!isCurrent()) return;
         await onImported(isCurrent);
         if (!isCurrent()) return;
-        message(`${result.importadas} músicas adicionadas; ${result.ja_existentes} já estavam no seu catálogo. Suas faixas existentes foram preservadas.`, 'success');
+        const added = Number(result.importadas) || 0;
+        const existing = Number(result.ja_existentes) || 0;
+        message(`${added} ${added === 1 ? 'música adicionada' : 'músicas adicionadas'}; ${existing} já ${existing === 1 ? 'estava' : 'estavam'} no seu catálogo. Suas faixas existentes foram preservadas.`, 'success');
       } catch (error) {
         if (!isCurrent() || error?.name === 'StaleRequestError' || error?.name === 'AbortError') return;
         message(describeError(error), 'error');

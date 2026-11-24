@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { listeningText, feedbackText, historyFilterSummary, historyRecordTitle, historyEntries } from '../../static/history.js';
+import { initHistory, listeningText, feedbackText, historyFilterSummary, historyRecordTitle, historyEntries } from '../../static/history.js';
 
 const complete = overrides => ({
   progresso: { recomendacoes_geradas: true }, recomendacoes: [], ...overrides,
@@ -81,4 +81,116 @@ test('título prioriza finalidade e depois o relato sem fabricar um nome de expe
   const long = historyRecordTitle({ texto_usuario: '😌'.repeat(120) });
   assert.equal(Array.from(long).length, 90);
   assert.ok(long.endsWith('…'));
+});
+
+test('voltar à lista do diário limpa o detalhe e devolve foco ao gatilho ou ao cabeçalho da lista', async t => {
+  const prev = { document: globalThis.document, window: globalThis.window };
+  const elements = new Map();
+  const doc = { activeElement: null };
+  class MockClassList {
+    constructor(node) { this.node = node; this.set = new Set(); }
+    add(...names) { names.forEach(n => this.set.add(n)); }
+    toggle(name, force) {
+      if (force === undefined) this.set[this.set.has(name) ? 'delete' : 'add'](name);
+      else if (force) this.set.add(name);
+      else this.set.delete(name);
+    }
+    contains(name) { return this.set.has(name); }
+  }
+  class MockNode {
+    constructor(tag = 'div', id = '') {
+      this.tagName = tag.toUpperCase();
+      this.id = id;
+      this.children = [];
+      this.attributes = {};
+      this.dataset = {};
+      this.listeners = new Map();
+      this.classList = new MockClassList(this);
+      this.className = '';
+      this.hidden = false;
+      this.disabled = false;
+      this.open = false;
+      this.isConnected = true;
+      this.value = '';
+      this.elements = { namedItem: () => null };
+      this._text = '';
+    }
+    set textContent(value) { this._text = String(value); this.children = []; }
+    get textContent() { return this._text + this.children.map(child => child.textContent).join(''); }
+    append(...children) {
+      for (const child of children) {
+        if (typeof child === 'object' && child) {
+          child.isConnected = this.isConnected;
+          this.children.push(child);
+        }
+      }
+    }
+    replaceChildren(...children) {
+      for (const old of this.children) old.isConnected = false;
+      this.children = [];
+      this._text = '';
+      this.append(...children);
+    }
+    setAttribute(name, value) { this.attributes[name] = String(value); }
+    removeAttribute(name) { delete this.attributes[name]; }
+    addEventListener(type, fn) { this.listeners.set(type, fn); }
+    dispatch(type) { return this.listeners.get(type)?.({ preventDefault() {}, currentTarget: this }); }
+    reset() {}
+    focus() { if (!this.disabled && this.isConnected) doc.activeElement = this; }
+    scrollIntoView() {}
+    matches() { return false; }
+    querySelector(selector) {
+      if (selector === 'button[data-session-id]') {
+        return this.children.find(child => child.tagName === 'BUTTON' && child.dataset.sessionId) || null;
+      }
+      return null;
+    }
+    querySelectorAll(selector) {
+      if (selector === '.history-card') return this.children.filter(child => child.className.includes('history-card'));
+      return [];
+    }
+  }
+  const byId = id => {
+    if (!elements.has(id)) elements.set(id, new MockNode(id === 'history-filter-form' || id === 'history-correction-form' ? 'form' : 'div', id));
+    return elements.get(id);
+  };
+  for (const id of ['history-list-heading', 'history-heading', 'history-detail-back', 'history-detail-title', 'history-detail']) byId(id);
+  doc.getElementById = id => byId(id);
+  doc.createElement = tag => new MockNode(tag);
+  doc.querySelector = sel => sel.startsWith('#') ? byId(sel.slice(1)) : null;
+  globalThis.document = doc;
+  globalThis.window = { innerWidth: 1280, scrollTo() {} };
+  t.after(() => {
+    for (const [k, v] of Object.entries(prev)) {
+      if (v === undefined) delete globalThis[k];
+      else globalThis[k] = v;
+    }
+  });
+
+  const record = complete({ data_hora: '12/11/2026 10:00:00', texto_usuario: 'Relato fictício' });
+  const history = initHistory({
+    api: async path => path === '/api/historico'
+      ? { registros: { s1: record } }
+      : path === '/api/padroes'
+        ? { avaliacoes_sessoes: { sessoes_totais: 1 } }
+        : { registro: record },
+    notify: () => {}, onResume: () => {}, onChanged: () => {},
+  });
+
+  await history.load();
+  const cardBtn = byId('history-list').children[0].querySelector('button[data-session-id]');
+  await cardBtn.dispatch('click');
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert.equal(byId('history-detail').hidden, false);
+  assert.equal(doc.activeElement, byId('history-detail-title'));
+
+  byId('history-detail-back').dispatch('click');
+  assert.equal(byId('history-detail').hidden, true);
+  assert.equal(doc.activeElement, cardBtn);
+
+  await history.open('s1', true);
+  assert.equal(byId('history-detail').hidden, false);
+  byId('history-detail-back').dispatch('click');
+  assert.equal(byId('history-detail').hidden, true);
+  assert.equal(doc.activeElement, byId('history-list-heading'));
 });

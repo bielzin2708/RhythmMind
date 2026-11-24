@@ -48,22 +48,39 @@ def _config():
     return config
 
 
+def _eh_https(request):
+    if request.url.scheme == "https":
+        return True
+    if getattr(request.app.state, "modo_producao", False):
+        proto = request.headers.get("x-forwarded-proto", "")
+        primeiro = proto.split(",", 1)[0].strip().lower()
+        return primeiro == "https"
+    return False
+
+
 def _origem_request(request):
-    # O Host ja foi validado pela restricao local, sem confiar em proxies.
-    return str(request.base_url).rstrip("/")
+    # Em desenvolvimento local, o Host ja foi validado sem confiar em proxies.
+    base = str(request.base_url).rstrip("/")
+    if (
+        getattr(request.app.state, "modo_producao", False)
+        and base.startswith("http://")
+        and _eh_https(request)
+    ):
+        return "https://" + base[len("http://"):]
+    return base
 
 
 def _cookie(resposta, nome, valor, request, *, max_age):
     resposta.set_cookie(
         nome, valor, max_age=max_age, path=_COOKIE_PATH,
-        httponly=True, secure=request.url.scheme == "https", samesite="lax",
+        httponly=True, secure=_eh_https(request), samesite="lax",
     )
 
 
 def _apagar_cookie(resposta, nome, request):
     resposta.delete_cookie(
         nome, path=_COOKIE_PATH, httponly=True,
-        secure=request.url.scheme == "https", samesite="lax",
+        secure=_eh_https(request), samesite="lax",
     )
 
 

@@ -83,9 +83,11 @@ export RHYTHMMIND_GOOGLE_CLIENT_SECRET
 .venv-local/bin/python -B -m api.desenvolvimento --persistente
 ```
 
-O código lê as variáveis de ambiente. Não há carregamento automático de
-arquivo `.env`. `RHYTHMMIND_GOOGLE_REDIRECT_URI` pode ser omitida para usar
-o endereço padrão com `127.0.0.1` mostrado acima.
+O servidor lê as variáveis de ambiente. No início local com `api.desenvolvimento`,
+se existir um arquivo `.env.local` na raiz do repositório (ignorado pelo `.gitignore`),
+variáveis ainda não definidas no terminal são carregadas dele automaticamente;
+valores já definidos no terminal têm prioridade. `RHYTHMMIND_GOOGLE_REDIRECT_URI`
+pode ser omitida para usar o endereço padrão com `127.0.0.1` mostrado acima.
 
 ## Dados entre reinicializações
 

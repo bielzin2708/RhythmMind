@@ -57,10 +57,11 @@
           <summary id="account-menu-toggle" aria-label="Opções da sua conta"><span id="workspace-avatar" class="workspace-avatar" aria-hidden="true"></span><span class="account-menu-label">Sua conta</span><svg class="nav-icon account-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"/></svg></summary>
           <div class="account-menu-panel">
             <section class="workspace-profile" aria-label="Resumo do seu espaço">
-        <div class="profile-top"><div><strong id="account-name"></strong><span class="profile-label">Seu espaço pessoal</span></div></div>
+        <div class="profile-top"><div><strong id="account-name"></strong><span id="account-provider-label" class="profile-label">Seu espaço pessoal</span></div></div>
         <dl class="profile-stats"><div><dt>Sessões registradas</dt><dd id="profile-sessions">—</dd></div><div><dt>Última finalidade</dt><dd id="profile-last-purpose">—</dd></div><div><dt>Catálogo</dt><dd id="profile-catalog">—</dd></div></dl>
       </section>
             <div class="account-actions">
+              <button id="account-name-button" class="account-action" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span>Nome de exibição</span></button>
               <button id="workspace-export" class="account-action" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg><span>Exportar meus dados</span></button>
               <button id="appearance-button" class="account-action" type="button" aria-label="Preferências visuais"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 3-.6 2.4-2.2 1.3L3.8 6l-2 3.5 1.8 1.7v2.6l-1.8 1.7 2 3.5 2.4-.7 2.2 1.3L9 22h4l.6-2.4 2.2-1.3 2.4.7 2-3.5-1.8-1.7v-2.6l1.8-1.7-2-3.5-2.4.7-2.2-1.3L13 3z"/><circle cx="11" cy="12.5" r="3"/></svg><span>Preferências visuais</span></button>
               <button id="about-button" class="account-action" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>Sobre o RhythmMind</span></button>
@@ -104,17 +105,19 @@
           <div class="card-topline"><span class="eyebrow">SEU DIÁRIO</span><span class="small-label">Acesso individual</span></div>
           <form method="post" id="auth-login-form" class="stack-form">
             <div class="form-intro"><h2>Bom ter você por aqui.</h2><p>Acesse seus registros e continue de onde parou.</p></div>
-            <div class="field"><label for="login-name">Usuário ou pseudônimo</label><input id="login-name" name="nome_usuario" autocomplete="username" minlength="3" maxlength="64" pattern="[a-zA-Z0-9_.\-]+" placeholder="Seu nome de usuário" required></div>
-            <div class="field"><label for="login-password">Senha</label><div class="password-field"><input id="login-password" name="senha" type="password" minlength="6" maxlength="128" autocomplete="current-password" placeholder="Sua senha" required><button class="password-toggle" type="button" data-toggle-password="login-password" aria-controls="login-password" aria-pressed="false" aria-label="Mostrar senha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span data-password-label>Mostrar</span></button></div></div>
+            <p class="required-legend"><span class="required-mark" aria-hidden="true">*</span> Campos obrigatórios</p>
+            <div class="field"><label for="login-name">Usuário ou pseudônimo <span class="required-mark" aria-hidden="true">*</span></label><input id="login-name" name="nome_usuario" autocomplete="username" minlength="3" maxlength="64" pattern="[a-zA-Z0-9_.\-]+" placeholder="Seu nome de usuário" required></div>
+            <div class="field"><label for="login-password">Senha <span class="required-mark" aria-hidden="true">*</span></label><div class="password-field"><input id="login-password" name="senha" type="password" minlength="6" maxlength="128" autocomplete="current-password" placeholder="Sua senha" required><button class="password-toggle" type="button" data-toggle-password="login-password" aria-controls="login-password" aria-pressed="false" aria-label="Mostrar senha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span data-password-label>Mostrar</span></button></div></div>
             <button class="button button-primary button-wide" type="submit">Entrar no meu espaço <span aria-hidden="true">→</span></button>
-            <p class="access-switch">Primeira vez por aqui? <button id="show-register" class="button-link" type="button">Criar conta</button></p>
+            <p class="access-switch">Primeira vez por aqui? <button id="show-register" class="button-link nav-destination" type="button">Criar conta <span aria-hidden="true">→</span></button></p>
           </form>
           <form method="post" id="auth-register-form" class="stack-form" hidden>
             <div class="form-intro"><h2>Crie seu espaço.</h2><p>Você pode usar um pseudônimo para identificar sua conta.</p></div>
-            <div class="field"><label for="register-name">Nome de usuário ou pseudônimo</label><input id="register-name" name="nome_usuario" autocomplete="username" minlength="3" maxlength="64" pattern="[a-zA-Z0-9_.\-]+" placeholder="Como quer se identificar?" aria-describedby="register-name-help" required><small id="register-name-help">De 3 a 64 caracteres: letras sem acento, números, ponto, traço ou sublinhado.</small></div>
-            <div class="field"><label for="register-password">Crie uma senha</label><div class="password-field"><input id="register-password" name="senha" type="password" minlength="6" maxlength="128" autocomplete="new-password" placeholder="Pelo menos 6 caracteres" aria-describedby="register-password-help" required><button class="password-toggle" type="button" data-toggle-password="register-password" aria-controls="register-password" aria-pressed="false" aria-label="Mostrar senha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span data-password-label>Mostrar</span></button></div><small id="register-password-help">Use entre 6 e 128 caracteres.</small></div>
+            <p class="required-legend"><span class="required-mark" aria-hidden="true">*</span> Campos obrigatórios</p>
+            <div class="field"><label for="register-name">Nome de usuário ou pseudônimo <span class="required-mark" aria-hidden="true">*</span></label><input id="register-name" name="nome_usuario" autocomplete="username" minlength="3" maxlength="64" pattern="[a-zA-Z0-9_.\-]+" placeholder="Como quer se identificar?" aria-describedby="register-name-help" required><small id="register-name-help">De 3 a 64 caracteres: letras sem acento, números, ponto, traço ou sublinhado.</small></div>
+            <div class="field"><label for="register-password">Crie uma senha <span class="required-mark" aria-hidden="true">*</span></label><div class="password-field"><input id="register-password" name="senha" type="password" minlength="6" maxlength="128" autocomplete="new-password" placeholder="Pelo menos 6 caracteres" aria-describedby="register-password-help" required><button class="password-toggle" type="button" data-toggle-password="register-password" aria-controls="register-password" aria-pressed="false" aria-label="Mostrar senha"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true" focusable="false"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg><span data-password-label>Mostrar</span></button></div><small id="register-password-help">Use entre 6 e 128 caracteres.</small></div>
             <button class="button button-primary button-wide" type="submit">Criar minha conta <span aria-hidden="true">→</span></button>
-            <p class="access-switch">Já tem uma conta? <button id="show-login" class="button-link" type="button">Entrar</button></p>
+            <p class="access-switch">Já tem uma conta? <button id="show-login" class="button-link nav-destination" type="button">Entrar <span aria-hidden="true">→</span></button></p>
           </form>
           <div class="google-access">
             <div class="access-divider" aria-hidden="true"><span>ou</span></div>
@@ -187,19 +190,19 @@
                 <div id="home-pending-empty" class="home-empty" hidden><svg class="home-empty-icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="18"/><path d="M24 13v12l9 5"/></svg><div><h3>No seu tempo.</h3><p>Você não tem etapas pendentes. Comece um relato quando quiser.</p></div></div>
               </section>
               <section class="home-section" aria-labelledby="home-recent-heading">
-                <div class="home-section-heading"><h2 id="home-recent-heading">Seu diário recente</h2><button id="home-open-history" class="button-link" type="button">Ver meu diário <span aria-hidden="true">→</span></button></div>
+                <div class="home-section-heading"><h2 id="home-recent-heading">Seu diário recente</h2><button id="home-open-history" class="button-link nav-destination" type="button">Ver meu diário <span aria-hidden="true">→</span></button></div>
                 <div id="home-recent-list" class="home-recent-list"></div>
                 <div id="home-recent-empty" class="home-empty" hidden><svg class="home-empty-icon" viewBox="0 0 48 48" aria-hidden="true"><path d="M9 7h29v34H9a5 5 0 0 1-5-5V12a5 5 0 0 1 5-5zM9 7v34M20 7v17l5-3 5 3V7"/></svg><div><h3>Seu diário começa com um relato.</h3><p>Suas palavras, escolhas e percepções aparecerão aqui.</p></div></div>
               </section>
             </div>
             <aside class="home-explore" aria-labelledby="home-explore-heading">
               <h2 id="home-explore-heading">Explore seu espaço</h2>
-              <div class="home-explore-row"><svg class="home-explore-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5zM9 7h6M9 11h6M9 15h4"/></svg><div><h3>Meu diário</h3><p>Revisite seus relatos, escolhas e percepções.</p><button id="home-explore-history" class="button-link" type="button">Abrir diário <span aria-hidden="true">→</span></button></div></div>
-              <div class="home-explore-row"><svg class="home-explore-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13M9 8l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></svg><div><h3>Minhas músicas</h3><p id="home-catalog-description">Organize as faixas disponíveis para suas próximas escutas.</p><button id="home-open-catalog" class="button-link" type="button">Explorar minhas músicas <span aria-hidden="true">→</span></button></div></div>
+              <div class="home-explore-row"><svg class="home-explore-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5zM9 7h6M9 11h6M9 15h4"/></svg><div><h3>Meu diário</h3><p>Revisite seus relatos, escolhas e percepções.</p><button id="home-explore-history" class="button-link nav-destination" type="button">Abrir diário <span aria-hidden="true">→</span></button></div></div>
+              <div class="home-explore-row"><svg class="home-explore-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13M9 8l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></svg><div><h3>Minhas músicas</h3><p id="home-catalog-description">Organize as faixas disponíveis para suas próximas escutas.</p><button id="home-open-catalog" class="button-link nav-destination" type="button">Explorar minhas músicas <span aria-hidden="true">→</span></button></div></div>
               <div class="home-support"><h3>Você decide o que faz sentido.</h3><p>As interpretações são sugestões. Você pode ajustar ou seguir sem categoria.</p></div>
             </aside>
           </div>
-          <details id="home-summary" class="home-summary"><summary>Resumo dos meus registros</summary>
+          <details id="home-summary" class="home-summary"><summary><span>Resumo dos meus registros</span><svg class="disclosure-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
             <section class="home-metrics" aria-label="Resumo dos seus registros">
             <article class="home-metric"><svg class="metric-icon" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12"/><path d="M11 16l3 3 7-7"/></svg><div class="metric-content"><h3 class="metric-label">Sessões registradas</h3><strong id="home-total-sessions">—</strong></div></article>
             <article class="home-metric"><svg class="metric-icon" viewBox="0 0 32 32" aria-hidden="true"><path d="M2 17h7l3-9 5 17 3-8h10"/></svg><div class="metric-content"><h3 class="metric-label">Último estado confirmado</h3><strong id="home-last-state">—</strong><small id="home-last-state-date">Data não informada</small></div></article>
@@ -210,6 +213,12 @@
         </section>
 
         <section id="view-session" class="workspace-view" aria-labelledby="session-heading" hidden>
+          <nav class="view-return-bar" aria-label="Caminho atual">
+            <ol class="breadcrumb-list">
+              <li><button type="button" class="breadcrumb-link nav-return-link" data-return-view="home"><span aria-hidden="true">←</span> Voltar para seu espaço</button></li>
+              <li><span class="breadcrumb-current" aria-current="page">Nova sessão</span></li>
+            </ol>
+          </nav>
           <div class="page-heading"><div><p class="eyebrow">UM REGISTRO DE CADA VEZ</p><h1 id="session-heading" tabindex="-1">Como está seu momento?</h1><p>Você conta. A interpretação sugere. A escolha continua sendo sua.</p></div><div class="heading-actions"><span class="quiet-badge">Sua experiência importa</span><button id="new-session-button" class="button button-secondary" type="button">Novo relato</button></div></div>
           <ol id="session-progress" class="progress-steps" aria-label="Etapas da sessão">
             <li id="step-relato" class="current" aria-current="step"><span aria-hidden="true">1</span>Relato e finalidade</li>
@@ -225,18 +234,61 @@
                 <div class="section-heading"><span class="section-marker" aria-hidden="true">01</span><div><h2 id="narrative-heading">Comece pelas suas palavras.</h2><p>Um relato simples já é um ponto de partida.</p></div></div>
                 <div id="session-catalog-guidance" class="inset-note" role="status" aria-live="polite" hidden>
                   <p id="session-catalog-message"></p>
-                  <div class="button-row"><button id="entry-open-catalog" class="button-link" type="button">Preparar meu catálogo</button><button id="entry-retry-catalog" class="button-link" type="button" hidden>Conferir catálogo novamente</button></div>
+                  <div class="button-row"><button id="entry-open-catalog" class="button-link nav-destination" type="button">Preparar meu catálogo <span aria-hidden="true">→</span></button><button id="entry-retry-catalog" class="button-link" type="button" hidden>Conferir catálogo novamente</button></div>
                 </div>
                 <form method="post" id="narrative-form" class="stack-form">
-                  <div class="field"><label for="narrative-text">Como você está se sentindo?</label><textarea id="narrative-text" name="texto_atual" rows="5" maxlength="4000" placeholder="Por exemplo: estou cansado depois de um dia cheio e queria desacelerar um pouco…" aria-describedby="narrative-help" required></textarea><small id="narrative-help">Conte o que representa seu momento. Você poderá revisar a interpretação antes de continuar.</small></div>
-                  <div class="field-grid"><div class="field"><label for="session-purpose">Qual é a finalidade da escuta? <span class="optional">Opcional</span></label><input id="session-purpose" name="finalidade" list="activity-options" maxlength="200" placeholder="Relaxar, estudar, treinar…"><datalist id="activity-options"><option value="Relaxar"><option value="Estudar"><option value="Treinar"><option value="Trabalhar"><option value="Refletir"><option value="Compreender meu momento"><option value="Socializar"></datalist></div><div class="field"><label for="session-limit">Quantas sugestões quer ver?</label><select id="session-limit" name="limite_recomendacoes"><option value="1">1 sugestão</option><option value="2">2 sugestões</option><option value="3" selected>3 sugestões</option><option value="5">5 sugestões</option><option value="10">10 sugestões</option></select></div></div>
-                  <div class="field"><label for="session-context">Em que contexto? <span class="optional">Opcional</span></label><textarea id="session-context" name="contexto" rows="2" maxlength="500" placeholder="Em casa, no intervalo do trabalho, antes do treino…"></textarea></div>
-                  <div class="interpretation-options"><div class="field"><label for="interpretation-engine">Como interpretar seu relato?</label><select id="interpretation-engine" name="motor"><option value="dicionario">Dicionário local</option><option value="llm">LLM · serviço externo</option></select><small>Os dois caminhos geram sugestões para você revisar.</small></div><div id="llm-options" class="inset-note" hidden><p>Ao escolher LLM, seu relato é enviado ao provedor configurado neste ambiente.</p><label class="checkbox-line"><input id="allow-fallback" type="checkbox"><span>Permitir o dicionário local se o serviço externo estiver indisponível.</span></label></div></div>
+                  <p class="required-legend"><span class="required-mark" aria-hidden="true">*</span> Campos obrigatórios</p>
+                  <div class="field narrative-hero-field">
+                    <div class="field-topline"><label for="narrative-text">Como você está se sentindo? <span class="required-mark" aria-hidden="true">*</span></label><span id="narrative-counter" class="live-counter" aria-live="off">Pronto para ouvir você</span></div>
+                    <textarea id="narrative-text" name="texto_atual" rows="4" maxlength="4000" placeholder="Por exemplo: estou cansado depois de um dia cheio e queria desacelerar um pouco…" aria-describedby="narrative-help" required></textarea>
+                    <small id="narrative-help">Conte o que representa seu momento. Você poderá revisar a interpretação antes de continuar.</small>
+                  </div>
+                  <div class="field">
+                    <label for="session-purpose">Qual é a finalidade da escuta? <span class="optional">Opcional</span></label>
+                    <div id="purpose-chips" class="quick-chip-bar" role="group" aria-label="Sugestões rápidas de finalidade">
+                      <button type="button" class="quick-chip" data-purpose-chip="Relaxar">Relaxar</button>
+                      <button type="button" class="quick-chip" data-purpose-chip="Estudar">Estudar</button>
+                      <button type="button" class="quick-chip" data-purpose-chip="Treinar">Treinar</button>
+                      <button type="button" class="quick-chip" data-purpose-chip="Trabalhar">Trabalhar</button>
+                      <button type="button" class="quick-chip" data-purpose-chip="Refletir">Refletir</button>
+                      <button type="button" class="quick-chip" data-purpose-chip="Socializar">Socializar</button>
+                    </div>
+                    <input id="session-purpose" name="finalidade" list="activity-options" maxlength="200" placeholder="Escolha acima ou escreva outra finalidade…">
+                    <datalist id="activity-options"><option value="Relaxar"><option value="Estudar"><option value="Treinar"><option value="Trabalhar"><option value="Refletir"><option value="Compreender meu momento"><option value="Socializar"></datalist>
+                  </div>
+                  <details id="session-extra-options" class="session-options-drawer">
+                    <summary class="session-options-summary">
+                      <span>Personalizar contexto, sugestões e motor</span>
+                      <span class="options-summary-trailing"><span id="session-options-badge" class="options-summary-pill">3 sugestões · Dicionário local</span><svg class="disclosure-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
+                    </summary>
+                    <div class="session-options-body">
+                      <div class="field">
+                        <label for="session-context">Em que contexto? <span class="optional">Opcional</span></label>
+                        <div id="context-chips" class="quick-chip-bar" role="group" aria-label="Sugestões rápidas de contexto">
+                          <button type="button" class="quick-chip" data-context-chip="Em casa">Em casa</button>
+                          <button type="button" class="quick-chip" data-context-chip="À noite">À noite</button>
+                          <button type="button" class="quick-chip" data-context-chip="No intervalo do trabalho">No trabalho</button>
+                          <button type="button" class="quick-chip" data-context-chip="Estudando">Estudando</button>
+                          <button type="button" class="quick-chip" data-context-chip="No transporte">No transporte</button>
+                          <button type="button" class="quick-chip" data-context-chip="Antes do treino">Antes do treino</button>
+                        </div>
+                        <textarea id="session-context" name="contexto" rows="2" maxlength="500" placeholder="Em casa, no intervalo do trabalho, antes do treino…"></textarea>
+                      </div>
+                      <div class="field-grid">
+                        <div class="field"><label for="session-limit">Quantas sugestões quer ver?</label><select id="session-limit" name="limite_recomendacoes"><option value="1">1 sugestão</option><option value="2">2 sugestões</option><option value="3" selected>3 sugestões</option><option value="5">5 sugestões</option><option value="10">10 sugestões</option></select></div>
+                        <div class="field"><label for="interpretation-engine">Como interpretar seu relato?</label><select id="interpretation-engine" name="motor"><option value="dicionario">Dicionário local</option><option value="llm">LLM · serviço externo</option></select><small>Os dois caminhos geram sugestões para você revisar.</small></div>
+                      </div>
+                      <div id="llm-options" class="inset-note" hidden><p>Ao escolher LLM, seu relato é enviado ao provedor configurado neste ambiente.</p><label class="checkbox-line"><input id="allow-fallback" type="checkbox"><span>Permitir o dicionário local se o serviço externo estiver indisponível.</span></label></div>
+                    </div>
+                  </details>
                   <div class="form-footer"><p class="small-label">Seu relato é salvo antes da interpretação.</p><button class="button button-primary" type="submit">Salvar relato e interpretar <span aria-hidden="true">→</span></button></div>
                 </form>
               </section>
 
               <section id="session-review" class="card stage-card" aria-labelledby="review-heading" hidden>
+                <div class="stage-return-row">
+                  <button id="review-new-session" class="button-link nav-return-link" type="button"><span aria-hidden="true">←</span> Começar outro relato</button>
+                </div>
                 <div class="section-heading"><span class="section-marker" aria-hidden="true">02</span><div><h2 id="review-heading">Faz sentido para você?</h2><p>Esta é uma interpretação sugerida para revisão.</p></div></div>
                 <div class="narrative-snapshot"><span class="eyebrow">SEU RELATO ORIGINAL</span><blockquote id="review-original"></blockquote></div>
                 <div class="reflection-panel"><span class="eyebrow">COM BASE NO SEU RELATO</span><p id="review-reflection" class="reflection-text"></p><p id="review-origin" class="small-label"></p></div>
@@ -253,8 +305,8 @@
 
               <section id="session-listening" class="stage-group" aria-labelledby="listening-heading" hidden>
                 <div class="card stage-card"><div class="section-heading"><span class="section-marker" aria-hidden="true">03</span><div><h2 id="listening-heading">Uma escolha para sua escuta.</h2><p id="listening-intro">Veja as sugestões e escolha o que faz sentido agora.</p></div></div><div id="strategy-summary" class="strategy-summary"></div><form method="post" id="listening-form" class="stack-form"><div id="recommendation-list" class="recommendation-list"></div><div id="recommendation-empty" class="empty-state" hidden><span class="empty-icon" aria-hidden="true">♪</span><h3 id="recommendation-empty-title">Ainda sem sugestões nesta sessão.</h3><p id="recommendation-empty-message">Você pode continuar sem escolher uma faixa ou preparar seu catálogo para uma nova sessão.</p><button id="open-catalog-button" class="button button-secondary" type="button">Abrir meu catálogo</button><p id="listening-catalog-message" class="field-help" hidden></p><button id="listening-retry-catalog" class="button-link" type="button" hidden>Conferir catálogo novamente</button></div><div class="button-row" id="listening-actions"><button id="save-listening" class="button button-primary" type="submit">Salvar escolha e escuta</button><button id="choose-none" class="button-link" type="button">Não escolher uma faixa agora</button></div><p class="field-help" id="listening-help">Escolher uma faixa e informar que a ouviu são decisões diferentes. A reprodução acontece no serviço de sua preferência.</p></form></div>
-                <div id="feedback-card" class="card stage-card"><div class="section-heading"><span class="section-marker text-marker" aria-hidden="true">↳</span><div><h2>Depois da escuta, como foi?</h2><p>Seu retorno se refere à experiência desta sessão.</p></div></div><form method="post" id="feedback-form" class="stack-form"><div class="field"><label for="feedback-answer">O que você percebeu?</label><select id="feedback-answer" name="retorno"><option value="">Escolher uma resposta</option><option value="ajudou">Senti que me ajudou</option><option value="sem_mudanca">Não percebi mudança</option><option value="nao_ajudou">Não senti que me ajudou</option></select></div><div class="field"><label for="feedback-comment">Quer contar um pouco mais? <span class="optional">Opcional</span></label><textarea id="feedback-comment" name="motivo" rows="3" maxlength="4000" placeholder="O que fez sentido — ou não — para você?"></textarea></div><div class="field"><label for="feedback-improvement">Algo que faria diferente? <span class="optional">Opcional</span></label><textarea id="feedback-improvement" name="melhoria" rows="2" maxlength="4000" placeholder="Uma observação para sua próxima escuta…"></textarea></div><div class="button-row"><button id="save-feedback" class="button button-primary" type="submit">Registrar meu retorno</button><button id="feedback-later" class="button-link" type="button">Responder depois</button></div></form><div id="feedback-status" class="notice" role="status" aria-live="polite"></div></div>
-                <div class="completion-actions"><button id="session-to-history" class="button button-secondary" type="button">Ver meu histórico</button><button id="start-another" class="button button-primary" type="button">Começar outra sessão <span aria-hidden="true">→</span></button></div>
+                <div id="feedback-card" class="card stage-card"><div class="section-heading"><span class="section-marker text-marker" aria-hidden="true">↳</span><div><h2>Depois da escuta, como foi?</h2><p>Seu retorno se refere à experiência desta sessão.</p></div></div><form method="post" id="feedback-form" class="stack-form"><div class="field"><label for="feedback-answer">O que você percebeu?</label><div id="feedback-quick-choices" class="feedback-choice-grid" role="group" aria-label="Escolher percepção da escuta"><button type="button" class="feedback-choice-btn" data-feedback-choice="ajudou"><strong>Senti que me ajudou</strong><span>Fez sentido para o meu momento</span></button><button type="button" class="feedback-choice-btn" data-feedback-choice="sem_mudanca"><strong>Não percebi mudança</strong><span>Continuou parecido após a escuta</span></button><button type="button" class="feedback-choice-btn" data-feedback-choice="nao_ajudou"><strong>Não senti que me ajudou</strong><span>Não combinou com o que eu precisava</span></button></div><select id="feedback-answer" name="retorno"><option value="">Escolher uma resposta</option><option value="ajudou">Senti que me ajudou</option><option value="sem_mudanca">Não percebi mudança</option><option value="nao_ajudou">Não senti que me ajudou</option></select></div><details id="feedback-extra-fields" class="session-options-drawer feedback-extra-drawer"><summary class="session-options-summary"><span>Contar um pouco mais ou anotar algo para a próxima escuta</span><span class="options-summary-trailing"><span class="options-summary-pill">Opcional</span><svg class="disclosure-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></summary><div class="session-options-body"><div class="field"><label for="feedback-comment">Quer contar um pouco mais? <span class="optional">Opcional</span></label><textarea id="feedback-comment" name="motivo" rows="3" maxlength="4000" placeholder="O que fez sentido — ou não — para você?"></textarea></div><div class="field"><label for="feedback-improvement">Algo que faria diferente? <span class="optional">Opcional</span></label><textarea id="feedback-improvement" name="melhoria" rows="2" maxlength="4000" placeholder="Uma observação para sua próxima escuta…"></textarea></div></div></details><div class="button-row"><button id="save-feedback" class="button button-primary" type="submit">Registrar meu retorno</button><button id="feedback-later" class="button-link" type="button">Responder depois</button></div></form><div id="feedback-status" class="notice" role="status" aria-live="polite"></div></div>
+                <div class="completion-actions"><button id="session-to-history" class="button button-secondary nav-destination" type="button">Ver meu histórico <span aria-hidden="true">→</span></button><button id="start-another" class="button button-primary" type="button">Começar outra sessão <span aria-hidden="true">→</span></button></div>
               </section>
             </div>
 
@@ -266,11 +318,17 @@
         </section>
 
         <section id="view-history" class="workspace-view" aria-labelledby="history-heading" hidden>
+          <nav class="view-return-bar" aria-label="Caminho atual">
+            <ol class="breadcrumb-list">
+              <li><button type="button" class="breadcrumb-link nav-return-link" data-return-view="home"><span aria-hidden="true">←</span> Voltar para seu espaço</button></li>
+              <li><span class="breadcrumb-current" aria-current="page">Meu diário</span></li>
+            </ol>
+          </nav>
           <div class="page-heading"><div><h1 id="history-heading" tabindex="-1">Meu diário</h1><p>Revisite seus relatos, escolhas e percepções, no contexto de cada sessão.</p></div><button id="history-export" class="button button-secondary" type="button">Exportar meus dados</button></div>
           <div id="history-status" class="notice" role="status" aria-live="polite"></div>
           <div class="history-layout">
             <div class="history-browser">
-              <div class="list-heading"><h2>Seus registros recentes</h2><p id="history-summary" class="small-label" role="status"></p></div>
+              <div class="list-heading"><h2 id="history-list-heading" tabindex="-1">Seus registros recentes</h2><p id="history-summary" class="small-label" role="status"></p></div>
               <div class="history-tools">
                 <details id="history-filters" class="history-disclosure">
                   <summary id="history-filters-summary"><span>Filtrar registros</span><span id="history-filter-count" hidden></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
@@ -281,7 +339,7 @@
               <div id="history-list" class="history-list"></div>
               <div id="history-empty" class="empty-state" hidden><h3>Nenhum registro por aqui.</h3><p>Uma nova sessão é um ponto de partida. Se usou filtros, tente ampliar sua busca.</p></div>
             </div>
-            <section id="history-detail" class="card history-detail" aria-labelledby="history-detail-title" hidden><div class="section-heading"><div><h2 id="history-detail-title" tabindex="-1">Detalhes da sessão</h2></div></div><div id="history-detail-content" class="history-detail-content"></div><div class="button-row detail-actions"><button id="history-resume" class="button button-primary" type="button">Abrir esta sessão</button><button id="history-export-one" class="button button-secondary" type="button">Exportar registro</button></div><form method="post" id="history-correction-form" class="stack-form correction-form"><div class="form-intro"><h3>Corrigir informações do registro</h3><p>Você pode ajustar a finalidade, o contexto e suas observações. O relato original permanece preservado.</p></div><div class="field"><label for="correction-purpose">Finalidade</label><input id="correction-purpose" maxlength="200"></div><div class="field"><label for="correction-context">Contexto</label><textarea id="correction-context" rows="2" maxlength="500"></textarea></div><div class="field"><label for="correction-notes">Observações</label><textarea id="correction-notes" rows="3" maxlength="4000"></textarea></div><div class="field"><label for="correction-reason">Motivo da correção <span class="optional">Opcional</span></label><input id="correction-reason" maxlength="500" placeholder="Para lembrar o que foi ajustado"></div><button id="save-correction" class="button button-secondary" type="submit">Salvar correção</button><small>As alterações e os valores anteriores ficam registrados nesta sessão até sua exclusão.</small></form><div class="single-delete"><button id="history-delete-one" class="button button-danger-outline" type="button">Excluir esta sessão</button></div></section>
+            <section id="history-detail" class="card history-detail" aria-labelledby="history-detail-title" hidden><div class="history-detail-topbar"><button id="history-detail-back" class="button-link nav-return-link" type="button"><span aria-hidden="true">←</span> Voltar à lista do diário</button></div><div class="section-heading"><div><h2 id="history-detail-title" tabindex="-1">Detalhes da sessão</h2></div></div><div id="history-detail-content" class="history-detail-content"></div><div class="button-row detail-actions"><button id="history-resume" class="button button-primary" type="button">Abrir esta sessão</button><button id="history-export-one" class="button button-secondary" type="button">Exportar registro</button></div><details id="history-correction-drawer" class="history-disclosure correction-disclosure"><summary id="history-correction-summary"><span>Corrigir informações do registro</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary><form method="post" id="history-correction-form" class="stack-form correction-form"><div class="form-intro"><h3>Corrigir informações do registro</h3><p>Você pode ajustar a finalidade, o contexto e suas observações. O relato original permanece preservado.</p></div><div class="field"><label for="correction-purpose">Finalidade</label><input id="correction-purpose" maxlength="200"></div><div class="field"><label for="correction-context">Contexto</label><textarea id="correction-context" rows="2" maxlength="500"></textarea></div><div class="field"><label for="correction-notes">Observações</label><textarea id="correction-notes" rows="3" maxlength="4000"></textarea></div><div class="field"><label for="correction-reason">Motivo da correção <span class="optional">Opcional</span></label><input id="correction-reason" maxlength="500" placeholder="Para lembrar o que foi ajustado"></div><button id="save-correction" class="button button-secondary" type="submit">Salvar correção</button><small>As alterações e os valores anteriores ficam registrados nesta sessão até sua exclusão.</small></form></details><div class="single-delete"><button id="history-delete-one" class="button button-danger-outline" type="button">Excluir esta sessão</button></div></section>
           </div>
           <details id="history-patterns" class="history-disclosure history-patterns">
             <summary id="patterns-heading"><span>Ver padrões dos meus registros</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
@@ -291,23 +349,88 @@
         </section>
 
         <section id="view-catalog" class="workspace-view" aria-labelledby="catalog-heading" hidden>
+          <nav class="view-return-bar" aria-label="Caminho atual">
+            <ol class="breadcrumb-list">
+              <li><button type="button" class="breadcrumb-link nav-return-link" data-return-view="home"><span aria-hidden="true">←</span> Voltar para seu espaço</button></li>
+              <li><span class="breadcrumb-current" aria-current="page">Minhas músicas</span></li>
+            </ol>
+          </nav>
           <div class="page-heading"><div><p class="eyebrow">MÚSICAS DO SEU ESPAÇO</p><h1 id="catalog-heading" tabindex="-1">Prepare seu catálogo.</h1><p>As sugestões usam as faixas do seu catálogo. Adicione uma seleção inicial ou cadastre suas próprias músicas.</p></div></div>
           <div id="catalog-status" class="notice" role="status" aria-live="polite"></div>
-          <section id="catalog-reference" class="inset-note" aria-labelledby="catalog-reference-heading">
-            <h2 id="catalog-reference-heading">Seleção inicial de músicas reais</h2>
-            <p>A seleção reúne faixas com fontes públicas. As associações iniciais de parte do acervo são provisórias; as demais aguardam suas sensações para participar das sugestões. A experiência com cada música pode variar.</p>
-            <p id="catalog-reference-count" class="field-help">Confira as faixas e adicione a seleção ao seu catálogo.</p>
-            <button id="catalog-reference-import" class="button button-primary" type="button">Adicionar seleção ao meu catálogo</button>
+          <section id="catalog-reference" class="card catalog-reference-card" aria-labelledby="catalog-reference-heading">
+            <div class="catalog-reference-top">
+              <div class="catalog-reference-copy">
+                <span class="eyebrow">CURADORIA EDITORIAL INICIAL</span>
+                <h2 id="catalog-reference-heading">Seleção inicial de músicas reais</h2>
+                <p>A seleção reúne faixas com fontes públicas. As associações iniciais de parte do acervo são provisórias; as demais aguardam suas sensações para participar das sugestões. A experiência com cada música pode variar.</p>
+              </div>
+              <div class="catalog-reference-cta">
+                <p id="catalog-reference-count" class="reference-count-badge">Confira as faixas e adicione a seleção ao seu catálogo.</p>
+                <button id="catalog-reference-import" class="button button-primary" type="button">Adicionar seleção ao meu catálogo</button>
+              </div>
+            </div>
             <p class="field-help">A seleção completa é adicionada de uma vez. Repetir a ação preserva suas faixas e evita duplicatas. A reprodução acontece no serviço de sua preferência.</p>
             <p id="catalog-reference-status" class="notice" role="status" aria-live="polite"></p>
-            <details id="catalog-reference-preview"><summary>Conferir músicas e fontes da seleção</summary>
-              <div class="field"><label for="catalog-reference-search">Buscar na seleção por faixa, artista ou álbum</label><input id="catalog-reference-search" type="search" maxlength="200" placeholder="Nome, artista ou álbum" aria-controls="catalog-reference-list"></div>
-              <p id="catalog-reference-page-count" class="field-help" role="status" aria-live="polite"></p>
-              <div id="catalog-reference-list" class="catalog-list"></div>
+            <details id="catalog-reference-preview" class="reference-preview-drawer"><summary><span>Conferir músicas e fontes da seleção</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+              <div class="reference-preview-controls">
+                <div class="field"><label for="catalog-reference-search">Buscar na seleção por faixa, artista ou álbum</label><input id="catalog-reference-search" type="search" maxlength="200" placeholder="Nome, artista ou álbum" aria-controls="catalog-reference-list"></div>
+                <p id="catalog-reference-page-count" class="field-help" role="status" aria-live="polite"></p>
+              </div>
+              <div id="catalog-reference-list" class="catalog-list reference-preview-grid"></div>
               <button id="catalog-reference-more" class="button button-secondary" type="button" hidden>Carregar mais faixas da seleção</button>
             </details>
           </section>
-          <div class="catalog-layout"><section class="card stage-card" aria-labelledby="add-track-heading"><div class="section-heading"><span class="section-marker" aria-hidden="true">＋</span><div><h2 id="add-track-heading">Adicionar uma faixa</h2><p>Conte como você percebe essa música.</p></div></div><form method="post" id="catalog-form" class="stack-form"><div class="field"><label for="catalog-name">Nome da música</label><input id="catalog-name" name="nome" maxlength="200" required></div><div class="field-grid"><div class="field"><label for="catalog-artist">Artista</label><input id="catalog-artist" name="artista" maxlength="200" required></div><div class="field"><label for="catalog-duration">Duração</label><input id="catalog-duration" name="duracao" value="3:00" placeholder="3:00" pattern="[0-9]{1,2}:[0-5][0-9]" aria-describedby="duration-help" required><small id="duration-help">Minutos e segundos, como 3:45.</small></div></div><div class="field"><label for="catalog-feelings">Que sensações você associa à faixa?</label><textarea id="catalog-feelings" name="sentimentos_texto" rows="3" maxlength="4000" placeholder="Calmo, animado, reflexivo, com foco…" required></textarea><small>Essas associações descrevem seu cadastro; a experiência pode variar conforme o momento.</small></div><button class="button button-primary" type="submit">Adicionar ao meu catálogo</button></form><div class="demo-tracks"><p>Para experimentar o fluxo com músicas inventadas:</p><button id="catalog-demo" class="button button-secondary" type="button">Adicionar faixas fictícias de exemplo</button></div></section><section class="card stage-card" aria-labelledby="catalog-list-heading"><div class="section-heading"><div><p class="eyebrow">SEU CATÁLOGO</p><h2 id="catalog-list-heading" tabindex="-1">Suas faixas</h2></div></div><div class="field"><label for="catalog-search">Buscar nas suas faixas por nome, artista ou álbum</label><input id="catalog-search" type="search" maxlength="200" placeholder="Nome, artista ou álbum" aria-controls="catalog-list"></div><p id="catalog-page-count" class="field-help" role="status" aria-live="polite"></p><div id="catalog-list" class="catalog-list"><p class="empty-copy">As faixas cadastradas aparecerão aqui.</p></div><button id="catalog-more" class="button button-secondary" type="button" hidden>Carregar mais faixas</button><p class="field-help">Indique sensações nas faixas pendentes para incluí-las nas próximas sugestões. Você pode editar ou remover todas as associações sem apagar a faixa. Sessões já registradas conservam suas escolhas.</p></section></div>
+          <div class="catalog-layout">
+            <section class="card stage-card catalog-list-card" aria-labelledby="catalog-list-heading">
+              <div class="section-heading catalog-list-header">
+                <div><p class="eyebrow">SEU CATÁLOGO</p><h2 id="catalog-list-heading" tabindex="-1">Suas faixas</h2></div>
+                <span id="catalog-total-badge" class="count-badge">0</span>
+              </div>
+              <div class="field"><label for="catalog-search">Buscar nas suas faixas por nome, artista ou álbum</label><input id="catalog-search" type="search" maxlength="200" placeholder="Nome, artista ou álbum" aria-controls="catalog-list"></div>
+              <div id="catalog-filter-bar" class="quick-chip-bar catalog-filter-bar" role="group" aria-label="Filtrar faixas por sensação" hidden>
+                <button type="button" class="quick-chip active" data-catalog-filter="all" aria-pressed="true">Todas</button>
+                <button type="button" class="quick-chip" data-catalog-filter="pending" aria-pressed="false">Sem sensações</button>
+                <button type="button" class="quick-chip" data-catalog-filter="calmo" aria-pressed="false">Calmo</button>
+                <button type="button" class="quick-chip" data-catalog-filter="foco" aria-pressed="false">Foco</button>
+                <button type="button" class="quick-chip" data-catalog-filter="animado" aria-pressed="false">Animado</button>
+                <button type="button" class="quick-chip" data-catalog-filter="feliz" aria-pressed="false">Feliz</button>
+                <button type="button" class="quick-chip" data-catalog-filter="reflexivo" aria-pressed="false">Reflexivo</button>
+                <button type="button" class="quick-chip" data-catalog-filter="cansado" aria-pressed="false">Cansado</button>
+                <button type="button" class="quick-chip" data-catalog-filter="triste" aria-pressed="false">Triste</button>
+                <button type="button" class="quick-chip" data-catalog-filter="ansioso" aria-pressed="false">Ansioso</button>
+              </div>
+              <p id="catalog-page-count" class="field-help" role="status" aria-live="polite"></p>
+              <div id="catalog-list" class="catalog-list catalog-personal-grid"><p class="empty-copy">As faixas cadastradas aparecerão aqui.</p></div>
+              <button id="catalog-more" class="button button-secondary" type="button" hidden>Carregar mais faixas</button>
+              <p class="field-help">Indique sensações nas faixas pendentes para incluí-las nas próximas sugestões. Você pode editar ou remover todas as associações sem apagar a faixa. Sessões já registradas conservam suas escolhas.</p>
+            </section>
+            <section class="card stage-card catalog-add-card" aria-labelledby="add-track-heading">
+              <div class="section-heading"><span class="section-marker" aria-hidden="true">＋</span><div><h2 id="add-track-heading">Adicionar uma faixa</h2><p>Conte como você percebe essa música.</p></div></div>
+              <form method="post" id="catalog-form" class="stack-form">
+                <p class="required-legend"><span class="required-mark" aria-hidden="true">*</span> Campos obrigatórios</p>
+                <div class="field"><label for="catalog-name">Nome da música <span class="required-mark" aria-hidden="true">*</span></label><input id="catalog-name" name="nome" maxlength="200" placeholder="Ex.: Clair de Lune" required></div>
+                <div class="field-grid"><div class="field"><label for="catalog-artist">Artista <span class="required-mark" aria-hidden="true">*</span></label><input id="catalog-artist" name="artista" maxlength="200" placeholder="Ex.: Claude Debussy" required></div><div class="field"><label for="catalog-duration">Duração <span class="required-mark" aria-hidden="true">*</span></label><input id="catalog-duration" name="duracao" value="3:00" placeholder="3:00" pattern="[0-9]{1,2}:[0-5][0-9]" aria-describedby="duration-help" required><small id="duration-help">Minutos e segundos, como 3:45.</small></div></div>
+                <div class="field">
+                  <label for="catalog-feelings">Que sensações você associa à faixa? <span class="required-mark" aria-hidden="true">*</span></label>
+                  <div id="catalog-feeling-chips" class="quick-chip-bar" role="group" aria-label="Toque para adicionar sensações">
+                    <button type="button" class="quick-chip" data-feeling-chip="calmo">Calmo</button>
+                    <button type="button" class="quick-chip" data-feeling-chip="foco">Foco</button>
+                    <button type="button" class="quick-chip" data-feeling-chip="animado">Animado</button>
+                    <button type="button" class="quick-chip" data-feeling-chip="feliz">Feliz</button>
+                    <button type="button" class="quick-chip" data-feeling-chip="disposto">Disposto</button>
+                    <button type="button" class="quick-chip" data-feeling-chip="reflexivo">Reflexivo</button>
+                    <button type="button" class="quick-chip" data-feeling-chip="cansado">Cansado</button>
+                    <button type="button" class="quick-chip" data-feeling-chip="triste">Triste</button>
+                    <button type="button" class="quick-chip" data-feeling-chip="ansioso">Ansioso</button>
+                  </div>
+                  <textarea id="catalog-feelings" name="sentimentos_texto" rows="2" maxlength="4000" placeholder="Toque nas etiquetas acima ou descreva: calmo, animado, com foco…" required></textarea>
+                  <small>Essas associações descrevem seu cadastro; a experiência pode variar conforme o momento.</small>
+                </div>
+                <button class="button button-primary" type="submit">Adicionar ao meu catálogo</button>
+              </form>
+              <div class="demo-tracks"><p>Para experimentar o fluxo com músicas inventadas:</p><button id="catalog-demo" class="button button-secondary" type="button">Adicionar faixas fictícias de exemplo</button></div>
+            </section>
+          </div>
         </section>
       </div>
     </main>
@@ -325,8 +448,8 @@
       </form>
     </dialog>
     <dialog id="confirm-dialog" class="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-text"><form method="post" id="confirm-form"><span class="eyebrow">UMA ESCOLHA SOBRE SEUS DADOS</span><h2 id="confirm-title">Confirmar ação</h2><p id="confirm-text"></p><div class="button-row"><button id="confirm-cancel" class="button button-secondary" type="button">Cancelar</button><button id="confirm-submit" class="button button-danger" type="submit">Confirmar exclusão</button></div></form></dialog>
-    <dialog id="about-dialog" class="confirm-dialog" aria-labelledby="about-title"><span class="eyebrow">NO SEU RITMO</span><h2 id="about-title">Sobre o RhythmMind</h2><p>Um diário de relatos, escolhas musicais e percepções. Você conta como está, revisa as sugestões e registra o que fez sentido na sua experiência.</p><p>A interpretação é provisória e as escolhas são suas. As sugestões musicais vêm do seu catálogo; a reprodução acontece no serviço de sua preferência.</p><p>O RhythmMind oferece apoio reflexivo. Não realiza diagnósticos nem substitui acompanhamento profissional.</p><button id="about-close" class="button button-primary" type="button">Voltar ao meu espaço</button></dialog>
-    <dialog id="appearance-dialog" class="confirm-dialog" aria-labelledby="appearance-title">
+    <dialog id="about-dialog" class="confirm-dialog" closedby="any" aria-labelledby="about-title"><span class="eyebrow">NO SEU RITMO</span><h2 id="about-title">Sobre o RhythmMind</h2><p>Um diário de relatos, escolhas musicais e percepções. Você conta como está, revisa as sugestões e registra o que fez sentido na sua experiência.</p><p>A interpretação é provisória e as escolhas são suas. As sugestões musicais vêm do seu catálogo; a reprodução acontece no serviço de sua preferência.</p><p>O RhythmMind oferece apoio reflexivo. Não realiza diagnósticos nem substitui acompanhamento profissional.</p><button id="about-close" class="button button-primary" type="button" commandfor="about-dialog" command="close">Voltar ao meu espaço</button></dialog>
+    <dialog id="appearance-dialog" class="confirm-dialog" closedby="any" aria-labelledby="appearance-title">
       <h2 id="appearance-title">Preferências visuais</h2>
       <p>Escolha o tema e os efeitos que prefere. São ajustes independentes.</p>
       <div class="field theme-picker"><label for="theme-mode">Tema da interface</label><select id="theme-mode" data-theme-preference aria-describedby="theme-status"><option value="light">Claro</option><option value="dark" selected>Escuro</option><option value="system">Usar o sistema</option></select><p id="theme-status" class="field-help" role="status" aria-live="polite"></p></div>
@@ -335,7 +458,22 @@
       <label class="checkbox-line"><input id="ambient-toggle" type="checkbox" checked aria-describedby="ambient-help"><span>Ativar transição de cores</span></label>
       <p id="ambient-help" class="field-help"></p>
       <p class="field-help">A ambientação varia sutilmente os tons da onda conforme o tema. As cores são decorativas e não representam o seu estado emocional.</p>
-      <button id="appearance-close" class="button button-primary" type="button">Concluir</button>
+      <button id="appearance-close" class="button button-primary" type="button" commandfor="appearance-dialog" command="close">Concluir</button>
+    </dialog>
+    <dialog id="display-name-dialog" class="confirm-dialog" closedby="any" aria-labelledby="display-name-title" aria-describedby="display-name-help">
+      <form id="display-name-form" method="post" class="stack-form">
+        <span class="eyebrow">SUA CONTA</span>
+        <h2 id="display-name-title">Nome de exibição</h2>
+        <div class="field">
+          <label for="display-name-input">Como quer ser chamado?</label>
+          <input id="display-name-input" name="display_name" type="text" maxlength="40" autocomplete="nickname" enterkeyhint="done" placeholder="Ex.: João" aria-describedby="display-name-help">
+          <p id="display-name-help" class="field-help">Esse nome aparece na saudação e no menu da conta só neste navegador, sem mudar seu login. Deixe em branco para usar o padrão.</p>
+        </div>
+        <div class="button-row">
+          <button id="display-name-cancel" class="button button-secondary" type="button">Cancelar</button>
+          <button id="display-name-save" class="button button-primary" type="submit">Salvar nome</button>
+        </div>
+      </form>
     </dialog>
   </body>
 </html>

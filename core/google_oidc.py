@@ -24,10 +24,27 @@ _TOKEN = "https://oauth2.googleapis.com/token"
 _ISSUER = "https://accounts.google.com"
 _CALLBACK = "/api/auth/google/callback"
 _REDIRECT_PADRAO = "http://127.0.0.1:8000" + _CALLBACK
+_HOSTS_LOCAIS = frozenset({"localhost", "127.0.0.1", "::1"})
+_ROTULO_HOST = re.compile(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\Z")
 _TIMEOUT = 10
 _CLIENT_ID = re.compile(r"[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com\Z")
 _ALEATORIO = re.compile(r"[a-zA-Z0-9_-]{43}\Z")
 _VERIFIER = re.compile(r"[a-zA-Z0-9._~-]{43,128}\Z")
+
+
+def ambiente_producao(environ=None):
+    env = os.environ if environ is None else environ
+    return env.get("RHYTHMMIND_AMBIENTE", "").strip().lower() == "producao"
+
+
+def _host_externo_valido(host):
+    if not isinstance(host, str) or not 1 <= len(host) <= 253 or "." not in host:
+        return False
+    rotulos = host.split(".")
+    if any(not _ROTULO_HOST.fullmatch(rotulo) for rotulo in rotulos):
+        return False
+    tld = rotulos[-1]
+    return tld != "invalid" and not tld.isdigit() and len(tld) >= 2
 
 
 class ConfiguracaoGoogleInvalida(Exception):
@@ -55,6 +72,7 @@ class GoogleConfig:
     client_id: str
     client_secret: str = field(repr=False)
     redirect_uri: str = _REDIRECT_PADRAO
+    permitir_host_externo: bool = False
 
     def __post_init__(self):
         if (not _texto_seguro(self.client_id, 1024) or not _CLIENT_ID.fullmatch(self.client_id)
@@ -64,8 +82,11 @@ class GoogleConfig:
         try:
             url = urlsplit(self.redirect_uri)
             porta = url.port
-            if (url.scheme not in {"http", "https"}
-                    or url.hostname not in {"localhost", "127.0.0.1", "::1"}
+            local = url.hostname in _HOSTS_LOCAIS
+            esquema_valido = url.scheme in {"http", "https"} if local else url.scheme == "https"
+            host_valido = local or (self.permitir_host_externo and _host_externo_valido(url.hostname))
+            if (not esquema_valido
+                    or not host_valido
                     or url.username is not None or url.password is not None
                     or (porta is not None and not 1 <= porta <= 65535)
                     or url.path != _CALLBACK or url.query or url.fragment
@@ -105,10 +126,23 @@ def carregar_config_google():
     client_secret = os.environ.get("RHYTHMMIND_GOOGLE_CLIENT_SECRET", "")
     if not client_id and not client_secret:
         return None
-    return GoogleConfig(
-        client_id=client_id, client_secret=client_secret,
-        redirect_uri=os.environ.get("RHYTHMMIND_GOOGLE_REDIRECT_URI", _REDIRECT_PADRAO),
+    producao = ambiente_producao()
+    redirect_uri = (
+        os.environ.get("RHYTHMMIND_GOOGLE_REDIRECT_URI", "")
+        if producao
+        else os.environ.get("RHYTHMMIND_GOOGLE_REDIRECT_URI", _REDIRECT_PADRAO)
     )
+    config = GoogleConfig(
+        client_id=client_id,
+        client_secret=client_secret,
+        redirect_uri=redirect_uri,
+        permitir_host_externo=producao,
+    )
+    if producao:
+        url = urlsplit(config.redirect_uri)
+        if url.scheme != "https" or url.hostname in _HOSTS_LOCAIS:
+            raise ConfiguracaoGoogleInvalida()
+    return config
 
 
 class _RequestComTimeout:

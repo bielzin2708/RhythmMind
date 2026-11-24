@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { recordsForHome, sessionPending, summarizeHome, catalogTotal } from '../../static/home.js';
+import { initHome, recordsForHome, sessionPending, summarizeHome, catalogTotal } from '../../static/home.js';
 
 const complete = () => ({
   progresso: { emocoes_confirmadas: true, estado_desejado_informado: true, recomendacoes_geradas: true },
@@ -209,4 +209,67 @@ test('catálogo usa total válido e distingue ausência de dados de catálogo va
   for (const invalid of [null, [], {}, { total: '18' }, { total: -1 }, { musicas: null }]) {
     assert.throws(() => catalogTotal(invalid), TypeError);
   }
+});
+
+test('initHome destaca ações de navegação com nav-destination e seta decorativa', async t => {
+  const prev = { document: globalThis.document, Node: globalThis.Node };
+  const elements = new Map();
+  class MockNode {
+    constructor(tag = '', text = '') {
+      this.tagName = tag.toUpperCase();
+      this.children = [];
+      this.attributes = {};
+      this.dataset = {};
+      this.listeners = new Map();
+      this.className = '';
+      this.hidden = false;
+      this._text = text;
+    }
+    set textContent(value) { this._text = String(value); this.children = []; }
+    get textContent() { return this._text + this.children.map(child => child.textContent).join(''); }
+    append(...children) { this.children.push(...children); }
+    replaceChildren(...children) { this.children = []; this._text = ''; this.append(...children); }
+    setAttribute(name, value) { this.attributes[name] = String(value); }
+    removeAttribute(name) { delete this.attributes[name]; }
+    addEventListener(type, fn) { this.listeners.set(type, fn); }
+  }
+  const byId = id => {
+    if (!elements.has(id)) {
+      const el = new MockNode('div');
+      el.id = id;
+      elements.set(id, el);
+    }
+    return elements.get(id);
+  };
+  globalThis.Node = MockNode;
+  globalThis.document = {
+    createElement: tag => new MockNode(tag),
+    createTextNode: text => new MockNode('', text),
+    querySelector: sel => byId(sel.replace(/^#/, '')),
+  };
+  t.after(() => {
+    for (const [k, v] of Object.entries(prev)) {
+      if (v === undefined) delete globalThis[k];
+      else globalThis[k] = v;
+    }
+  });
+  const home = initHome({
+    api: async path => path === '/api/historico'
+      ? { registros: { 'sessao-1': { ...complete(), data_hora: '12/11/2026 10:00:00', finalidade: 'Relaxar' } } }
+      : { total: 2, musicas: [{}, {}] },
+    onNew: () => {}, onResume: () => {}, onRecord: () => {}, onHistory: () => {}, onCatalog: () => {},
+  });
+  home.setUser({ nome_usuario: 'Teste' });
+  await home.load();
+  const recentBtn = byId('home-recent-list').children[0].children.find(child => child.tagName === 'BUTTON');
+  assert.ok(recentBtn.className.split(/\s+/).includes('button-link'));
+  assert.ok(recentBtn.className.split(/\s+/).includes('home-card-action'));
+  assert.ok(recentBtn.className.split(/\s+/).includes('nav-destination'));
+  assert.equal(recentBtn.textContent, 'Ver registro →');
+  const arrow = recentBtn.children.find(child => child.tagName === 'SPAN');
+  assert.equal(arrow.attributes['aria-hidden'], 'true');
+  assert.equal(arrow.textContent, '→');
+  const catalogBtn = byId('home-open-catalog');
+  assert.equal(catalogBtn.textContent, 'Explorar músicas →');
+  assert.equal(catalogBtn.children.find(child => child.tagName === 'SPAN')?.attributes['aria-hidden'], 'true');
 });

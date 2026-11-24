@@ -81,7 +81,72 @@
     }
   }
 
-  function setPreference(value) {
+  let switchTimer = null;
+  let switchToken = 0;
+
+  function prefersReducedMotion() {
+    try {
+      if (typeof window.matchMedia !== 'function') return false;
+      const result = window.matchMedia('(prefers-reduced-motion: reduce)');
+      return Boolean(result && result.matches);
+    } catch {
+      return false;
+    }
+  }
+
+  function clearSwitchingState() {
+    switchToken += 1;
+    if (switchTimer !== null) {
+      if (typeof window.clearTimeout === 'function') window.clearTimeout(switchTimer);
+      else if (typeof clearTimeout === 'function') clearTimeout(switchTimer);
+      switchTimer = null;
+    }
+    delete document.documentElement.dataset.themeSwitching;
+  }
+
+  function applyWithTransition(previousTheme) {
+    const nextTheme = resolvedTheme();
+    const canViewTransition = typeof document.startViewTransition === 'function'
+      && document.visibilityState !== 'hidden';
+    const hasWindowTimer = typeof window.setTimeout === 'function';
+    const hasGlobalTimer = !hasWindowTimer && typeof setTimeout === 'function';
+
+    if (previousTheme === nextTheme || (!canViewTransition && !hasWindowTimer && !hasGlobalTimer) || prefersReducedMotion()) {
+      clearSwitchingState();
+      apply();
+      return;
+    }
+
+    if (canViewTransition) {
+      clearSwitchingState();
+      try {
+        const transition = document.startViewTransition(() => apply());
+        if (transition && transition.ready && typeof transition.ready.catch === 'function') {
+          transition.ready.catch(() => {});
+        }
+        if (transition && transition.finished && typeof transition.finished.catch === 'function') {
+          transition.finished.catch(() => {});
+        }
+        return;
+      } catch { /* Usa a transição por CSS quando startViewTransition não puder rodar. */ }
+    }
+
+    clearSwitchingState();
+    const token = switchToken;
+    document.documentElement.dataset.themeSwitching = 'true';
+    apply();
+    const clearAfterDelay = () => {
+      if (token !== switchToken) return;
+      switchTimer = null;
+      delete document.documentElement.dataset.themeSwitching;
+    };
+    switchTimer = hasWindowTimer
+      ? window.setTimeout(clearAfterDelay, 480)
+      : setTimeout(clearAfterDelay, 480);
+  }
+
+  function setPreference(value, { animate = false } = {}) {
+    const previousTheme = resolvedTheme();
     if (!choices.has(value)) {
       apply();
       return;
@@ -92,7 +157,8 @@
       window.localStorage.setItem(storageKey, preference);
       storageAvailable.theme = true;
     } catch { storageAvailable.theme = false; }
-    apply();
+    if (animate) applyWithTransition(previousTheme);
+    else apply();
   }
 
   function setSoftEffects(value) {
@@ -106,10 +172,10 @@
 
   function bindControls() {
     document.querySelectorAll('button[data-theme-toggle]').forEach(button => {
-      button.addEventListener('click', () => setPreference(resolvedTheme() === 'dark' ? 'light' : 'dark'));
+      button.addEventListener('click', () => setPreference(resolvedTheme() === 'dark' ? 'light' : 'dark', { animate: true }));
     });
     document.querySelectorAll('select[data-theme-preference]').forEach(select => {
-      select.addEventListener('change', () => setPreference(select.value));
+      select.addEventListener('change', () => setPreference(select.value, { animate: true }));
     });
     document.querySelectorAll('input[data-soft-effects-toggle]').forEach(checkbox => {
       checkbox.addEventListener('change', () => setSoftEffects(checkbox.checked));
@@ -118,7 +184,12 @@
   }
 
   if (systemMedia) {
-    const updateFromSystem = () => { if (preference === 'system') apply(); };
+    const updateFromSystem = () => {
+      if (preference === 'system') {
+        clearSwitchingState();
+        apply();
+      }
+    };
     if (typeof systemMedia.addEventListener === 'function') systemMedia.addEventListener('change', updateFromSystem);
     else if (typeof systemMedia.addListener === 'function') systemMedia.addListener(updateFromSystem);
   }
@@ -134,6 +205,7 @@
       softEffects = readSoftEffects();
     } else if (event.key === storageKey) preference = normalize(event.newValue);
     else softEffects = event.newValue === 'true';
+    clearSwitchingState();
     apply();
   });
 

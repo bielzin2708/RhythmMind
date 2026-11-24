@@ -43,6 +43,11 @@ def _nao_autorizado():
 
 
 def _raiz_autorizada(request):
+    if getattr(request.app.state, "modo_producao", False):
+        diretorio = getattr(request.app.state, "diretorio_dados", None)
+        if diretorio is None or not Path(diretorio).is_dir():
+            raise HTTPException(status_code=503, detail="Ambiente de producao nao autorizado.")
+        return Path(diretorio).resolve()
     diretorio = getattr(request.app.state, "diretorio_desenvolvimento", None)
     if diretorio is None or Path.cwd().resolve() != Path(diretorio).resolve():
         raise HTTPException(status_code=503, detail="Ambiente de desenvolvimento local nao autorizado.")

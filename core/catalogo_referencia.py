@@ -16,7 +16,7 @@ from core.interpretacao.contratos import CATEGORIAS
 
 
 ARQ_CATALOGO_REFERENCIA = Path(__file__).resolve().parents[1] / "data/catalogo_referencia.json"
-MAX_IDS_IMPORTACAO = 300
+MAX_IDS_IMPORTACAO = 600
 _HOSTS_FONTES = {"music.apple.com", "itunes.apple.com", "open.spotify.com"}
 _CURADORIA_TITULAR = {
     "status": "informada_pelo_usuario",

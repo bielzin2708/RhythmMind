@@ -1,4 +1,4 @@
-import { $, el, strategyLabel, withBusy, confirmAction } from './ui.js';
+import { $, el, strategyLabel, withBusy, confirmAction, CATEGORIAS } from './ui.js';
 import { createNarrativeDraft } from './narrative-draft.js';
 import { renderCategories, clearCategories } from './review-categories.js';
 import { recommendationState, currentCatalogState } from './listening-state.js';
@@ -45,6 +45,21 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
   let fallback = false;
   let guidanceRequest = 0;
   let catalogState = 'unknown';
+  let activeCatalogFilter = 'all';
+  const catalogStatus = (message, kind = 'info') => {
+    const target = $('#catalog-status');
+    if (!target) return;
+    target.textContent = message;
+    target.dataset.type = kind;
+    target.setAttribute('role', kind === 'error' ? 'alert' : 'status');
+  };
+  const feedbackStatus = (message, kind = 'info') => {
+    const target = $('#feedback-status');
+    if (!target) return;
+    target.textContent = message;
+    target.dataset.type = kind;
+    target.setAttribute('role', kind === 'error' ? 'alert' : 'status');
+  };
   const narrativeDraft = createNarrativeDraft($('#narrative-form'), { confirm: confirmAction });
   const catalogReference = createCatalogReference({
     api, button: $('#catalog-reference-import'), status: $('#catalog-reference-status'),
@@ -68,10 +83,9 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     describeError: readableError,
     onError: error => notify(readableError(error), 'error'),
     onSaved: async (_song, isCurrent) => {
-      await loadCatalog({ loadReference: false });
+      await loadCatalog({ loadReference: false, preserveLimit: true });
       if (!isCurrent()) return;
-      $('#catalog-status').textContent = 'Sensações salvas. As faixas com associações participam das próximas sugestões.';
-      $('#catalog-status').dataset.type = 'success';
+      catalogStatus('Sensações salvas. As faixas com associações participam das próximas sugestões.', 'success');
       changed();
       void refreshCatalogGuidance();
     },
@@ -80,6 +94,7 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     list: $('#catalog-list'), search: $('#catalog-search'), count: $('#catalog-page-count'), more: $('#catalog-more'),
     emptyMessage: 'Seu catálogo ainda está vazio. Adicione a seleção inicial de músicas reais, cadastre uma faixa ou use os exemplos fictícios para experimentar o fluxo.',
     renderCard: song => renderCatalogCard(song, { onEdit: (item, trigger) => catalogAssociations.open(item, trigger) }),
+    onRender: state => syncCatalogFilterBar(state),
   });
 
   window.addEventListener('beforeunload', event => {
@@ -107,14 +122,14 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
       if (!own(version) || stale(error)) return;
       const message = readableError(error);
       if (container?.closest('#view-catalog') || container?.id === 'view-catalog') {
-        $('#catalog-status').textContent = message;
-        $('#catalog-status').dataset.type = 'error';
+        catalogStatus(message, 'error');
       } else status(message, 'error');
       notify(message, 'error');
     }
   }
 
   function stage(number) {
+    const previous = !$('#session-entry').hidden ? 1 : !$('#session-review').hidden ? 2 : 3;
     $('#session-entry').hidden = number !== 1;
     $('#session-review').hidden = number !== 2;
     $('#session-listening').hidden = number !== 3;
@@ -127,12 +142,16 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
       item.classList.toggle('current', index + 1 === number);
       item.classList.toggle('complete', index + 1 < number);
     });
+    if (number !== previous && window.scrollY > 0) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
   }
 
   function reset({ preserveNarrative = false } = {}) {
     epoch += 1;
     draftsEpoch += 1;
     catalogEpoch += 1;
+    activeCatalogFilter = 'all';
     catalogReference.reset();
     catalogAssociations.reset();
     catalogBrowser.reset();
@@ -159,8 +178,15 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     $('#review-clarification').hidden = true;
     $('#llm-options').hidden = $('#interpretation-engine').value !== 'llm';
     $('#draft-count').textContent = '0';
-    $('#catalog-status').textContent = '';
-    $('#feedback-status').textContent = '';
+    catalogStatus('');
+    feedbackStatus('');
+    if (!preserveNarrative && $('#session-extra-options')) $('#session-extra-options').open = false;
+    if ($('#feedback-extra-fields')) $('#feedback-extra-fields').open = false;
+    syncCatalogFilterChips();
+    syncCatalogFilterBar({ query: '', total: 0, matched: 0, error: '', searchMatched: [] });
+    syncEntryDynamics();
+    syncFeedbackChoices();
+    syncCatalogFeelingChips();
     status('');
     stage(1);
     renderCatalogGuidance();
@@ -182,7 +208,10 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     notify('');
     void loadDrafts();
     void refreshCatalogGuidance();
-    $('#narrative-text').focus();
+    if ($('#session-entry').getClientRects().length) {
+      $('#narrative-text').focus({ preventScroll: true });
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
     return true;
   }
 
@@ -396,12 +425,13 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
 
   async function loadDrafts() {
     const requestVersion = ++draftsEpoch;
+    const list = $('#draft-list');
+    list?.setAttribute('aria-busy', 'true');
     try {
       const history = await api('/api/historico');
       if (requestVersion !== draftsEpoch) return;
       const drafts = Object.entries(history.registros || {}).filter(([, item]) => item.progresso && !item.progresso.recomendacoes_geradas).reverse();
       $('#draft-count').textContent = String(drafts.length);
-      const list = $('#draft-list');
       list.replaceChildren();
       if (!drafts.length) list.append(el('p', { class: 'hint' }, 'Nenhum rascunho pendente. Você pode começar uma nova sessão.'));
       drafts.forEach(([id, item]) => {
@@ -415,7 +445,9 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
       });
     } catch (error) {
       if (requestVersion !== draftsEpoch || stale(error)) return;
-      $('#draft-list').replaceChildren(el('p', { class: 'hint' }, 'Não foi possível carregar os rascunhos agora. Use “Atualizar” para tentar novamente.'));
+      list.replaceChildren(el('p', { class: 'hint' }, 'Não foi possível carregar os rascunhos agora. Use “Atualizar” para tentar novamente.'));
+    } finally {
+      if (requestVersion === draftsEpoch) list?.removeAttribute('aria-busy');
     }
   }
 
@@ -485,8 +517,12 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     $('#feedback-answer').value = feedback?.ajudou === true ? 'ajudou' : noChange ? 'sem_mudanca' : feedback?.ajudou === false ? 'nao_ajudou' : '';
     $('#feedback-comment').value = comment;
     $('#feedback-improvement').value = feedback?.melhoria || '';
+    syncFeedbackChoices();
+    if ($('#feedback-extra-fields')) {
+      $('#feedback-extra-fields').open = Boolean(comment || feedback?.melhoria);
+    }
     $('#feedback-later').textContent = typeof feedback?.ajudou === 'boolean' ? 'Manter retorno atual' : 'Responder depois';
-    $('#feedback-status').textContent = typeof feedback?.ajudou === 'boolean' ? 'Esta sessão já tem um retorno registrado. Você pode mantê-lo ou atualizá-lo.' : 'O retorno ainda não foi informado.';
+    feedbackStatus(typeof feedback?.ajudou === 'boolean' ? 'Esta sessão já tem um retorno registrado. Você pode mantê-lo ou atualizá-lo.' : 'O retorno ainda não foi informado.');
     status(!hasSuggestions ? 'Relato e revisão salvos. Não há uma escuta pendente nesta sessão.' : record.escuta?.faixas?.length === 0
       ? 'Você registrou a decisão de não escolher uma faixa nesta sessão.'
       : record.escuta ? 'Sua escolha de faixa e a informação de escuta estão salvas.'
@@ -519,27 +555,222 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
     changed();
   }
 
-  async function loadCatalog({ loadReference = true } = {}) {
+  function syncEntryDynamics() {
+    const text = $('#narrative-text')?.value || '';
+    const counter = $('#narrative-counter');
+    if (counter) {
+      const len = text.trim().length;
+      if (len === 0) {
+        counter.textContent = 'Pronto para ouvir você';
+        delete counter.dataset.state;
+      } else if (text.length >= 4000) {
+        counter.textContent = '4000 / 4000 · limite atingido';
+        counter.dataset.state = 'near-limit';
+      } else if (text.length >= 3600) {
+        counter.textContent = `${text.length} / 4000 · restam ${4000 - text.length}`;
+        counter.dataset.state = 'near-limit';
+      } else {
+        counter.textContent = `${text.length} / 4000 caracteres`;
+        counter.dataset.state = 'ready';
+      }
+      counter.classList.toggle('active', len > 0);
+    }
+    const purposeVal = ($('#session-purpose')?.value || '').trim().toLowerCase();
+    document.querySelectorAll('[data-purpose-chip]').forEach((chip) => {
+      const match = chip.dataset.purposeChip.toLowerCase() === purposeVal && purposeVal.length > 0;
+      chip.classList.toggle('active', match);
+      chip.setAttribute('aria-pressed', String(match));
+    });
+    const contextVal = ($('#session-context')?.value || '').trim().toLowerCase();
+    const contextTokens = contextVal.length > 0
+      ? contextVal.split(/[,;·]+/).map((s) => s.trim()).filter(Boolean) : [];
+    document.querySelectorAll('[data-context-chip]').forEach((chip) => {
+      const target = chip.dataset.contextChip.toLowerCase();
+      const match = contextVal === target || contextTokens.includes(target);
+      chip.classList.toggle('active', match);
+      chip.setAttribute('aria-pressed', String(match));
+    });
+    const badge = $('#session-options-badge');
+    if (badge) {
+      const limit = $('#session-limit')?.value || '3';
+      const motor = $('#interpretation-engine')?.value === 'llm' ? 'LLM externo' : 'Dicionário local';
+      const ctx = ($('#session-context')?.value || '').trim();
+      badge.textContent = `${ctx ? 'Com contexto · ' : ''}${limit} ${Number(limit) === 1 ? 'sugestão' : 'sugestões'} · ${motor}`;
+    }
+  }
+
+  function syncFeedbackChoices() {
+    const val = $('#feedback-answer')?.value || '';
+    document.querySelectorAll('[data-feedback-choice]').forEach((btn) => {
+      const active = btn.dataset.feedbackChoice === val && val.length > 0;
+      btn.classList.toggle('active', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
+  }
+
+  function syncCatalogFeelingChips() {
+    const raw = ($('#catalog-feelings')?.value || '').toLowerCase();
+    const tokens = new Set(raw.split(/[\s,;]+/).filter(Boolean));
+    document.querySelectorAll('[data-feeling-chip]').forEach((chip) => {
+      const active = tokens.has(chip.dataset.feelingChip.toLowerCase());
+      chip.classList.toggle('active', active);
+      chip.setAttribute('aria-pressed', String(active));
+    });
+  }
+
+  function isPendingCatalogSong(song) {
+    return !Array.isArray(song.sentimentos_associados)
+      || !song.sentimentos_associados.some(value => CATEGORIAS.includes(value));
+  }
+
+  function catalogFilterPredicate(filter) {
+    if (filter === 'all') return null;
+    if (filter === 'pending') return isPendingCatalogSong;
+    return song => Array.isArray(song.sentimentos_associados) && song.sentimentos_associados.includes(filter);
+  }
+
+  function syncCatalogFilterChips() {
+    document.querySelectorAll('[data-catalog-filter]').forEach((chip) => {
+      const active = chip.dataset.catalogFilter === activeCatalogFilter;
+      chip.classList.toggle('active', active);
+      chip.setAttribute('aria-pressed', String(active));
+    });
+  }
+
+  function syncCatalogFilterBar({ total = 0, matched = 0, query = '', error = '', searchMatched = [] } = {}) {
+    const bar = $('#catalog-filter-bar');
+    const chips = document.querySelectorAll('[data-catalog-filter]');
+    const show = total > 0 && !error;
+    if (bar) bar.hidden = !show;
+    const pool = Array.isArray(searchMatched) ? searchMatched : [];
+    const counts = { all: pool.length, pending: 0 };
+    if (show) {
+      for (const song of pool) {
+        if (isPendingCatalogSong(song)) counts.pending += 1;
+        if (Array.isArray(song.sentimentos_associados)) {
+          for (const tag of song.sentimentos_associados) {
+            if (CATEGORIAS.includes(tag)) counts[tag] = (counts[tag] || 0) + 1;
+          }
+        }
+      }
+    }
+    chips.forEach((chip) => {
+      const base = chip.dataset.baseLabel || chip.textContent.trim();
+      chip.dataset.baseLabel = base;
+      const filter = chip.dataset.catalogFilter;
+      const count = show ? (counts[filter] || 0) : 0;
+      chip.textContent = count > 0 ? `${base} (${count})` : base;
+    });
+    const badge = $('#catalog-total-badge');
+    if (!badge) return;
+    if (!show) {
+      badge.textContent = '0';
+      return;
+    }
+    const filtered = activeCatalogFilter !== 'all' || Boolean(query);
+    badge.textContent = filtered ? `${matched}/${total}` : String(total);
+  }
+
+  function applyCatalogFilter(filter = activeCatalogFilter) {
+    activeCatalogFilter = filter;
+    syncCatalogFilterChips();
+    catalogBrowser.setFilter(catalogFilterPredicate(filter));
+  }
+
+  async function loadCatalog({ loadReference = true, preserveLimit = false } = {}) {
     const version = ++catalogEpoch;
     if (loadReference) void catalogReference.load();
     catalogBrowser.setBusy(true);
     try {
       const result = await api('/api/musicas');
       if (version !== catalogEpoch) return;
-      catalogBrowser.setSongs(result.musicas);
-      if ($('#catalog-status').dataset.type === 'error') $('#catalog-status').textContent = '';
+      const songs = result.musicas || [];
+      catalogBrowser.setSongs(songs, { preserveLimit });
+      if ($('#catalog-status').dataset.type === 'error') catalogStatus('');
     } catch (error) {
       if (version !== catalogEpoch || stale(error)) return;
-      $('#catalog-status').textContent = readableError(error);
-      $('#catalog-status').dataset.type = 'error';
+      catalogStatus(readableError(error), 'error');
       catalogBrowser.setError('Não foi possível carregar suas faixas. Abra Minhas músicas novamente para tentar.');
     } finally {
       if (version === catalogEpoch) catalogBrowser.setBusy(false);
     }
   }
 
+  $('#narrative-text')?.addEventListener('input', syncEntryDynamics);
+  $('#narrative-text')?.addEventListener('change', syncEntryDynamics);
+  $('#session-purpose')?.addEventListener('input', syncEntryDynamics);
+  $('#session-purpose')?.addEventListener('change', syncEntryDynamics);
+  $('#session-context')?.addEventListener('input', syncEntryDynamics);
+  $('#session-context')?.addEventListener('change', syncEntryDynamics);
+  $('#session-limit')?.addEventListener('change', syncEntryDynamics);
+  $('#narrative-form')?.addEventListener('reset', () => queueMicrotask(syncEntryDynamics));
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return;
+    syncEntryDynamics();
+    syncFeedbackChoices();
+    syncCatalogFeelingChips();
+  });
+  document.querySelectorAll('[data-purpose-chip]').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const input = $('#session-purpose');
+      if (!input) return;
+      const value = chip.dataset.purposeChip;
+      input.value = input.value.trim().toLowerCase() === value.toLowerCase() ? '' : value;
+      syncEntryDynamics();
+    });
+  });
+  document.querySelectorAll('[data-context-chip]').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const input = $('#session-context');
+      if (!input) return;
+      const value = chip.dataset.contextChip;
+      const parts = input.value.split(/[,;·]+/).map((s) => s.trim()).filter(Boolean);
+      const exists = parts.some((p) => p.toLowerCase() === value.toLowerCase());
+      const next = exists ? parts.filter((p) => p.toLowerCase() !== value.toLowerCase()) : [...parts, value];
+      input.value = next.join(', ');
+      syncEntryDynamics();
+    });
+  });
+  const handleFeedbackSelection = () => {
+    syncFeedbackChoices();
+    if ($('#feedback-answer')?.value && $('#feedback-extra-fields')) $('#feedback-extra-fields').open = true;
+    if ($('#feedback-status')?.dataset.type === 'error' && $('#feedback-answer')?.value) {
+      feedbackStatus(typeof record?.feedback?.ajudou === 'boolean'
+        ? 'Esta sessão já tem um retorno registrado. Você pode mantê-lo ou atualizá-lo.'
+        : 'Escolha pronta para salvar quando quiser.');
+    }
+  };
+  document.querySelectorAll('[data-feedback-choice]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const select = $('#feedback-answer');
+      if (!select) return;
+      select.value = btn.dataset.feedbackChoice;
+      handleFeedbackSelection();
+    });
+  });
+  $('#feedback-answer')?.addEventListener('change', handleFeedbackSelection);
+  document.querySelectorAll('[data-feeling-chip]').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const input = $('#catalog-feelings');
+      if (!input) return;
+      const target = chip.dataset.feelingChip.toLowerCase();
+      const parts = input.value.split(/[\s,;]+/).filter(Boolean);
+      const exists = parts.some((p) => p.toLowerCase() === target);
+      const next = exists ? parts.filter((p) => p.toLowerCase() !== target) : [...parts, target];
+      input.value = next.join(', ');
+      syncCatalogFeelingChips();
+    });
+  });
+  $('#catalog-feelings')?.addEventListener('input', syncCatalogFeelingChips);
+  $('#catalog-feelings')?.addEventListener('change', syncCatalogFeelingChips);
+  $('#catalog-form')?.addEventListener('reset', () => queueMicrotask(syncCatalogFeelingChips));
+  document.querySelectorAll('[data-catalog-filter]').forEach((chip) => {
+    chip.addEventListener('click', () => applyCatalogFilter(chip.dataset.catalogFilter));
+  });
+
   $('#interpretation-engine').addEventListener('change', () => {
     $('#llm-options').hidden = $('#interpretation-engine').value !== 'llm';
+    syncEntryDynamics();
   });
   $('#narrative-form').addEventListener('submit', (event) => {
     event.preventDefault();
@@ -583,6 +814,7 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
   $('#session-to-history').addEventListener('click', () => onHistory());
   $('#start-another').addEventListener('click', () => newSession());
   $('#new-session-button')?.addEventListener('click', () => newSession());
+  $('#review-new-session')?.addEventListener('click', () => newSession());
 
   async function saveListening(version, none = false) {
     if (!sessionId || !record) return;
@@ -609,7 +841,7 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
       if (!sessionId) return;
       const answer = $('#feedback-answer').value;
       if (!answer) {
-        $('#feedback-status').textContent = 'Escolha uma resposta ou use “Responder depois” para manter o retorno pendente.';
+        feedbackStatus('Escolha uma resposta ou use “Responder depois” para manter o retorno pendente.', 'error');
         $('#feedback-answer').focus();
         return;
       }
@@ -619,38 +851,38 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
       await api('/api/feedback', { method: 'POST', body: { sessao_id: sessionId, ...feedback } });
       if (!own(version)) return;
       record.feedback = feedback;
-      $('#feedback-status').textContent = 'Seu retorno foi salvo para esta sessão, sem atribuir o resultado a uma faixa específica.';
+      feedbackStatus('Seu retorno foi salvo para esta sessão, sem atribuir o resultado a uma faixa específica.', 'success');
       $('#feedback-later').textContent = 'Manter retorno atual';
       notify('Retorno salvo.', 'success');
       changed();
     });
   });
   $('#feedback-later').addEventListener('click', () => {
-    $('#feedback-status').textContent = typeof record?.feedback?.ajudou === 'boolean'
+    feedbackStatus(typeof record?.feedback?.ajudou === 'boolean'
       ? 'O retorno já salvo foi mantido.'
-      : 'O retorno permanece pendente. Você pode voltar a esta sessão pelo histórico.';
+      : 'O retorno permanece pendente. Você pode voltar a esta sessão pelo histórico.');
   });
 
   $('#catalog-form').addEventListener('submit', (event) => {
     event.preventDefault();
     action($('#catalog-form'), async (version) => {
-      $('#catalog-status').textContent = 'Adicionando a faixa ao seu catálogo…';
-      $('#catalog-status').dataset.type = 'loading';
+      catalogStatus('Adicionando a faixa ao seu catálogo…', 'loading');
       await api('/api/musicas', { method: 'POST', body: {
         nome: $('#catalog-name').value, artista: $('#catalog-artist').value,
         duracao: $('#catalog-duration').value, sentimentos_texto: $('#catalog-feelings').value,
       } });
       if (!own(version)) return;
       $('#catalog-form').reset();
-      $('#catalog-status').textContent = 'Faixa adicionada ao seu catálogo. Ela estará disponível nas próximas sessões.';
-      $('#catalog-status').dataset.type = 'success';
-      await loadCatalog();
+      syncCatalogFeelingChips();
+      catalogStatus('Faixa adicionada ao seu catálogo. Ela estará disponível nas próximas sessões.', 'success');
+      await loadCatalog({ loadReference: false });
+      if (!own(version)) return;
       changed();
+      void refreshCatalogGuidance();
     });
   });
   $('#catalog-demo').addEventListener('click', () => action($('#view-catalog'), async (version) => {
-    $('#catalog-status').textContent = 'Preparando as faixas fictícias do seu catálogo…';
-    $('#catalog-status').dataset.type = 'loading';
+    catalogStatus('Preparando as faixas fictícias do seu catálogo…', 'loading');
     const current = await api('/api/musicas');
     if (!own(version)) return;
     const existing = new Set((current.musicas || []).map((song) => `${song.nome}|${song.artista}`));
@@ -661,12 +893,13 @@ export function initSession({ api, notify, onChanged, onHistory, onCatalog }) {
       if (!own(version)) return;
       added += 1;
     }
-    $('#catalog-status').textContent = added
+    catalogStatus(added
       ? 'Faixas fictícias adicionadas ao seu catálogo para experimentar as próximas sessões.'
-      : 'As faixas fictícias de exemplo já estão no seu catálogo.';
-    $('#catalog-status').dataset.type = 'success';
-    await loadCatalog();
+      : 'As faixas fictícias de exemplo já estão no seu catálogo.', 'success');
+    await loadCatalog({ loadReference: false });
+    if (!own(version)) return;
     changed();
+    void refreshCatalogGuidance();
   }));
 
   reset();

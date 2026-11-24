@@ -120,3 +120,76 @@ export function downloadJSON(data, filename = 'rhythmmind-registros.json') {
   link.remove();
   setTimeout(() => URL.revokeObjectURL(objectURL), 1000);
 }
+
+const GENERATED_GOOGLE_USERNAME = /^google_[0-9a-f]{32}$/i;
+const DISPLAY_NAME_KEY_PREFIX = 'rhythmmind.displayName.';
+const MAX_DISPLAY_NAME = 40;
+
+export function isGeneratedGoogleUsername(value) {
+  return typeof value === 'string' && GENERATED_GOOGLE_USERNAME.test(value.trim());
+}
+
+export function sanitizeDisplayName(value) {
+  if (typeof value !== 'string') return '';
+  const normalized = value.trim().replace(/\s+/g, ' ');
+  if (!normalized) return '';
+  return Array.from(normalized).slice(0, MAX_DISPLAY_NAME).join('');
+}
+
+export function readStoredDisplayName(userId) {
+  if (!userId || typeof localStorage === 'undefined') return '';
+  try {
+    return sanitizeDisplayName(localStorage.getItem(DISPLAY_NAME_KEY_PREFIX + userId));
+  } catch {
+    return '';
+  }
+}
+
+export function saveStoredDisplayName(userId, displayName) {
+  if (!userId || typeof localStorage === 'undefined') return false;
+  const normalized = sanitizeDisplayName(displayName);
+  try {
+    if (normalized) localStorage.setItem(DISPLAY_NAME_KEY_PREFIX + userId, normalized);
+    else localStorage.removeItem(DISPLAY_NAME_KEY_PREFIX + userId);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function accountIdentity(profile) {
+  const raw = typeof profile?.nome_usuario === 'string' ? profile.nome_usuario.trim() : '';
+  const generatedGoogle = isGeneratedGoogleUsername(raw);
+  const custom = readStoredDisplayName(profile?.usuario_id);
+  if (custom) {
+    return {
+      displayName: custom,
+      avatar: Array.from(custom)[0].toLocaleUpperCase('pt-BR'),
+      greetingName: custom,
+      providerLabel: generatedGoogle ? 'Conta Google · seu espaço pessoal' : 'Seu espaço pessoal',
+      customName: custom,
+      isCustom: true,
+      isGeneratedGoogle: generatedGoogle,
+    };
+  }
+  if (generatedGoogle) {
+    return {
+      displayName: 'Conta Google',
+      avatar: 'G',
+      greetingName: '',
+      providerLabel: 'Conectado com Google · seu espaço pessoal',
+      customName: '',
+      isCustom: false,
+      isGeneratedGoogle: true,
+    };
+  }
+  return {
+    displayName: raw,
+    avatar: Array.from(raw || 'R')[0].toLocaleUpperCase('pt-BR'),
+    greetingName: raw,
+    providerLabel: 'Seu espaço pessoal',
+    customName: '',
+    isCustom: false,
+    isGeneratedGoogle: false,
+  };
+}

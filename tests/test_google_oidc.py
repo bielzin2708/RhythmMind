@@ -97,6 +97,47 @@ class GoogleConfigTests(unittest.TestCase):
         self.assertNotIn("access_type", query)
         self.assertNotIn("login_hint", query)
 
+    def test_modo_producao_aceita_https_externo_e_exige_redirect_explicito(self):
+        uri = "https://rhythmmind-abc123-uc.a.run.app/api/auth/google/callback"
+        config = google.GoogleConfig(CLIENT_ID, SECRET, uri, permitir_host_externo=True)
+        self.assertEqual(config.redirect_uri, uri)
+        self.assertEqual(config.origin, "https://rhythmmind-abc123-uc.a.run.app")
+
+        for invalida in (
+            "http://rhythmmind-abc123-uc.a.run.app/api/auth/google/callback",
+            "https://semtld/api/auth/google/callback",
+            "https://192.0.2.1/api/auth/google/callback",
+            "https://exemplo.invalid/api/auth/google/callback",
+        ):
+            with self.subTest(uri=invalida), self.assertRaises(google.ConfiguracaoGoogleInvalida):
+                google.GoogleConfig(CLIENT_ID, SECRET, invalida, permitir_host_externo=True)
+
+        with patch.dict(os.environ, {
+            "RHYTHMMIND_AMBIENTE": "producao",
+            "RHYTHMMIND_GOOGLE_CLIENT_ID": CLIENT_ID,
+            "RHYTHMMIND_GOOGLE_CLIENT_SECRET": SECRET,
+            "RHYTHMMIND_GOOGLE_REDIRECT_URI": uri,
+        }, clear=True):
+            carregada = google.carregar_config_google()
+        self.assertEqual(carregada.redirect_uri, uri)
+
+        for sem_uri in (
+            {
+                "RHYTHMMIND_AMBIENTE": "producao",
+                "RHYTHMMIND_GOOGLE_CLIENT_ID": CLIENT_ID,
+                "RHYTHMMIND_GOOGLE_CLIENT_SECRET": SECRET,
+            },
+            {
+                "RHYTHMMIND_AMBIENTE": "producao",
+                "RHYTHMMIND_GOOGLE_CLIENT_ID": CLIENT_ID,
+                "RHYTHMMIND_GOOGLE_CLIENT_SECRET": SECRET,
+                "RHYTHMMIND_GOOGLE_REDIRECT_URI": "http://127.0.0.1:8000/api/auth/google/callback",
+            },
+        ):
+            with self.subTest(env=sem_uri), patch.dict(os.environ, sem_uri, clear=True):
+                with self.assertRaises(google.ConfiguracaoGoogleInvalida):
+                    google.carregar_config_google()
+
 
 class GoogleIdentityTests(unittest.TestCase):
     @classmethod

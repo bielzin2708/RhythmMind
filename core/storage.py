@@ -6,6 +6,8 @@ from threading import RLock
 from core.caracterizacao import preparar_musica
 from core.contexto import resolver_caminho
 
+LOCK_MUSICAS = RLock()
+
 # Definição das constantes
 ARQ_MUSICAS = 'data/musicas_usuario.json'
 ARQ_HISTORICO = 'data/historico.json'

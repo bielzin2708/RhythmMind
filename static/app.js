@@ -1,5 +1,5 @@
 import { api, setToken, onUnauthorized, StaleRequestError } from './api.js';
-import { $, notify, withBusy, dismissConfirmation, downloadJSON } from './ui.js';
+import { $, notify, withBusy, dismissConfirmation, downloadJSON, accountIdentity, readStoredDisplayName, saveStoredDisplayName } from './ui.js';
 import { initSession } from './session.js';
 import { initHistory } from './history.js';
 import { initHome } from './home.js';
@@ -138,11 +138,13 @@ for (const button of document.querySelectorAll('[data-toggle-password]')) {
   });
 }
 
+const TOP_HEADINGS = new Set(['home-heading', 'session-heading', 'history-heading', 'catalog-heading']);
+
 function focusContent(target) {
   if (!target || !target.getClientRects().length) return;
   target.focus({ preventScroll: true });
-  // O título da home fica dentro do destaque; a saudação deve chegar inteira.
-  if (target.id === 'home-heading') window.scrollTo({ top: 0, behavior: 'auto' });
+  // Os títulos principais das visões posicionam o documento no topo sem ficarem cobertos pela barra fixa.
+  if (TOP_HEADINGS.has(target.id)) window.scrollTo({ top: 0, behavior: 'instant' });
   else target.scrollIntoView({ block: 'start', behavior: 'auto' });
 }
 
@@ -224,8 +226,10 @@ function clearIdentity() {
   home.reset();
   $('#about-dialog').close();
   $('#appearance-dialog').close();
+  $('#display-name-dialog').close();
   $('.storage-info').open = false;
   $('#account-name').textContent = '';
+  $('#account-provider-label').textContent = 'Seu espaço pessoal';
   $('#workspace-avatar').textContent = '';
   document.title = 'RhythmMind — seu momento, sua escuta';
   $('#app-shell').hidden = true;
@@ -238,6 +242,7 @@ function clearIdentity() {
   clearPasswords();
   $('#auth-status').textContent = '';
   notify('');
+  window.scrollTo({ top: 0, behavior: 'instant' });
   $('#login-name').focus();
   void configureGoogle();
 }
@@ -259,19 +264,84 @@ onUnauthorized(() => {
 });
 
 for (const name of ['home', 'session', 'history', 'catalog']) {
-  $(`#nav-${name}`).addEventListener('click', () => showView(name));
+  $(`#nav-${name}`).addEventListener('click', () => {
+    notify('');
+    showView(name);
+  });
 }
-$('#workspace-home-link').addEventListener('click', () => showView('home'));
-$('#about-button').addEventListener('click', () => {
-  if (user) $('#about-dialog').showModal();
+$('#workspace-home-link').addEventListener('click', () => {
+  notify('');
+  showView('home');
 });
-$('#about-close').addEventListener('click', () => $('#about-dialog').close());
+for (const button of document.querySelectorAll('[data-return-view]')) {
+  button.addEventListener('click', () => {
+    notify('');
+    showView(button.dataset.returnView);
+  });
+}
+$('#about-button').addEventListener('click', () => {
+  if (!user) return;
+  closeAccountMenu();
+  $('#about-dialog').showModal();
+});
+$('#about-dialog').addEventListener('close', () => {
+  if (user && !document.querySelector('dialog[open]')) $('#account-menu-toggle').focus();
+});
 $('#appearance-button').addEventListener('click', () => {
   if (!user) return;
+  closeAccountMenu();
   updateAmbientAppearance();
   $('#appearance-dialog').showModal();
 });
-$('#appearance-close').addEventListener('click', () => $('#appearance-dialog').close());
+$('#appearance-dialog').addEventListener('close', () => {
+  if (user && !document.querySelector('dialog[open]')) $('#account-menu-toggle').focus();
+});
+$('#account-name-button').addEventListener('click', () => {
+  if (!user) return;
+  closeAccountMenu();
+  const input = $('#display-name-input');
+  input.value = readStoredDisplayName(user.usuario_id);
+  $('#display-name-dialog').showModal();
+  input.focus();
+  input.select();
+});
+$('#display-name-cancel').addEventListener('click', () => $('#display-name-dialog').close());
+$('#display-name-dialog').addEventListener('close', () => {
+  if (user && !document.querySelector('dialog[open]')) $('#account-menu-toggle').focus();
+});
+$('#display-name-form').addEventListener('submit', event => {
+  event.preventDefault();
+  if (!user) return;
+  const saved = saveStoredDisplayName(user.usuario_id, $('#display-name-input').value);
+  $('#display-name-dialog').close();
+  applyAccountIdentity();
+  if (!saved) {
+    notify('Não foi possível salvar o nome de exibição neste navegador.', 'error');
+    return;
+  }
+  const identity = accountIdentity(user);
+  notify(identity.isCustom
+    ? `Nome de exibição atualizado para ${identity.displayName}.`
+    : 'Nome de exibição restaurado para o padrão da conta.', 'success');
+});
+// Fallback local para navegadores sem Invoker Commands (CSP 'self' bloqueia CDN externo).
+if (!('commandForElement' in HTMLButtonElement.prototype)) {
+  for (const button of document.querySelectorAll('button[commandfor][command="close"]')) {
+    button.addEventListener('click', () => document.getElementById(button.getAttribute('commandfor'))?.close());
+  }
+}
+// Fallback para light-dismiss de diálogos informativos onde <dialog closedby> ainda não existe.
+if (!('closedBy' in HTMLDialogElement.prototype)) {
+  for (const dialog of [$('#about-dialog'), $('#appearance-dialog'), $('#display-name-dialog')]) {
+    dialog.addEventListener('click', event => {
+      if (event.target !== dialog) return;
+      const rect = dialog.getBoundingClientRect();
+      const inside = rect.top <= event.clientY && event.clientY <= rect.top + rect.height
+        && rect.left <= event.clientX && event.clientX <= rect.left + rect.width;
+      if (!inside) dialog.close();
+    });
+  }
+}
 $('#ambient-toggle').addEventListener('change', event => {
   ambientEnabled = event.currentTarget.checked;
   updateAmbientAppearance();
@@ -307,14 +377,21 @@ $('#show-login').addEventListener('click', () => {
   $('#login-name').focus();
 });
 
+function applyAccountIdentity() {
+  if (!user) return;
+  const identity = accountIdentity(user);
+  $('#account-name').textContent = identity.displayName;
+  $('#account-provider-label').textContent = identity.providerLabel;
+  $('#workspace-avatar').textContent = identity.avatar;
+  home.updateGreeting(user);
+}
+
 async function activateAccess(access, attempt) {
   if (attempt !== accessEpoch) return;
   setToken(access.token_acesso);
   const profile = await api('/api/auth/eu');
   if (attempt !== accessEpoch) return;
   user = profile;
-  $('#account-name').textContent = profile.nome_usuario;
-  $('#workspace-avatar').textContent = Array.from(profile.nome_usuario || 'R')[0].toLocaleUpperCase('pt-BR');
   $('#auth-shell').hidden = true;
   $('#app-shell').hidden = false;
   setAccessAppearance(false);
@@ -325,6 +402,7 @@ async function activateAccess(access, attempt) {
   session.reset();
   history.reset();
   home.setUser(profile);
+  applyAccountIdentity();
   showView('home');
   notify('');
 }

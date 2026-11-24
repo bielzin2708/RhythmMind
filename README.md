@@ -128,13 +128,13 @@ Veja [contrato e limites](docs/escolha_musical_explicada.md).
 ## Catálogo de músicas reais
 
 Em **Minhas músicas → Adicionar seleção ao meu catálogo**, uma requisição copia
-a seleção de [96 faixas reais](data/catalogo_referencia.json) para a própria conta.
+a seleção de [500 faixas reais](data/catalogo_referencia.json) para a própria conta.
 A prévia tem busca e paginação e mostra títulos, artistas, álbuns conhecidos e
 fontes antes da importação. Repetir a ação evita duplicatas e preserva os
 cadastros existentes; outras contas continuam com seus próprios catálogos.
 
-As 66 faixas iniciais mantêm associações editoriais provisórias. Outras 30 faixas,
-distribuídas entre quatro playlists fornecidas pelo autor, entram com as sensações
+As 66 faixas iniciais mantêm associações editoriais provisórias. Outras 434 faixas,
+distribuídas entre cinco playlists públicas fornecidas pelo autor, entram com as sensações
 pendentes: cada titular pode indicá-las ou alterá-las em **Minhas músicas** antes
 que participem das recomendações. BPM, energia, valência e efeitos emocionais não
 foram inferidos. Consulte [fontes, limites e contratos](docs/catalogo_referencia.md).

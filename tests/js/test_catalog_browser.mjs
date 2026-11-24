@@ -339,3 +339,70 @@ for (const cancellation of ['button', 'escape']) {
     assert.equal(requests, 0);
   });
 }
+
+test('onRender sincroniza contagens de busca e filtro, preserva limite ao salvar e responde ao evento search', t => {
+  const events = [];
+  const { browser, search, more, count } = fixture(t, {
+    onRender: state => events.push({
+      total: state.total,
+      matched: state.matched,
+      searchCount: state.searchMatched.length,
+      query: state.query,
+    }),
+  });
+  const data = [
+    { id: '1', nome: 'Nocturne 1', artista: 'Chopin', sentimentos_associados: [] },
+    { id: '2', nome: 'Nocturne 2', artista: 'Chopin', sentimentos_associados: ['calmo'] },
+    { id: '3', nome: 'Aria', artista: 'Bach', sentimentos_associados: [] },
+    ...songs(30),
+  ];
+  browser.setSongs(data);
+  assert.deepEqual(events.at(-1), { total: 33, matched: 33, searchCount: 33, query: '' });
+
+  more.dispatch('click');
+  assert.equal(browser.state.visible, 33);
+  browser.setSongs(data, { preserveLimit: true });
+  assert.equal(browser.state.visible, 33);
+
+  browser.setFilter(song => !song.sentimentos_associados?.length);
+  assert.deepEqual(events.at(-1), { total: 33, matched: 32, searchCount: 33, query: '' });
+
+  search.value = 'Nocturne';
+  search.dispatch('input');
+  assert.deepEqual(events.at(-1), { total: 33, matched: 1, searchCount: 2, query: 'nocturne' });
+  assert.match(count.textContent, /Mostrando 1 de 1 faixa \(33 no catálogo\)\./);
+
+  search.value = '';
+  search.dispatch('search');
+  assert.deepEqual(events.at(-1), { total: 33, matched: 32, searchCount: 33, query: '' });
+
+  browser.reset();
+  assert.deepEqual(events.at(-1), { total: 0, matched: 0, searchCount: 0, query: '' });
+});
+
+test('editor restaura foco para o botão atualizado após re-renderização e expande opções em faixa pendente', async t => {
+  const { editor, categories, trigger } = associations(t, async () => ({
+    musica: { id: 'pendente-1', sentimentos_associados: ['calmo'] },
+  }), {
+    onSaved: () => { trigger.isConnected = false; },
+  });
+  const replacement = globalThis.document.createElement('button');
+  replacement.className = 'catalog-edit-button';
+  replacement.dataset.songId = 'pendente-1';
+  globalThis.document.querySelectorAll = selector => (
+    selector === '#catalog-list .catalog-edit-button' ? [replacement] : []
+  );
+  globalThis.document.querySelector = () => null;
+
+  const proto = Object.getPrototypeOf(trigger);
+  proto.click = function click() { return this.dispatch('click'); };
+  t.after(() => { delete proto.click; });
+
+  editor.open({ id: 'pendente-1', nome: 'Faixa pendente', sentimentos_associados: [] }, trigger);
+  const labels = categories.querySelectorAll('label');
+  assert.equal(labels.every(label => label.hidden === false), true);
+  assert.match(categories.querySelector('.category-selection-note').textContent, /Escolha as opções abaixo/);
+
+  await editor.submit();
+  assert.equal(globalThis.document.activeElement, replacement);
+});

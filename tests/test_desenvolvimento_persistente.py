@@ -1,6 +1,7 @@
 """Armazenamento local opcional; dados e credenciais dos testes são fictícios."""
 
 import json
+import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
@@ -15,7 +16,7 @@ from core.storage import ARQ_DICIONARIO, ARQ_HISTORICO, ARQ_MUSICAS
 
 class DesenvolvimentoPersistenteTests(unittest.TestCase):
     def setUp(self):
-        self.temporario = Path(self.enterContext(TemporaryDirectory(prefix="rhythmmind-persistencia-teste-")))
+        self.temporario = Path(self.enterContext(TemporaryDirectory(prefix="rhythmmind-persistencia-teste-"))).resolve()
         self.raiz = self.temporario / "dados-locais"
 
     def cliente(self):
@@ -102,6 +103,29 @@ class DesenvolvimentoPersistenteTests(unittest.TestCase):
         persistente.assert_called_once_with()
         servidor.assert_called_once_with(app, host="127.0.0.1", port=8000, proxy_headers=False)
         self.assertTrue((self.raiz / ARQ_HISTORICO).is_file())
+
+    def test_carregar_env_local_aplica_ausentes_preserva_terminal_e_restaura_ao_sair(self):
+        env_path = self.temporario / ".env.local"
+        env_path.write_text(
+            "\ufeff# comentario local ficticio\n"
+            "SEM_IGUAL\n"
+            "1INVALIDA=valor\n"
+            'export RHYTHMMIND_TESTE_ID="123-ficticio.apps.googleusercontent.com"\n'
+            "RHYTHMMIND_TESTE_SEGREDO='segredo-ficticio'\n"
+            "RHYTHMMIND_TESTE_TERMINAL=valor_do_arquivo\n",
+            encoding="utf-8",
+        )
+        with patch.dict(os.environ, {"RHYTHMMIND_TESTE_TERMINAL": "ja_definida", "RHYTHMMIND_TESTE_SEGREDO": ""}):
+            with desenvolvimento.carregar_env_local(env_path) as carregou:
+                self.assertTrue(carregou)
+                self.assertEqual(os.environ["RHYTHMMIND_TESTE_ID"], "123-ficticio.apps.googleusercontent.com")
+                self.assertEqual(os.environ["RHYTHMMIND_TESTE_SEGREDO"], "segredo-ficticio")
+                self.assertEqual(os.environ["RHYTHMMIND_TESTE_TERMINAL"], "ja_definida")
+            self.assertNotIn("RHYTHMMIND_TESTE_ID", os.environ)
+            self.assertEqual(os.environ["RHYTHMMIND_TESTE_SEGREDO"], "")
+            self.assertEqual(os.environ["RHYTHMMIND_TESTE_TERMINAL"], "ja_definida")
+        with desenvolvimento.carregar_env_local(self.temporario / "inexistente.env") as carregou:
+            self.assertFalse(carregou)
 
 
 if __name__ == "__main__":

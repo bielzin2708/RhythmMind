@@ -52,8 +52,7 @@ from core.storage import (
     salvar_json,
     ARQ_HISTORICO,
 )
-# Reaproveita as inferências do BLOCO B do main.py (não duplicadas aqui)
-from main import (
+from core.catalogo import (
     validar_duracao,
     validar_bpm,
     inferir_contextos_para_musica,
@@ -95,23 +94,36 @@ app.add_middleware(
 @app.middleware("http")
 async def restringir_desenvolvimento_local(request: Request, call_next):
     """Proteção operacional temporária; não substitui autenticação/autorização."""
-    if (
-        request.client is None
-        or request.client.host not in {"127.0.0.1", "::1"}
-        or request.url.hostname not in {"localhost", "127.0.0.1", "::1"}
-    ):
-        return JSONResponse(
-            status_code=403,
-            content={"detail": "API restrita ao desenvolvimento local."},
-        )
-    diretorio = getattr(app.state, "diretorio_desenvolvimento", None)
-    if diretorio is None or Path.cwd().resolve() != Path(diretorio).resolve():
-        return JSONResponse(
-            status_code=503,
-            content={"detail": "Use python -m api.desenvolvimento com dados fictícios temporários."},
-        )
+    if getattr(app.state, "modo_producao", False):
+        if not request.url.hostname:
+            return JSONResponse(
+                status_code=403,
+                content={"detail": "Host de requisição inválido."},
+            )
+        diretorio = getattr(app.state, "diretorio_dados", None)
+        if diretorio is None or not Path(diretorio).is_dir():
+            return JSONResponse(
+                status_code=503,
+                content={"detail": "Armazenamento de produção indisponível."},
+            )
+    else:
+        if (
+            request.client is None
+            or request.client.host not in {"127.0.0.1", "::1"}
+            or request.url.hostname not in {"localhost", "127.0.0.1", "::1"}
+        ):
+            return JSONResponse(
+                status_code=403,
+                content={"detail": "API restrita ao desenvolvimento local."},
+            )
+        diretorio = getattr(app.state, "diretorio_desenvolvimento", None)
+        if diretorio is None or Path.cwd().resolve() != Path(diretorio).resolve():
+            return JSONResponse(
+                status_code=503,
+                content={"detail": "Use python -m api.desenvolvimento com dados fictícios temporários."},
+            )
     resposta = await call_next(request)
-    if request.url.path.startswith("/api/"):
+    if request.url.path.startswith("/api/") or request.url.path == "/healthz":
         resposta.headers["Cache-Control"] = "no-store"
         resposta.headers["Pragma"] = "no-cache"
     if request.url.path.startswith("/api/auth/google/"):
@@ -150,12 +162,12 @@ class MetadadosSessaoRequest(BaseModel):
 
 
 class EstadoEmocionalRequest(MetadadosSessaoRequest):
-    texto_atual: str
+    texto_atual: str = Field(max_length=4000)
     emocoes_confirmadas: Optional[List[str]] = Field(
         default=None,
         description="Ausente/null: revisão pendente. []: seguir sem categoria por escolha explícita.",
     )
-    texto_desejado: Optional[str] = None  # ausente: pendente; "" explícito: seguir sem definir
+    texto_desejado: Optional[str] = Field(default=None, max_length=4000)  # ausente: pendente; "" explícito: seguir sem definir
     limite_recomendacoes: StrictInt = Field(
         default=3, ge=1, le=10,
         description="Quantidade máxima de sugestões para esta sessão, de 1 a 10.",
@@ -198,7 +210,7 @@ class RetomarSessaoRequest(ReferenciaSessaoRequest):
         default=None,
         description="Ausente/null: manter a revisão atual. []: seguir sem categoria por escolha explícita.",
     )
-    texto_desejado: Optional[str] = None
+    texto_desejado: Optional[str] = Field(default=None, max_length=4000)
     limite_recomendacoes: Optional[StrictInt] = Field(
         default=None, ge=1, le=10,
         description="Ausente/null preserva. Só pode mudar antes das recomendações serem salvas.",
@@ -214,9 +226,9 @@ class ContextoSessaoRequest(ReferenciaSessaoRequest, MetadadosSessaoRequest):
 
 
 class FeedbackRequest(ReferenciaSessaoRequest):
-    ajudou: bool
-    motivo: str = ""
-    melhoria: str = ""
+    ajudou: StrictBool
+    motivo: str = Field(default="", max_length=4000)
+    melhoria: str = Field(default="", max_length=4000)
 
 
 class FaixaEscutaRequest(BaseModel):
@@ -235,13 +247,20 @@ class EscutaRequest(ReferenciaSessaoRequest):
 class NovaMusicaRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    nome: str
-    artista: str
+    nome: str = Field(max_length=200)
+    artista: str = Field(max_length=200)
     duracao: str             # formato m:ss ou mm:ss
     bpm: Optional[str] = ""  # string porque pode vir vazio do formulário
-    sentimentos_texto: str   # texto livre, ex: "calmo reflexivo"
-    tags: Optional[str] = "" # separadas por vírgula ou espaço
+    sentimentos_texto: str = Field(max_length=4000)  # texto livre, ex: "calmo reflexivo"
+    tags: Optional[str] = Field(default="", max_length=500)  # separadas por vírgula ou espaço
     caracterizacao: Optional[dict] = None
+
+    @field_validator("nome", "artista")
+    @classmethod
+    def validar_identificacao_musica(cls, valor):
+        if not isinstance(valor, str) or not valor.strip():
+            raise ValueError("Informe nome e artista não vazios.")
+        return valor.strip()
 
     @field_validator("caracterizacao", mode="before")
     @classmethod
@@ -645,6 +664,11 @@ def ver_proposta():
             "emocional, músicas ouvidas e bem-estar."
         ),
     }
+
+
+@app.get("/healthz", include_in_schema=False)
+def saude():
+    return {"status": "ok"}
 
 
 app.include_router(router_autenticacao)

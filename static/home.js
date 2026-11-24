@@ -1,4 +1,4 @@
-import { $, el, formatDate, CATEGORIAS, categoriaLabel } from './ui.js';
+import { $, el, formatDate, CATEGORIAS, categoriaLabel, accountIdentity } from './ui.js';
 
 const STAGES = {
   revisao: { kind: 'revisao', label: 'Revisão pendente', action: 'Continuar sessão' },
@@ -142,11 +142,18 @@ export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog 
     $('#home-last-state').removeAttribute('title');
   }
 
+  function setCatalogLinkLabel(label) {
+    $('#home-open-catalog').replaceChildren(
+      document.createTextNode(`${label} `),
+      el('span', { 'aria-hidden': 'true' }, '→'),
+    );
+  }
+
   function clearCatalogMetrics() {
     $('#profile-catalog').textContent = '—';
     $('#home-total-tracks').textContent = '—';
     $('#home-catalog-description').textContent = 'Organize as faixas disponíveis para suas próximas escutas.';
-    $('#home-open-catalog').textContent = 'Explorar músicas →';
+    setCatalogLinkLabel('Explorar músicas');
   }
 
   function renderHistoryMetrics(records) {
@@ -170,7 +177,7 @@ export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog 
     $('#home-catalog-description').textContent = total === 0
       ? 'Prepare seu catálogo para receber sugestões musicais. Você também pode escrever sem escolher uma faixa.'
       : 'Organize as faixas disponíveis para suas próximas escutas.';
-    $('#home-open-catalog').textContent = total === 0 ? 'Adicionar músicas →' : 'Explorar músicas →';
+    setCatalogLinkLabel(total === 0 ? 'Adicionar músicas' : 'Explorar músicas');
   }
 
   function clear() {
@@ -192,11 +199,15 @@ export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog 
     $('#home-greeting').textContent = 'Seu espaço';
   }
 
+  function updateGreeting(profile) {
+    const name = summary(accountIdentity(profile).greetingName);
+    $('#home-greeting').textContent = name ? `Olá, ${name}.` : 'Bem-vindo ao seu espaço.';
+  }
+
   function setUser(profile) {
     reset();
     activeUser = Boolean(profile);
-    const name = summary(profile?.nome_usuario);
-    $('#home-greeting').textContent = name ? `Olá, ${name}.` : 'Bem-vindo ao seu espaço.';
+    updateGreeting(profile);
   }
 
   function pendingCard(entry, renderedVersion) {
@@ -212,7 +223,11 @@ export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog 
   }
 
   function recentRow(entry, renderedVersion) {
-    const button = el('button', { type: 'button', class: 'button-link home-card-action', 'aria-label': `Ver registro: ${entry.title}` }, 'Ver registro →');
+    const button = el('button', {
+      type: 'button',
+      class: 'button-link home-card-action nav-destination',
+      'aria-label': `Ver registro: ${entry.title}`,
+    }, 'Ver registro ', el('span', { 'aria-hidden': 'true' }, '→'));
     button.addEventListener('click', () => {
       if (activeUser && version === renderedVersion) onRecord(entry.id);
     });
@@ -267,5 +282,5 @@ export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog 
   $('#home-open-catalog').addEventListener('click', () => { if (activeUser) onCatalog(); });
   $('#home-retry').addEventListener('click', () => { void load(); });
   reset();
-  return { load, reset, setUser };
+  return { load, reset, setUser, updateGreeting };
 }

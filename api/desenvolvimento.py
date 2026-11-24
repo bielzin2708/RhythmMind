@@ -8,6 +8,7 @@ Não habilitar reload/workers: o diretório de trabalho pertence ao processo.
 import argparse
 import json
 import os
+import re
 import sys
 from contextlib import contextmanager
 from pathlib import Path
@@ -22,6 +23,9 @@ from core.storage import ARQ_DICIONARIO, ARQ_HISTORICO, ARQ_MUSICAS, salvar_json
 _RAIZ_PROJETO = Path(__file__).resolve().parents[1]
 _DICIONARIO_REFERENCIA = _RAIZ_PROJETO / "data" / "dicionario_emocional.json"
 _DIRETORIO_PERSISTENTE = _RAIZ_PROJETO / ".rhythmmind-local"
+_ENV_LOCAL = _RAIZ_PROJETO / ".env.local"
+_CHAVE_ENV = re.compile(r"[A-Za-z_][A-Za-z0-9_]*\Z")
+_AUSENTE = object()
 
 
 def _sementes_ficticias():
@@ -101,6 +105,51 @@ def dados_locais_persistentes(caminho=None):
         os.chdir(anterior)
 
 
+def _ler_env_local(caminho):
+    """Lê pares CHAVE=VALOR de um arquivo local ignorado pelo Git."""
+    pares = {}
+    for bruta in Path(caminho).read_text(encoding="utf-8-sig").splitlines():
+        linha = bruta.strip()
+        if not linha or linha.startswith("#"):
+            continue
+        if linha.startswith("export "):
+            linha = linha[7:].lstrip()
+        if "=" not in linha:
+            continue
+        chave, valor = linha.split("=", 1)
+        chave = chave.strip()
+        valor = valor.strip()
+        if not _CHAVE_ENV.fullmatch(chave):
+            continue
+        if len(valor) >= 2 and valor[0] == valor[-1] and valor[0] in {"'", '"'}:
+            valor = valor[1:-1]
+        pares[chave] = valor
+    return pares
+
+
+@contextmanager
+def carregar_env_local(caminho=None):
+    """Aplica variáveis ausentes de .env.local apenas durante a execução local."""
+    alvo = Path(caminho if caminho is not None else _ENV_LOCAL)
+    if not alvo.is_file():
+        yield False
+        return
+    anteriores = {}
+    try:
+        for chave, valor in _ler_env_local(alvo).items():
+            atual = os.environ.get(chave, _AUSENTE)
+            if atual is _AUSENTE or atual == "":
+                anteriores[chave] = atual
+                os.environ[chave] = valor
+        yield bool(anteriores)
+    finally:
+        for chave, anterior in anteriores.items():
+            if anterior is _AUSENTE:
+                os.environ.pop(chave, None)
+            else:
+                os.environ[chave] = anterior
+
+
 def main(argv=()):
     from api.google_auth import configurar_logs_acesso_google
 
@@ -113,11 +162,13 @@ def main(argv=()):
     # importar/chamar main em testes não consome argumentos do unittest.
     opcoes = argumentos.parse_args(argv)
     ambiente = dados_locais_persistentes if opcoes.persistente else dados_ficticios_temporarios
-    with ambiente():
+    with carregar_env_local() as env_carregado, ambiente():
         if opcoes.persistente:
             print("Desenvolvimento local: use somente dados fictícios. Dados persistentes nesta máquina.")
         else:
             print("Desenvolvimento local: use somente dados fictícios. Dados temporários.")
+        if env_carregado and os.environ.get("RHYTHMMIND_GOOGLE_CLIENT_ID"):
+            print("Variáveis locais carregadas de .env.local.")
         configurar_logs_acesso_google()
         uvicorn.run(app, host="127.0.0.1", port=8000, proxy_headers=False)
 

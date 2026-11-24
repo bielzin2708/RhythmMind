@@ -109,6 +109,7 @@ export function initHistory({ api, notify, onResume, onChanged }) {
   let detailVersion = 0;
   let records = {};
   let selected = null;
+  let lastOpenTrigger = null;
   let totalRecords = 0;
   let appliedFilters = {};
 
@@ -133,13 +134,27 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     }
   }
 
+  function syncSelectedCard(activeId = selected?.id) {
+    const list = byId('history-list');
+    if (!list) return;
+    for (const card of list.querySelectorAll('.history-card')) {
+      const active = Boolean(activeId) && card.dataset.sessionId === activeId;
+      card.classList.toggle('selected', active);
+      const button = card.querySelector('button[data-session-id]');
+      if (button) button.setAttribute('aria-pressed', String(active));
+    }
+  }
+
   function clearDetail() {
     detailVersion += 1;
     selected = null;
+    lastOpenTrigger = null;
+    syncSelectedCard(null);
     byId('history-detail').hidden = true;
     byId('history-detail-content').replaceChildren();
     byId('history-detail-title').textContent = 'Seu registro';
     byId('history-correction-form').reset();
+    if (byId('history-correction-drawer')) byId('history-correction-drawer').open = false;
     detailButtons();
   }
 
@@ -169,6 +184,7 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     byId('history-empty').hidden = entries.length > 0;
     for (const [id, record] of entries) {
       const card = textNode('article', 'history-card card');
+      card.dataset.sessionId = id;
       const heading = textNode('div', 'history-card-heading');
       const title = textNode('h3', '', historyRecordTitle(record));
       const stamp = textNode('p', 'muted small', formatDate(record.data_hora));
@@ -179,8 +195,13 @@ export function initHistory({ api, notify, onResume, onChanged }) {
       const button = textNode('button', 'button button-secondary', 'Ver registro');
       button.type = 'button';
       button.dataset.sessionId = id;
-      button.addEventListener('click', () => { void openRecord(id); });
+      button.setAttribute('aria-pressed', String(selected?.id === id));
+      button.addEventListener('click', () => {
+        lastOpenTrigger = button;
+        void openRecord(id);
+      });
       card.append(button);
+      if (selected?.id === id) card.classList.add('selected');
       list.append(card);
     }
   }
@@ -226,7 +247,7 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     list.setAttribute('aria-busy', 'true');
     list.replaceChildren(textNode('p', 'muted', 'Carregando seus registros…'));
     byId('history-empty').hidden = true;
-    status('Consultando o seu histórico…');
+    status('Consultando o seu histórico…', 'loading');
     appliedFilters = filterQuery();
     renderFilterState();
     const [history, patterns] = await Promise.allSettled([
@@ -341,6 +362,7 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     byId('correction-reason').value = '';
     byId('history-resume').textContent = completed(record) ? 'Ver escolha e retorno' : 'Retomar rascunho';
     byId('history-detail').hidden = false;
+    syncSelectedCard(id);
     detailButtons();
     return id;
   }
@@ -349,7 +371,9 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     const ownEpoch = epoch;
     const version = ++detailVersion;
     selected = null;
+    syncSelectedCard(id);
     detailButtons();
+    if (byId('history-correction-drawer')) byId('history-correction-drawer').open = false;
     byId('history-detail').hidden = false;
     byId('history-detail-title').textContent = 'Carregando seu registro…';
     byId('history-detail-content').replaceChildren();
@@ -362,7 +386,11 @@ export function initHistory({ api, notify, onResume, onChanged }) {
         const heading = byId('history-detail-title');
         heading.tabIndex = -1;
         heading.focus({ preventScroll: true });
-        byId('history-detail').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (typeof window !== 'undefined' && window.innerWidth > 780) {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          byId('history-detail').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       }
     } catch (error) {
       if (ownEpoch !== epoch || version !== detailVersion) return;
@@ -394,6 +422,17 @@ export function initHistory({ api, notify, onResume, onChanged }) {
   }
   byId('history-clear-filters').addEventListener('click', clearFilters);
   byId('history-clear-active-filters').addEventListener('click', clearFilters);
+  byId('history-detail-back')?.addEventListener('click', () => {
+    const trigger = lastOpenTrigger;
+    clearDetail();
+    const target = (trigger?.isConnected && !trigger.disabled && trigger)
+      || byId('history-list-heading')
+      || byId('history-heading');
+    if (target) {
+      target.focus({ preventScroll: true });
+      target.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
   byId('history-resume').addEventListener('click', () => {
     if (!selected) return;
     const id = selected.id;
@@ -416,7 +455,7 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     }
     const motivo = byId('correction-reason').value.trim() || null;
     void action(event.currentTarget, async () => {
-      status('Salvando sua correção…');
+      status('Salvando sua correção…', 'loading');
       try {
         const result = await api('/api/historico/sessao', { method: 'PATCH', body: {
           sessao_id: snapshot.id, alteracoes, motivo,
@@ -426,6 +465,7 @@ export function initHistory({ api, notify, onResume, onChanged }) {
         if (selected?.id === snapshot.id) {
           selected = { id: snapshot.id, record: result.registro };
           renderDetail();
+          if (byId('history-correction-drawer')) byId('history-correction-drawer').open = false;
         }
         await load();
         if (ownEpoch !== epoch) return;
@@ -450,7 +490,7 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     if (single && !id) return;
     const control = byId(single ? 'history-export-one' : 'history-export');
     await action(control, async () => {
-      status(single ? 'Preparando a exportação desta sessão…' : 'Preparando todos os seus registros para exportação…');
+      status(single ? 'Preparando a exportação desta sessão…' : 'Preparando todos os seus registros para exportação…', 'loading');
       const data = await api('/api/historico/exportacao', { query: id ? { sessao_id: id } : {} });
       if (ownEpoch !== epoch) return;
       downloadJSON(data, single ? 'rhythmmind-sessao.json' : 'rhythmmind-registros.json');
@@ -470,7 +510,7 @@ export function initHistory({ api, notify, onResume, onChanged }) {
         message: 'A sessão, suas correções, interpretação, escolhas e retorno serão removidos do histórico. Os outros registros serão preservados. Arquivos já exportados continuam sob seu controle.',
       });
       if (!accepted || ownEpoch !== epoch) return;
-      status('Excluindo esta sessão…');
+      status('Excluindo esta sessão…', 'loading');
       const response = await api('/api/historico/sessao', { method: 'DELETE', query: { sessao_id: snapshot.id } });
       if (ownEpoch !== epoch) return;
       delete records[snapshot.id];
@@ -499,7 +539,7 @@ export function initHistory({ api, notify, onResume, onChanged }) {
         message: `Todos os seus registros serão removidos (${totalRecords} nesta consulta), incluindo sessões fora dos filtros, correções, interpretações, escolhas e retornos. Sua conta e catálogo serão preservados. Arquivos já exportados continuam sob seu controle.`,
       });
       if (!accepted || ownEpoch !== epoch) return;
-      status('Excluindo todos os seus registros…');
+      status('Excluindo todos os seus registros…', 'loading');
       const response = await api('/api/historico', { method: 'DELETE', query: { confirmar: true } });
       if (ownEpoch !== epoch) return;
       records = {};

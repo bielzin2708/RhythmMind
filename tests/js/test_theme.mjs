@@ -8,13 +8,17 @@ const key = 'rhythmmind.theme';
 const softKey = 'rhythmmind.softEffects';
 
 function fixture({ stored = null, softStored = null, darkSystem = false, storageDenied = false, writeDenied = false,
-  mediaMissing = false, legacyMedia = false, ready = 'loading' } = {}) {
+  mediaMissing = false, legacyMedia = false, ready = 'loading',
+  reducedMotion = null, withTimers = false, withViewTransition = false } = {}) {
   const storageValues = new Map([[key, stored], [softKey, softStored]].filter(([, value]) => value !== null));
   const writes = [];
   const windowListeners = new Map();
   const documentListeners = new Map();
   const mediaListeners = [];
   const elements = [];
+  const timers = [];
+  const viewTransitions = [];
+  let nextTimerId = 1;
   const document = { documentElement: { dataset: {} }, readyState: ready };
   const metas = {
     'meta[name="color-scheme"]': { content: 'dark' },
@@ -48,6 +52,17 @@ function fixture({ stored = null, softStored = null, darkSystem = false, storage
   document.querySelectorAll = selector => elements.filter(node => node.type === selectorTypes[selector]);
   document.getElementById = id => id === 'theme-status' ? status : id === 'ambient-toggle' ? ambient : null;
   document.addEventListener = (name, listener) => documentListeners.set(name, listener);
+  if (withViewTransition) {
+    document.visibilityState = 'visible';
+    document.startViewTransition = callback => {
+      if (withViewTransition === 'throw') throw new Error('startViewTransition indisponível');
+      const entry = { ran: false };
+      viewTransitions.push(entry);
+      callback();
+      entry.ran = true;
+      return { ready: Promise.resolve(), finished: Promise.resolve() };
+    };
+  }
   const storage = {
     getItem(name) {
       if (storageDenied) throw new Error('Storage indisponível');
@@ -63,13 +78,36 @@ function fixture({ stored = null, softStored = null, darkSystem = false, storage
   if (legacyMedia) media.addListener = listener => mediaListeners.push(listener);
   else media.addEventListener = (name, listener) => { if (name === 'change') mediaListeners.push(listener); };
   const window = { localStorage: storage, addEventListener: (name, listener) => windowListeners.set(name, listener) };
+  if (withTimers) {
+    window.setTimeout = (fn, delay) => {
+      const entry = { id: nextTimerId++, fn, delay, cleared: false, ran: false };
+      timers.push(entry);
+      return entry.id;
+    };
+    window.clearTimeout = id => {
+      const entry = timers.find(item => item.id === id);
+      if (entry) entry.cleared = true;
+    };
+  }
   if (!mediaMissing) window.matchMedia = query => {
+    if (reducedMotion !== null || withTimers || withViewTransition) {
+      if (query === '(prefers-reduced-motion: reduce)') return { matches: Boolean(reducedMotion) };
+    }
     assert.equal(query, '(prefers-color-scheme: dark)');
     return media;
   };
   vm.runInNewContext(source, { window, document, Set });
   return {
     document, metas, status, accessToggle, workspaceToggle, select, softToggle, ambient, writes, storageValues,
+    timers, viewTransitions,
+    flushTimers() {
+      for (const entry of timers) {
+        if (!entry.cleared && !entry.ran) {
+          entry.ran = true;
+          entry.fn();
+        }
+      }
+    },
     ready() { documentListeners.get('DOMContentLoaded')?.(); },
     choose(value) { select.value = value; select.dispatch('change'); },
     soften(value) { softToggle.checked = value; softToggle.dispatch('change'); },
@@ -305,4 +343,76 @@ test('storage bloqueado não impede suavizar brilhos nesta aba', () => {
   assert.equal(f.ambient.checked, true);
   assert.match(f.status.textContent, /Suas preferências valem nesta aba/);
   assert.deepEqual(f.writes, []);
+});
+
+test('transição visual via startViewTransition ocorre apenas em trocas interativas que mudam o tema efetivo', () => {
+  const f = fixture({ stored: 'system', darkSystem: true, withTimers: true, withViewTransition: true });
+  assert.equal(f.viewTransitions.length, 0);
+  assert.equal(f.document.documentElement.dataset.themeSwitching, undefined);
+  f.ready();
+  assert.equal(f.viewTransitions.length, 0);
+
+  // Selecionar explicitamente 'dark' quando o sistema já estava em 'dark' não anima.
+  f.choose('dark');
+  assert.equal(f.viewTransitions.length, 0);
+  assert.equal(f.document.documentElement.dataset.theme, 'dark');
+
+  // Mudança via outra aba ou sistema não dispara transição interativa.
+  f.crossTab('light');
+  assert.equal(f.viewTransitions.length, 0);
+  f.crossTab('system');
+  f.system(false);
+  assert.equal(f.viewTransitions.length, 0);
+  assert.equal(f.document.documentElement.dataset.theme, 'light');
+
+  // Clique interativo no botão e troca no select disparam startViewTransition sem acionar fallback.
+  f.accessToggle.dispatch('click');
+  assert.equal(f.viewTransitions.length, 1);
+  assert.equal(f.viewTransitions[0].ran, true);
+  assert.equal(f.document.documentElement.dataset.theme, 'dark');
+  assert.equal(f.document.documentElement.dataset.themeSwitching, undefined);
+
+  f.choose('light');
+  assert.equal(f.viewTransitions.length, 2);
+  assert.equal(f.document.documentElement.dataset.theme, 'light');
+  assert.equal(f.timers.length, 0);
+});
+
+test('fallback por dataset.themeSwitching anima apenas em troca interativa e limpa após 480ms', () => {
+  const f = fixture({ stored: 'dark', withTimers: true, withViewTransition: 'throw' });
+  f.ready();
+  assert.equal(f.document.documentElement.dataset.themeSwitching, undefined);
+
+  f.workspaceToggle.dispatch('click');
+  assert.equal(f.document.documentElement.dataset.theme, 'light');
+  assert.equal(f.document.documentElement.dataset.themeSwitching, 'true');
+  assert.equal(f.timers.length, 1);
+  assert.equal(f.timers[0].delay, 480);
+
+  // Segundo clique rápido cancela o timer anterior e mantém themeSwitching até o novo prazo.
+  f.workspaceToggle.dispatch('click');
+  assert.equal(f.document.documentElement.dataset.theme, 'dark');
+  assert.equal(f.document.documentElement.dataset.themeSwitching, 'true');
+  assert.equal(f.timers.length, 2);
+  assert.equal(f.timers[0].cleared, true);
+  assert.equal(f.timers[1].cleared, false);
+
+  f.flushTimers();
+  assert.equal(f.document.documentElement.dataset.themeSwitching, undefined);
+});
+
+test('movimento reduzido suprime startViewTransition e dataset.themeSwitching mantendo a troca imediata', () => {
+  const f = fixture({ stored: 'dark', reducedMotion: true, withTimers: true, withViewTransition: true });
+  f.ready();
+  f.accessToggle.dispatch('click');
+  assert.equal(f.document.documentElement.dataset.theme, 'light');
+  assert.equal(f.viewTransitions.length, 0);
+  assert.equal(f.document.documentElement.dataset.themeSwitching, undefined);
+  assert.equal(f.timers.length, 0);
+
+  f.choose('dark');
+  assert.equal(f.document.documentElement.dataset.theme, 'dark');
+  assert.equal(f.viewTransitions.length, 0);
+  assert.equal(f.document.documentElement.dataset.themeSwitching, undefined);
+  assert.equal(f.timers.length, 0);
 });
