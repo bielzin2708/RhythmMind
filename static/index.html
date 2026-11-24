@@ -43,10 +43,10 @@
         <span>Rhythm<span class="brand-light">Mind</span></span>
       </button>
         <nav class="workspace-nav" aria-label="Navegação principal">
-        <button id="nav-home" class="nav-button active" type="button" aria-current="page"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3zM9 20v-6h6v6"/></svg><span>Seu espaço</span></button>
-        <button id="nav-session" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span>Sua sessão</span></button>
-        <button id="nav-history" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5zM9 7h6M9 11h6M9 15h4"/></svg><span>Meu diário</span></button>
-        <button id="nav-catalog" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13M9 8l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></svg><span>Minhas músicas</span></button>
+        <button id="nav-home" class="nav-button active" type="button" aria-current="page"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10H3zM9 20v-6h6v6"/></svg><span>Início</span></button>
+        <button id="nav-session" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg><span>Hoje</span></button>
+        <button id="nav-history" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h14v18H5zM9 7h6M9 11h6M9 15h4"/></svg><span>Histórico</span></button>
+        <button id="nav-catalog" class="nav-button" type="button"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l12-2v13M9 8l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></svg><span>Catálogo</span></button>
       </nav>
         <div class="workspace-user-controls">
           <button id="workspace-theme-toggle" class="theme-toggle" type="button" data-theme-toggle aria-label="Ativar modo claro" title="Ativar modo claro">
@@ -137,7 +137,29 @@
             <div class="home-hero-copy">
               <p id="home-greeting" class="home-greeting"></p>
               <h1 id="home-heading" tabindex="-1">Seu espaço, <span>no seu ritmo.</span></h1>
-              <div class="home-invitation"><h2 id="home-hero-heading">Como está seu momento?</h2><p>Conte com suas palavras. Você poderá revisar a interpretação antes de escolher sua escuta.</p><button id="home-new-session" class="button button-primary" type="button">Começar um relato <span aria-hidden="true">→</span></button><ol class="home-steps" aria-label="Como funciona uma sessão"><li>Seu relato</li><li>Sua revisão</li><li>Sua escuta</li></ol></div>
+              <div class="home-invitation">
+                <h2 id="home-hero-heading">O que você quer da escuta agora?</h2>
+                <p>Escolha um objetivo em um toque ou escreva como está se sentindo. Nada fica gravado no diário sem você pedir.</p>
+                <div class="home-quick-objectives" role="group" aria-label="Começar rápido por objetivo">
+                  <button id="home-quick-relax" class="home-objective-pill" type="button" data-home-objective="calmo">
+                    <span class="home-objective-icon" aria-hidden="true">〰</span>
+                    <span class="home-objective-text"><strong>Relaxar</strong><small>Desacelerar o ritmo</small></span>
+                  </button>
+                  <button id="home-quick-focus" class="home-objective-pill" type="button" data-home-objective="foco">
+                    <span class="home-objective-icon" aria-hidden="true">◎</span>
+                    <span class="home-objective-text"><strong>Focar</strong><small>Manter a atenção</small></span>
+                  </button>
+                  <button id="home-quick-energy" class="home-objective-pill" type="button" data-home-objective="disposto">
+                    <span class="home-objective-icon" aria-hidden="true">✦</span>
+                    <span class="home-objective-text"><strong>Ganhar energia</strong><small>Sair da inércia</small></span>
+                  </button>
+                </div>
+                <div class="home-hero-actions">
+                  <button id="home-new-session" class="button button-primary" type="button">Escrever ou personalizar escuta <span aria-hidden="true">→</span></button>
+                  <button id="home-starter-catalog" class="button button-secondary" type="button" hidden>Carregar 66 músicas iniciais</button>
+                </div>
+                <ol class="home-steps" aria-label="Como funciona uma sessão"><li>Objetivo ou nota opcional</li><li>Até 3 faixas explicadas</li><li>Guardar só se quiser</li></ol>
+              </div>
             </div>
             <svg class="home-wave" viewBox="0 0 560 300" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
   <defs>
@@ -215,15 +237,28 @@
         <section id="view-session" class="workspace-view" aria-labelledby="session-heading" hidden>
           <nav class="view-return-bar" aria-label="Caminho atual">
             <ol class="breadcrumb-list">
-              <li><button type="button" class="breadcrumb-link nav-return-link" data-return-view="home"><span aria-hidden="true">←</span> Voltar para seu espaço</button></li>
-              <li><span class="breadcrumb-current" aria-current="page">Nova sessão</span></li>
+              <li><button type="button" class="breadcrumb-link nav-return-link" data-return-view="home"><span aria-hidden="true">←</span> Voltar ao início</button></li>
+              <li><span class="breadcrumb-current" aria-current="page">Escuta de hoje</span></li>
             </ol>
           </nav>
-          <div class="page-heading"><div><p class="eyebrow">UM REGISTRO DE CADA VEZ</p><h1 id="session-heading" tabindex="-1">Como está seu momento?</h1><p>Você conta. A interpretação sugere. A escolha continua sendo sua.</p></div><div class="heading-actions"><span class="quiet-badge">Sua experiência importa</span><button id="new-session-button" class="button button-secondary" type="button">Novo relato</button></div></div>
+          <div class="page-heading session-hero-banner">
+            <div class="session-hero-copy">
+              <p class="eyebrow">NO SEU TEMPO · CONTROLE TOTAL DO DIÁRIO</p>
+              <h1 id="session-heading" tabindex="-1">O que você busca na sua escuta?</h1>
+              <p id="session-subheading">Comece por um objetivo rápido ou conte seu momento nas suas palavras. Você decide no final se quer guardar no diário.</p>
+            </div>
+            <div class="heading-actions">
+              <div id="session-visualizer" class="session-visualizer" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <span id="session-persistence-badge" class="quiet-badge">Não gravado no diário</span>
+              <button id="new-session-button" class="button button-secondary" type="button">Recomeçar</button>
+            </div>
+          </div>
           <ol id="session-progress" class="progress-steps" aria-label="Etapas da sessão">
-            <li id="step-relato" class="current" aria-current="step"><span aria-hidden="true">1</span>Relato e finalidade</li>
+            <li id="step-relato" class="current" aria-current="step"><span aria-hidden="true">1</span>Objetivo e nota</li>
             <li id="step-revisao"><span aria-hidden="true">2</span>Sua revisão</li>
-            <li id="step-escuta"><span aria-hidden="true">3</span>Escolha e retorno</li>
+            <li id="step-escuta"><span aria-hidden="true">3</span>Faixas e diário</li>
           </ol>
           <div id="session-status" class="notice" role="status" aria-live="polite"></div>
           <div class="button-row retry-actions"><button id="session-retry" class="button button-secondary" type="button" hidden>Tentar interpretação novamente</button><button id="fallback-local-button" class="button button-secondary" type="button" hidden>Usar dicionário local</button></div>
@@ -231,37 +266,91 @@
           <div class="session-layout">
             <div class="session-workspace">
               <section id="session-entry" class="card stage-card" aria-labelledby="narrative-heading">
-                <div class="section-heading"><span class="section-marker" aria-hidden="true">01</span><div><h2 id="narrative-heading">Comece pelas suas palavras.</h2><p>Um relato simples já é um ponto de partida.</p></div></div>
-                <div id="session-catalog-guidance" class="inset-note" role="status" aria-live="polite" hidden>
+                <div class="section-heading"><span class="section-marker" aria-hidden="true">01</span><div><h2 id="narrative-heading">Escolha o objetivo da escuta.</h2><p>Um toque já basta para ver sugestões — escrever sobre o seu momento é opcional.</p></div></div>
+                <div id="session-catalog-guidance" class="inset-note catalog-guidance-banner" role="status" aria-live="polite" hidden>
                   <p id="session-catalog-message"></p>
-                  <div class="button-row"><button id="entry-open-catalog" class="button-link nav-destination" type="button">Preparar meu catálogo <span aria-hidden="true">→</span></button><button id="entry-retry-catalog" class="button-link" type="button" hidden>Conferir catálogo novamente</button></div>
+                  <div class="button-row">
+                    <button id="entry-import-reference" class="button button-primary" type="button" hidden>Carregar 66 músicas iniciais (1 clique)</button>
+                    <button id="entry-open-catalog" class="button-link nav-destination" type="button">Abrir catálogo <span aria-hidden="true">→</span></button>
+                    <button id="entry-retry-catalog" class="button-link" type="button" hidden>Conferir catálogo novamente</button>
+                  </div>
                 </div>
                 <form method="post" id="narrative-form" class="stack-form">
-                  <p class="required-legend"><span class="required-mark" aria-hidden="true">*</span> Campos obrigatórios</p>
-                  <div class="field narrative-hero-field">
-                    <div class="field-topline"><label for="narrative-text">Como você está se sentindo? <span class="required-mark" aria-hidden="true">*</span></label><span id="narrative-counter" class="live-counter" aria-live="off">Pronto para ouvir você</span></div>
-                    <textarea id="narrative-text" name="texto_atual" rows="4" maxlength="4000" placeholder="Por exemplo: estou cansado depois de um dia cheio e queria desacelerar um pouco…" aria-describedby="narrative-help" required></textarea>
-                    <small id="narrative-help">Conte o que representa seu momento. Você poderá revisar a interpretação antes de continuar.</small>
-                  </div>
                   <div class="field">
-                    <label for="session-purpose">Qual é a finalidade da escuta? <span class="optional">Opcional</span></label>
-                    <div id="purpose-chips" class="quick-chip-bar" role="group" aria-label="Sugestões rápidas de finalidade">
-                      <button type="button" class="quick-chip" data-purpose-chip="Relaxar">Relaxar</button>
-                      <button type="button" class="quick-chip" data-purpose-chip="Estudar">Estudar</button>
-                      <button type="button" class="quick-chip" data-purpose-chip="Treinar">Treinar</button>
-                      <button type="button" class="quick-chip" data-purpose-chip="Trabalhar">Trabalhar</button>
-                      <button type="button" class="quick-chip" data-purpose-chip="Refletir">Refletir</button>
-                      <button type="button" class="quick-chip" data-purpose-chip="Socializar">Socializar</button>
+                    <label id="objective-group-label">Para onde você quer levar este momento?</label>
+                    <div id="objective-cards" class="objective-card-grid" role="group" aria-labelledby="objective-group-label">
+                      <button type="button" class="objective-card" data-objective="calmo" data-purpose="Relaxar" data-mood="calm" aria-pressed="false">
+                        <span class="objective-card-icon" aria-hidden="true">〰</span>
+                        <span class="objective-card-body">
+                          <strong>Relaxar</strong>
+                          <span>Desacelerar e baixar o ritmo</span>
+                        </span>
+                      </button>
+                      <button type="button" class="objective-card" data-objective="foco" data-purpose="Focar" data-mood="focus" aria-pressed="false">
+                        <span class="objective-card-icon" aria-hidden="true">◎</span>
+                        <span class="objective-card-body">
+                          <strong>Focar</strong>
+                          <span>Concentração para estudar ou criar</span>
+                        </span>
+                      </button>
+                      <button type="button" class="objective-card" data-objective="disposto" data-purpose="Ganhar energia" data-mood="energy" aria-pressed="false">
+                        <span class="objective-card-icon" aria-hidden="true">✦</span>
+                        <span class="objective-card-body">
+                          <strong>Ganhar energia</strong>
+                          <span>Sair da inércia com disposição</span>
+                        </span>
+                      </button>
+                      <button type="button" class="objective-card" data-objective="espelhar" data-purpose="Refletir" data-mood="reflect" aria-pressed="false">
+                        <span class="objective-card-icon" aria-hidden="true">◐</span>
+                        <span class="objective-card-body">
+                          <strong>Acolher o momento</strong>
+                          <span>Ouvir algo próximo ao que sinto</span>
+                        </span>
+                      </button>
                     </div>
-                    <input id="session-purpose" name="finalidade" list="activity-options" maxlength="200" placeholder="Escolha acima ou escreva outra finalidade…">
-                    <datalist id="activity-options"><option value="Relaxar"><option value="Estudar"><option value="Treinar"><option value="Trabalhar"><option value="Refletir"><option value="Compreender meu momento"><option value="Socializar"></datalist>
                   </div>
+
+                  <div class="field">
+                    <label id="state-chips-label">Como você está agora? <span class="optional">Opcional · ajuda a calibrar a transição</span></label>
+                    <div id="state-chips" class="quick-chip-bar" role="group" aria-labelledby="state-chips-label">
+                      <button type="button" class="quick-chip" data-state-chip="cansado" aria-pressed="false">Cansado</button>
+                      <button type="button" class="quick-chip" data-state-chip="ansioso" aria-pressed="false">Ansioso</button>
+                      <button type="button" class="quick-chip" data-state-chip="triste" aria-pressed="false">Triste</button>
+                      <button type="button" class="quick-chip" data-state-chip="reflexivo" aria-pressed="false">Reflexivo</button>
+                      <button type="button" class="quick-chip" data-state-chip="calmo" aria-pressed="false">Calmo</button>
+                      <button type="button" class="quick-chip" data-state-chip="animado" aria-pressed="false">Animado</button>
+                      <button type="button" class="quick-chip" data-state-chip="raiva" aria-pressed="false">Irritado</button>
+                      <button type="button" class="quick-chip" data-state-chip="explosivo" aria-pressed="false">No limite</button>
+                      <button type="button" class="quick-chip" data-state-chip="normal" aria-pressed="false">Neutro / bem</button>
+                    </div>
+                  </div>
+
+                  <div class="field narrative-hero-field">
+                    <div class="field-topline"><label for="narrative-text">Quer escrever uma nota sobre seu momento? <span class="optional">Opcional</span></label><span id="narrative-counter" class="live-counter" aria-live="off">Opcional · só seu</span></div>
+                    <textarea id="narrative-text" name="texto_atual" rows="3" maxlength="4000" placeholder="Se quiser, conte como está sendo seu dia. Se preferir, deixe em branco e siga apenas pelo objetivo acima…" aria-describedby="narrative-help"></textarea>
+                    <small id="narrative-help">Quando você escreve uma nota, mostramos a leitura sugerida como pergunta antes de recomendar músicas. Nada é salvo no diário sem sua confirmação.</small>
+                  </div>
+
                   <details id="session-extra-options" class="session-options-drawer">
                     <summary class="session-options-summary">
-                      <span>Personalizar contexto, sugestões e motor</span>
-                      <span class="options-summary-trailing"><span id="session-options-badge" class="options-summary-pill">3 sugestões · Dicionário local</span><svg class="disclosure-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
+                      <span>Ajustar atividade, contexto, quantidade e motor</span>
+                      <span class="options-summary-trailing"><span id="session-options-badge" class="options-summary-pill">Até 3 faixas · Dicionário local</span><svg class="disclosure-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span>
                     </summary>
                     <div class="session-options-body">
+                      <div class="field">
+                        <label for="session-purpose">Qual é a atividade ou finalidade? <span class="optional">Opcional</span></label>
+                        <div id="purpose-chips" class="quick-chip-bar" role="group" aria-label="Sugestões rápidas de finalidade">
+                          <button type="button" class="quick-chip" data-purpose-chip="Relaxar">Relaxar</button>
+                          <button type="button" class="quick-chip" data-purpose-chip="Focar">Focar</button>
+                          <button type="button" class="quick-chip" data-purpose-chip="Ganhar energia">Ganhar energia</button>
+                          <button type="button" class="quick-chip" data-purpose-chip="Estudar">Estudar</button>
+                          <button type="button" class="quick-chip" data-purpose-chip="Treinar">Treinar</button>
+                          <button type="button" class="quick-chip" data-purpose-chip="Trabalhar">Trabalhar</button>
+                          <button type="button" class="quick-chip" data-purpose-chip="Refletir">Refletir</button>
+                        </div>
+                        <input id="session-purpose" name="finalidade" list="activity-options" maxlength="200" placeholder="Escolha acima ou escreva outra finalidade…">
+                        <datalist id="activity-options"><option value="Relaxar"><option value="Focar"><option value="Ganhar energia"><option value="Estudar"><option value="Treinar"><option value="Trabalhar"><option value="Refletir"><option value="Compreender meu momento"><option value="Socializar"></datalist>
+                      </div>
                       <div class="field">
                         <label for="session-context">Em que contexto? <span class="optional">Opcional</span></label>
                         <div id="context-chips" class="quick-chip-bar" role="group" aria-label="Sugestões rápidas de contexto">
@@ -276,37 +365,131 @@
                       </div>
                       <div class="field-grid">
                         <div class="field"><label for="session-limit">Quantas sugestões quer ver?</label><select id="session-limit" name="limite_recomendacoes"><option value="1">1 sugestão</option><option value="2">2 sugestões</option><option value="3" selected>3 sugestões</option><option value="5">5 sugestões</option><option value="10">10 sugestões</option></select></div>
-                        <div class="field"><label for="interpretation-engine">Como interpretar seu relato?</label><select id="interpretation-engine" name="motor"><option value="dicionario">Dicionário local</option><option value="llm">LLM · serviço externo</option></select><small>Os dois caminhos geram sugestões para você revisar.</small></div>
+                        <div class="field"><label for="interpretation-engine">Como interpretar notas escritas?</label><select id="interpretation-engine" name="motor"><option value="dicionario">Dicionário local</option><option value="llm">LLM · serviço externo</option></select><small>Usado apenas quando você escreve uma nota.</small></div>
                       </div>
-                      <div id="llm-options" class="inset-note" hidden><p>Ao escolher LLM, seu relato é enviado ao provedor configurado neste ambiente.</p><label class="checkbox-line"><input id="allow-fallback" type="checkbox"><span>Permitir o dicionário local se o serviço externo estiver indisponível.</span></label></div>
+                      <div id="llm-options" class="inset-note" hidden><p>Ao escolher LLM, sua nota escrita é enviada ao provedor configurado neste ambiente.</p><label class="checkbox-line"><input id="allow-fallback" type="checkbox"><span>Permitir o dicionário local se o serviço externo estiver indisponível.</span></label></div>
                     </div>
                   </details>
-                  <div class="form-footer"><p class="small-label">Seu relato é salvo antes da interpretação.</p><button class="button button-primary" type="submit">Salvar relato e interpretar <span aria-hidden="true">→</span></button></div>
+                  <div class="form-footer">
+                    <p id="entry-privacy-hint" class="small-label">Modo sem rastro: nada é salvo no diário até você escolher guardar.</p>
+                    <div class="button-row">
+                      <button id="save-draft-button" class="button button-secondary" type="button" hidden>Salvar rascunho para depois</button>
+                      <button id="entry-submit-button" class="button button-primary" type="submit">Ver até 3 faixas para agora <span aria-hidden="true">→</span></button>
+                    </div>
+                  </div>
                 </form>
               </section>
 
               <section id="session-review" class="card stage-card" aria-labelledby="review-heading" hidden>
                 <div class="stage-return-row">
-                  <button id="review-new-session" class="button-link nav-return-link" type="button"><span aria-hidden="true">←</span> Começar outro relato</button>
+                  <button id="review-back-entry" class="button-link nav-return-link" type="button"><span aria-hidden="true">←</span> Voltar e editar objetivo ou nota</button>
+                  <button id="review-new-session" class="button-link" type="button" hidden>Começar outra sessão</button>
                 </div>
-                <div class="section-heading"><span class="section-marker" aria-hidden="true">02</span><div><h2 id="review-heading">Faz sentido para você?</h2><p>Esta é uma interpretação sugerida para revisão.</p></div></div>
-                <div class="narrative-snapshot"><span class="eyebrow">SEU RELATO ORIGINAL</span><blockquote id="review-original"></blockquote></div>
-                <div class="reflection-panel"><span class="eyebrow">COM BASE NO SEU RELATO</span><p id="review-reflection" class="reflection-text"></p><p id="review-origin" class="small-label"></p></div>
+                <div class="section-heading"><span class="section-marker" aria-hidden="true">02</span><div><h2 id="review-heading">Revise nossa leitura da sua nota.</h2><p>Confirme se faz sentido, mude as sensações ou siga sem categorias.</p></div></div>
+                <div id="review-question-box" class="reflection-panel review-question-card">
+                  <span class="eyebrow">PERGUNTA EDITÁVEL</span>
+                  <h3 id="review-question" class="review-question-title">Faz sentido para o seu momento?</h3>
+                  <p id="review-reflection" class="reflection-text"></p>
+                  <p id="review-origin" class="small-label"></p>
+                  <div id="review-quick-actions" class="button-row review-quick-actions">
+                    <button id="review-quick-confirm" class="button button-primary" type="button">Confirmar <span aria-hidden="true">→</span></button>
+                    <button id="review-toggle-editor" class="button button-secondary" type="button" aria-expanded="false" aria-controls="review-editor-panel">Mudar</button>
+                    <button id="review-without-category" class="button-link" type="button" aria-describedby="without-category-help">Seguir sem categoria</button>
+                  </div>
+                </div>
+                <div id="review-original-box" class="narrative-snapshot"><span class="eyebrow">SUA NOTA</span><blockquote id="review-original"></blockquote></div>
                 <div id="review-clarification" class="notice notice-warning" role="status" hidden></div>
                 <details id="review-references" class="reference-details"><summary>Referências usadas nesta interpretação</summary><div class="reference-list"></div></details>
                 <form method="post" id="review-form" class="stack-form">
-                  <div class="review-labels"><h3>Revise o que faz sentido.</h3><p>As sugestões aparecem primeiro. Você pode marcar mais de uma sensação, abrir outras opções ou seguir sem categoria.</p></div>
-                  <div class="review-grid"><div class="tag-panel"><fieldset id="current-tags"><legend>Como estou agora</legend></fieldset><button id="clear-current-tags" class="button-link" type="button">Limpar seleção atual</button></div><div class="tag-panel"><fieldset id="desired-tags"><legend>Como desejo me sentir</legend></fieldset><button id="clear-desired-tags" class="button-link" type="button">Limpar estado desejado</button></div></div>
-                  <div class="field"><label for="desired-text">Sua intenção, nas suas palavras <span class="optional">Opcional</span></label><textarea id="desired-text" name="texto_desejado" rows="2" maxlength="4000" placeholder="Gostaria de ficar mais calmo para estudar…" aria-describedby="desired-help"></textarea><small id="desired-help">Deixe em branco para seguir sem definir um estado desejado.</small></div>
-                  <div class="button-row"><button id="review-confirm" class="button button-primary" type="submit">Confirmar revisão e ver sugestões <span aria-hidden="true">→</span></button><button id="review-without-category" class="button-link" type="button" aria-describedby="without-category-help">Seguir sem categorias</button></div>
-                  <p class="field-help" id="without-category-help">Ao seguir sem categorias, seu relato será registrado sem sugestões automáticas de músicas.</p>
+                  <div id="review-editor-panel" class="review-editor-panel" hidden>
+                    <div class="review-labels"><h3>Ajuste o que faz sentido para você.</h3><p>Marque uma ou mais sensações, abra todas as opções ou limpe o que não combinar.</p></div>
+                    <div class="review-grid"><div class="tag-panel"><fieldset id="current-tags"><legend>Como estou agora</legend></fieldset><button id="clear-current-tags" class="button-link" type="button">Limpar seleção atual</button></div><div class="tag-panel"><fieldset id="desired-tags"><legend>Como desejo me sentir</legend></fieldset><button id="clear-desired-tags" class="button-link" type="button">Limpar estado desejado</button></div></div>
+                    <div class="field"><label for="desired-text">Sua intenção, nas suas palavras <span class="optional">Opcional</span></label><textarea id="desired-text" name="texto_desejado" rows="2" maxlength="4000" placeholder="Gostaria de ficar mais calmo para estudar…" aria-describedby="desired-help"></textarea><small id="desired-help">Deixe em branco se não quiser detalhar um estado desejado em texto.</small></div>
+                    <div class="button-row"><button id="review-confirm" class="button button-primary" type="submit">Aplicar mudanças e ver faixas <span aria-hidden="true">→</span></button></div>
+                  </div>
+                  <p class="field-help" id="without-category-help">Seguir sem categoria ignora as sensações sugeridas; se você escolheu um objetivo inicial, ele ainda pode ser mudado a qualquer momento.</p>
                 </form>
               </section>
 
               <section id="session-listening" class="stage-group" aria-labelledby="listening-heading" hidden>
-                <div class="card stage-card"><div class="section-heading"><span class="section-marker" aria-hidden="true">03</span><div><h2 id="listening-heading">Uma escolha para sua escuta.</h2><p id="listening-intro">Veja as sugestões e escolha o que faz sentido agora.</p></div></div><div id="strategy-summary" class="strategy-summary"></div><form method="post" id="listening-form" class="stack-form"><div id="recommendation-list" class="recommendation-list"></div><div id="recommendation-empty" class="empty-state" hidden><span class="empty-icon" aria-hidden="true">♪</span><h3 id="recommendation-empty-title">Ainda sem sugestões nesta sessão.</h3><p id="recommendation-empty-message">Você pode continuar sem escolher uma faixa ou preparar seu catálogo para uma nova sessão.</p><button id="open-catalog-button" class="button button-secondary" type="button">Abrir meu catálogo</button><p id="listening-catalog-message" class="field-help" hidden></p><button id="listening-retry-catalog" class="button-link" type="button" hidden>Conferir catálogo novamente</button></div><div class="button-row" id="listening-actions"><button id="save-listening" class="button button-primary" type="submit">Salvar escolha e escuta</button><button id="choose-none" class="button-link" type="button">Não escolher uma faixa agora</button></div><p class="field-help" id="listening-help">Escolher uma faixa e informar que a ouviu são decisões diferentes. A reprodução acontece no serviço de sua preferência.</p></form></div>
-                <div id="feedback-card" class="card stage-card"><div class="section-heading"><span class="section-marker text-marker" aria-hidden="true">↳</span><div><h2>Depois da escuta, como foi?</h2><p>Seu retorno se refere à experiência desta sessão.</p></div></div><form method="post" id="feedback-form" class="stack-form"><div class="field"><label for="feedback-answer">O que você percebeu?</label><div id="feedback-quick-choices" class="feedback-choice-grid" role="group" aria-label="Escolher percepção da escuta"><button type="button" class="feedback-choice-btn" data-feedback-choice="ajudou"><strong>Senti que me ajudou</strong><span>Fez sentido para o meu momento</span></button><button type="button" class="feedback-choice-btn" data-feedback-choice="sem_mudanca"><strong>Não percebi mudança</strong><span>Continuou parecido após a escuta</span></button><button type="button" class="feedback-choice-btn" data-feedback-choice="nao_ajudou"><strong>Não senti que me ajudou</strong><span>Não combinou com o que eu precisava</span></button></div><select id="feedback-answer" name="retorno"><option value="">Escolher uma resposta</option><option value="ajudou">Senti que me ajudou</option><option value="sem_mudanca">Não percebi mudança</option><option value="nao_ajudou">Não senti que me ajudou</option></select></div><details id="feedback-extra-fields" class="session-options-drawer feedback-extra-drawer"><summary class="session-options-summary"><span>Contar um pouco mais ou anotar algo para a próxima escuta</span><span class="options-summary-trailing"><span class="options-summary-pill">Opcional</span><svg class="disclosure-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></summary><div class="session-options-body"><div class="field"><label for="feedback-comment">Quer contar um pouco mais? <span class="optional">Opcional</span></label><textarea id="feedback-comment" name="motivo" rows="3" maxlength="4000" placeholder="O que fez sentido — ou não — para você?"></textarea></div><div class="field"><label for="feedback-improvement">Algo que faria diferente? <span class="optional">Opcional</span></label><textarea id="feedback-improvement" name="melhoria" rows="2" maxlength="4000" placeholder="Uma observação para sua próxima escuta…"></textarea></div></div></details><div class="button-row"><button id="save-feedback" class="button button-primary" type="submit">Registrar meu retorno</button><button id="feedback-later" class="button-link" type="button">Responder depois</button></div></form><div id="feedback-status" class="notice" role="status" aria-live="polite"></div></div>
-                <div class="completion-actions"><button id="session-to-history" class="button button-secondary nav-destination" type="button">Ver meu histórico <span aria-hidden="true">→</span></button><button id="start-another" class="button button-primary" type="button">Começar outra sessão <span aria-hidden="true">→</span></button></div>
+                <div class="card stage-card">
+                  <div class="stage-return-row">
+                    <button id="listening-change-objective" class="button-link nav-return-link" type="button"><span aria-hidden="true">←</span> Mudar objetivo ou sensações</button>
+                  </div>
+                  <div class="section-heading"><span class="section-marker" aria-hidden="true">03</span><div><h2 id="listening-heading">Sugestões para sua escuta.</h2><p id="listening-intro">Até três faixas do seu catálogo, com o motivo verificável de cada uma.</p></div></div>
+                  <div id="strategy-summary" class="strategy-summary"></div>
+                  <form method="post" id="listening-form" class="stack-form">
+                    <div id="recommendation-list" class="recommendation-list"></div>
+                    <div id="recommendation-empty" class="empty-state" hidden>
+                      <span class="empty-icon" aria-hidden="true">♪</span>
+                      <h3 id="recommendation-empty-title">Ainda sem sugestões nesta sessão.</h3>
+                      <p id="recommendation-empty-message">Prepare seu catálogo ou tente outro objetivo para explorar novas faixas.</p>
+                      <div class="button-row empty-state-actions">
+                        <button id="empty-import-reference" class="button button-primary" type="button" hidden>Carregar 66 músicas iniciais e sugerir agora</button>
+                        <button id="empty-change-objective" class="button button-primary" type="button" hidden>Mudar objetivo</button>
+                        <button id="open-catalog-button" class="button button-secondary" type="button">Adicionar faixa ao catálogo</button>
+                      </div>
+                      <p id="listening-catalog-message" class="field-help" hidden></p>
+                      <button id="listening-retry-catalog" class="button-link" type="button" hidden>Conferir catálogo novamente</button>
+                    </div>
+                    <div class="button-row" id="listening-actions"><button id="save-listening" class="button button-primary" type="submit">Confirmar escolha de escuta</button><button id="choose-none" class="button-link" type="button">Não escolher nenhuma faixa</button></div>
+                    <p class="field-help" id="listening-help">Escolher uma faixa e confirmar que a ouviu ficam separados. Use “Abrir faixa” para ouvir no seu serviço preferido.</p>
+                  </form>
+                </div>
+
+                <div id="feedback-card" class="card stage-card">
+                  <div class="section-heading"><span class="section-marker text-marker" aria-hidden="true">↳</span><div><h2>Reflexão opcional após a escolha</h2><p>Separe se a sugestão combinou do que você sentiu na escuta — ou pule esta etapa.</p></div></div>
+                  <form method="post" id="feedback-form" class="stack-form">
+                    <div class="field">
+                      <label id="suggestion-fit-label">A sugestão de faixas fez sentido para o objetivo? <span class="optional">Opcional</span></label>
+                      <div id="suggestion-fit-choices" class="quick-chip-bar" role="group" aria-labelledby="suggestion-fit-label">
+                        <button type="button" class="quick-chip" data-suggestion-fit="Fez sentido para o que eu buscava." aria-pressed="false">Sim, fez sentido</button>
+                        <button type="button" class="quick-chip" data-suggestion-fit="Fez sentido apenas em parte." aria-pressed="false">Em parte</button>
+                        <button type="button" class="quick-chip" data-suggestion-fit="A sugestão não combinou com o objetivo." aria-pressed="false">Não combinou</button>
+                      </div>
+                    </div>
+                    <div class="field">
+                      <label for="feedback-answer">E como foi a escuta para você?</label>
+                      <div id="feedback-quick-choices" class="feedback-choice-grid" role="group" aria-label="Escolher percepção da escuta">
+                        <button type="button" class="feedback-choice-btn" data-feedback-choice="ajudou" aria-pressed="false"><strong>Sim, me ajudou</strong><span>Apoiou bem o meu momento</span></button>
+                        <button type="button" class="feedback-choice-btn" data-feedback-choice="sem_mudanca" aria-pressed="false"><strong>Sem mudança</strong><span>Continuou parecido depois</span></button>
+                        <button type="button" class="feedback-choice-btn" data-feedback-choice="nao_ajudou" aria-pressed="false"><strong>Não ajudou</strong><span>Preferia outro caminho</span></button>
+                      </div>
+                      <select id="feedback-answer" name="retorno"><option value="">Pular ou escolher resposta…</option><option value="ajudou">Sim, me ajudou</option><option value="sem_mudanca">Não percebi mudança</option><option value="nao_ajudou">Não senti que me ajudou</option></select>
+                    </div>
+                    <details id="feedback-extra-fields" class="session-options-drawer feedback-extra-drawer"><summary class="session-options-summary"><span>Anotar motivo ou ideia para a próxima escuta</span><span class="options-summary-trailing"><span class="options-summary-pill">Opcional</span><svg class="disclosure-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></span></summary><div class="session-options-body"><div class="field"><label for="feedback-comment">Quer contar um pouco mais? <span class="optional">Opcional</span></label><textarea id="feedback-comment" name="motivo" rows="2" maxlength="4000" placeholder="O que funcionou — ou não — nesta escuta?"></textarea></div><div class="field"><label for="feedback-improvement">Algo que faria diferente? <span class="optional">Opcional</span></label><textarea id="feedback-improvement" name="melhoria" rows="2" maxlength="4000" placeholder="Uma nota rápida para sua próxima escolha…"></textarea></div></div></details>
+                    <div class="button-row"><button id="save-feedback" class="button button-secondary" type="submit">Aplicar retorno</button><button id="feedback-later" class="button-link" type="button">Pular retorno</button></div>
+                  </form>
+                  <div id="feedback-status" class="notice" role="status" aria-live="polite"></div>
+                </div>
+
+                <div id="diary-save-card" class="card stage-card diary-save-card">
+                  <div class="section-heading">
+                    <span class="section-marker diary-marker" aria-hidden="true">★</span>
+                    <div>
+                      <p class="eyebrow">DECISÃO DE PRIVACIDADE</p>
+                      <h2 id="diary-save-heading">Guardar no meu diário?</h2>
+                      <p id="diary-save-description">Nada foi gravado até agora. Guarde se quiser revisitar esta sessão depois, ou conclua sem deixar nenhum registro.</p>
+                    </div>
+                  </div>
+                  <label id="save-include-note-row" class="checkbox-line diary-note-choice" hidden>
+                    <input id="save-include-note" type="checkbox" checked>
+                    <span>Guardar também o texto íntimo que escrevi nesta sessão (desmarque para salvar só objetivo, categorias e escuta).</span>
+                  </label>
+                  <div class="button-row diary-save-actions">
+                    <button id="save-to-diary-button" class="button button-primary" type="button">Guardar no meu diário</button>
+                    <button id="finish-without-saving" class="button button-secondary" type="button">Concluir sem guardar</button>
+                  </div>
+                </div>
+
+                <div id="diary-saved-banner" class="card stage-card diary-saved-banner" hidden>
+                  <div class="diary-saved-copy">
+                    <span class="eyebrow">REGISTRO SALVO NA SUA CONTA</span>
+                    <h3>Esta sessão está guardada no seu diário.</h3>
+                    <p>Você pode atualizar a escuta ou o retorno acima quando quiser, ou consultar seus registros no histórico.</p>
+                  </div>
+                  <div class="completion-actions"><button id="session-to-history" class="button button-secondary nav-destination" type="button">Abrir histórico <span aria-hidden="true">→</span></button><button id="start-another" class="button button-primary" type="button">Nova escuta <span aria-hidden="true">→</span></button></div>
+                </div>
               </section>
             </div>
 

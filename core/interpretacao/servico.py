@@ -39,6 +39,31 @@ class PedidoInterpretacao(ContratoServico):
     regenerar: StrictBool = False
 
 
+class PedidoPreviaInterpretacao(ContratoServico):
+    texto_atual: StrictStr = Field(max_length=4000)
+    texto_desejado: StrictStr | None = Field(default=None, max_length=4000)
+    motor: Literal["dicionario", "llm"] = "dicionario"
+    permitir_fallback_dicionario: StrictBool = False
+
+    @model_validator(mode="after")
+    def validar_texto_previa(self):
+        if not self.texto_atual.strip():
+            raise ValueError("A interpretação exige um relato não vazio de até 4000 caracteres.")
+        return self
+
+
+class PreviaInterpretacao(ContratoServico):
+    versao_contrato: Literal["rhythmmind-previa-interpretacao-v1"] = "rhythmmind-previa-interpretacao-v1"
+    motor_solicitado: Literal["dicionario", "llm"]
+    motor_utilizado: Literal["dicionario", "llm", "mock"]
+    motor_versao: StrictStr = Field(min_length=1, max_length=200)
+    provedor: StrictStr | None = Field(default=None, min_length=1, max_length=100)
+    modelo: StrictStr | None = Field(default=None, min_length=1, max_length=100)
+    fallback_motivo: Literal["indisponivel", "saida_invalida", "falha_motor"] | None = None
+    proposta: PropostaInterpretacao
+    persistido: StrictBool = False
+
+
 class CategoriasRevisadas(ContratoServico):
     emocoes_confirmadas: list[Categoria] = Field(max_length=14)
     estado_desejado_confirmado: list[Categoria] = Field(max_length=14)
@@ -271,6 +296,40 @@ def interpretar_sessao(pedido: PedidoInterpretacao, motores: MotoresInterpretaca
     )
     _gravar(identificador, esperado=registro, interpretacao=rascunho.model_dump(mode="json"))
     return rascunho
+
+
+def interpretar_previa(pedido: PedidoPreviaInterpretacao, motores: MotoresInterpretacao):
+    """Sugere categorias em memória sem criar sessão ou gravar o relato no disco."""
+    original, desejo = pedido.texto_atual, pedido.texto_desejado
+    try:
+        base = carregar_base()
+    except (BaseIndisponivel, OSError, ValueError) as erro:
+        raise ErroInterpretacao(503, "Base de interpretação indisponível.") from erro
+    motor = motores.dicionario if pedido.motor == "dicionario" else motores.llm
+    fallback = None
+    try:
+        proposta, origem, versao = _executar_motor(motor, original, desejo, base)
+        if origem != "mock" and origem != pedido.motor:
+            raise _FalhaMotor("saida_invalida")
+    except _FalhaMotor as erro:
+        if pedido.motor != "llm" or not pedido.permitir_fallback_dicionario:
+            raise ErroInterpretacao(
+                503, "O motor solicitado não concluiu a interpretação. Nada foi gravado no diário."
+            ) from erro
+        fallback = erro.motivo
+        motor = motores.dicionario
+        try:
+            proposta, origem, versao = _executar_motor(motor, original, desejo, base)
+            if origem not in {"dicionario", "mock"}:
+                raise _FalhaMotor("saida_invalida")
+        except _FalhaMotor as falha:
+            raise ErroInterpretacao(503, "A interpretação e sua alternativa estão indisponíveis.") from falha
+    return PreviaInterpretacao(
+        motor_solicitado=pedido.motor, motor_utilizado=origem, motor_versao=versao,
+        provedor=motor.provedor if origem == "llm" else None,
+        modelo=motor.modelo if origem == "llm" else None,
+        fallback_motivo=fallback, proposta=proposta, persistido=False,
+    )
 
 
 def obter_interpretacao(identificador):

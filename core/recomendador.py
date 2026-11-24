@@ -11,26 +11,29 @@ def definir_estrategia(emocoes_atuais, estado_desejado):
     baixa_energia = {"triste", "sofrendo", "cansado", "ansioso"}
     alta_energia = {"animado", "disposto", "feliz", "explosivo", "raiva"}
     
-    # === 1. NOVA LÓGICA: TRANSIÇÃO EMOCIONAL (PONTE) ===
+    # === 1. ATIVAÇÃO GRADUAL (regra específica antes da ponte genérica) ===
+    # Cansaço com desejo de disposição tem uma regra própria; antes ela ficava
+    # inalcançável porque a transição emocional também cobre esse par.
+    if "cansado" in emocoes and ("disposto" in desejos or "animado" in desejos):
+        return "ativacao_gradual", "Vou usar uma estratégia de ativação gradual: músicas que ajudam a sair da inércia sem começar com uma intensidade extrema."
+
+    # === 2. TRANSIÇÃO EMOCIONAL (PONTE) ===
     # Se há um salto brusco de uma emoção densa para um desejo de alta energia
-    if emocoes.intersection(baixa_energia) and desejos.intersection(alta_energia):
-        return "transicao_emocional", "Notei um grande salto entre o que sentes agora e o que desejas alcançar. Vou usar uma estratégia de transição emocional: em vez de um choque abrupto, procurarei músicas que sirvam de ponte para te guiar suavemente."
+    elif emocoes.intersection(baixa_energia) and desejos.intersection(alta_energia):
+        return "transicao_emocional", "Há uma distância grande entre o que você sente agora e o que deseja alcançar. Vou usar uma estratégia de transição: em vez de uma mudança brusca, procuro músicas que sirvam de ponte, aos poucos."
     
-    # === 2. LÓGICAS PADRÃO ===
+    # === 3. LÓGICAS PADRÃO ===
     elif "foco" in desejos or "foco" in emocoes:
-        return "foco_cognitivo", "Vou sugerir músicas que ajudam a manter a concentração e o foco cognitivo, sem distrações excessivas."
+        return "foco_cognitivo", "Vou sugerir músicas que ajudam a manter a concentração, sem distrações excessivas."
         
     elif "raiva" in emocoes or "explosivo" in emocoes:
-        return "catarse", "Vou usar uma estratégia de catarse: músicas mais intensas para ajudar a extravasar o que estás a sentir agora."
-        
-    elif "cansado" in emocoes and ("disposto" in desejos or "animado" in desejos):
-        return "ativacao_gradual", "Vou usar uma estratégia de ativação gradual: músicas que tentam tirar-te da inércia sem jogar uma intensidade extrema logo de início."
+        return "catarse", "Vou usar uma estratégia de catarse: músicas mais intensas para ajudar a extravasar o que você está sentindo agora."
         
     elif "calmo" in desejos or "relaxar" in desejos:
-        return "descompressao", "Vou focar numa estratégia de descompressão: músicas mais tranquilas para ajudar a baixar o ritmo e relaxar."
+        return "descompressao", "Vou seguir uma estratégia de descompressão: músicas mais tranquilas para ajudar a baixar o ritmo e relaxar."
         
     elif "animado" in desejos or "disposto" in desejos:
-        return "ativacao", "Vou procurar uma ativação energética: músicas com um ritmo mais para cima para te dar aquele empurrãozinho."
+        return "ativacao", "Vou procurar uma ativação: músicas com um ritmo mais para cima para dar aquele empurrãozinho."
         
     elif not emocoes:
         if desejos:
@@ -40,7 +43,7 @@ def definir_estrategia(emocoes_atuais, estado_desejado):
         return None, explicacao
 
     else:
-        return "espelhamento", "Vou seguir uma estratégia de espelhamento: músicas que combinam e acolhem o que estás a sentir neste momento."
+        return "espelhamento", "Vou seguir uma estratégia de espelhamento: músicas que combinam com o que você está sentindo neste momento e acolhem isso."
 
 
 def validar_limite_recomendacoes(limite):
@@ -126,11 +129,22 @@ def explicar_recomendacoes(emocoes_atuais, estrategia, recomendacoes, ajuste_apr
     return explicacoes
 
 
-def recomendar_musicas(emocoes_atuais, estado_desejado=None, ajuste_aprendizagem=None, *, limite=3):
+def musica_elegivel(musica):
+    """Metadados públicos ou associações retiradas não entram no ranking sozinhos."""
+    curadoria = musica.get("curadoria") or {}
+    return not (isinstance(curadoria, dict)
+                and curadoria.get("status") in {"pendente", "informada_pelo_usuario"}
+                and not musica.get("sentimentos_associados") and not musica.get("estrategias"))
+
+
+def recomendar_musicas(emocoes_atuais, estado_desejado=None, ajuste_aprendizagem=None, *, limite=3,
+                       musicas=None):
     """
     Recomenda músicas com base no estado emocional atual e no estado desejado.
     Retorna (nome_estrategia, explicacao, lista_de_musicas[:limite]), com padrão 3.
     Sem categoria atual nem estratégia aplicável ao desejo, retorna (None, explicacao, []).
+    `musicas` permite ordenar outra lista (por exemplo, a seleção inicial) sem
+    gravar nada no catálogo da conta; ausente, usa o catálogo pessoal.
     """
     limite = validar_limite_recomendacoes(limite)
     if estado_desejado is None:
@@ -148,7 +162,7 @@ def recomendar_musicas(emocoes_atuais, estado_desejado=None, ajuste_aprendizagem
             "nenhuma categoria foi atribuída ao estado atual. " + explicacao
         )
 
-    todas_musicas = carregar_musicas_usuario()
+    todas_musicas = carregar_musicas_usuario() if musicas is None else musicas
     
     recomendadas = []
     
@@ -156,10 +170,7 @@ def recomendar_musicas(emocoes_atuais, estado_desejado=None, ajuste_aprendizagem
     for musica in todas_musicas:
         # Metadados públicos e associações retiradas precisam de uma associação
         # pessoal antes de voltar ao ranking, inclusive quando existe feedback.
-        curadoria = musica.get("curadoria") or {}
-        if (isinstance(curadoria, dict)
-                and curadoria.get("status") in {"pendente", "informada_pelo_usuario"}
-                and not musica.get("sentimentos_associados") and not musica.get("estrategias")):
+        if not musica_elegivel(musica):
             continue
         score, _criterios = _pontuar_musica(
             musica, emocoes_atuais, nome_estrategia, ajuste_aprendizagem,

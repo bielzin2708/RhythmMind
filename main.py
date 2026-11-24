@@ -642,42 +642,54 @@ _EMOCAO_HUMANIZADA = {
 }
 
 def opcao_ver_padroes():
+    from core.historico import resumir_padroes_historico
+
     historico = carregar_json(ARQ_HISTORICO, {})
 
     if not historico:
         print("\n⚠️ O sistema precisa de mais registros no histórico para gerar um relatório de padrões.")
         return
 
-    emocoes_count = Counter()
-    desejos_count = Counter()
-    estrategias_count = Counter()
     avaliacoes = resumir_avaliacoes(historico)
-
-    for reg in historico.values():
-        analise = reg.get("analise", {})
-
-        for e in analise.get("emocoes", []):
-            emocoes_count[e] += 1
-        for d in analise.get("estado_desejado", []):
-            desejos_count[d] += 1
-
-        estrategia_usada = reg.get("estrategia", "")
-        if estrategia_usada:
-            estrategias_count[estrategia_usada] += 1
+    resumo = resumir_padroes_historico(historico, rotulos=_EMOCAO_HUMANIZADA)
+    total = resumo["total_sessoes"]
+    periodo = resumo["periodo"]
 
     print("\n=== Os Seus Padrões Pessoais ===")
-    print("Este relatório ajuda você a refletir sobre seus estados emocionais e")
-    print("a forma como usa a música para se autorregular.\n")
+    print("Este relatório apresenta as contagens registradas nas suas sessões.")
+    if periodo:
+        faixa_datas = (
+            periodo["inicio"]
+            if periodo["inicio"] == periodo["fim"]
+            else f"{periodo['inicio']} a {periodo['fim']}"
+        )
+        print(f"Período observado: {faixa_datas} ({periodo['sessoes_com_data']} de {total} sessões com data).\n")
+    else:
+        print(f"Base considerada: {total} {'sessão registrada' if total == 1 else 'sessões registradas'}.\n")
 
-    if emocoes_count:
-        top_emocoes = [f"{_EMOCAO_HUMANIZADA.get(k, k)} ({v}x)" for k, v in emocoes_count.most_common(3)]
+    if resumo["emocoes_frequentes"]:
+        top_emocoes = [
+            f"{_EMOCAO_HUMANIZADA.get(k, k)} ({v} de {total})"
+            for k, v in resumo["emocoes_frequentes"]
+        ]
         print(f"🔹 Estados mais frequentes: {', '.join(top_emocoes)}")
 
-    if desejos_count:
-        top_desejos = [f"{_EMOCAO_HUMANIZADA.get(k, k)} ({v}x)" for k, v in desejos_count.most_common(3)]
-        print(f"🔹 O que mais procura sentir: {', '.join(top_desejos)}")
+    if resumo["desejos_frequentes"]:
+        top_desejos = [
+            f"{_EMOCAO_HUMANIZADA.get(k, k)} ({v} de {total})"
+            for k, v in resumo["desejos_frequentes"]
+        ]
+        print(f"🔹 Objetivos mais registrados: {', '.join(top_desejos)}")
     else:
-        print("🔹 O que mais procura sentir: ainda sem padrão claro")
+        print("🔹 Objetivos mais registrados: ainda sem objetivo confirmado")
+
+    if resumo["combinacoes_observadas"]:
+        pares_txt = [
+            f"{_EMOCAO_HUMANIZADA.get(item['emocao'], item['emocao'])} → "
+            f"{_EMOCAO_HUMANIZADA.get(item['desejo'], item['desejo'])} ({item['contagem']} de {total})"
+            for item in resumo["combinacoes_observadas"]
+        ]
+        print(f"🔹 Combinações registradas na mesma sessão: {', '.join(pares_txt)}")
 
     print(f"\nSessões avaliadas: {avaliacoes['sessoes_avaliadas']} de {avaliacoes['sessoes_totais']}.")
     print(f"Retornos positivos: {avaliacoes['retornos_positivos']}")
@@ -686,25 +698,12 @@ def opcao_ver_padroes():
     print(INTERPRETACAO_RETORNOS)
     print(LIMITACAO_POR_FAIXA)
 
-    # Síntese reflexiva — sem expor termos técnicos
     print("\n=== Síntese Reflexiva ===")
-    if emocoes_count and desejos_count:
-        emocao_top = _EMOCAO_HUMANIZADA.get(emocoes_count.most_common(1)[0][0], emocoes_count.most_common(1)[0][0])
-        desejo_top = _EMOCAO_HUMANIZADA.get(desejos_count.most_common(1)[0][0], desejos_count.most_common(1)[0][0])
-        print(
-            f"Com base no seu diário, parece que você costuma buscar apoio musical\n"
-            f"quando se sente com '{emocao_top}', buscando alcançar um estado de '{desejo_top}'.\n"
-            f"Observar esses padrões pode te ajudar a antecipar e acolher melhor\n"
-            f"seus estados antes que se tornem muito pesados."
-        )
-    elif emocoes_count:
-        emocao_top = _EMOCAO_HUMANIZADA.get(emocoes_count.most_common(1)[0][0], emocoes_count.most_common(1)[0][0])
-        print(
-            f"Você costuma buscar apoio musical quando se sente com '{emocao_top}'.\n"
-            f"Continue usando o sistema para refinar esse padrão."
-        )
+    if resumo["sintese_reflexiva"]:
+        print(resumo["sintese_reflexiva"])
+        print("Essas contagens descrevem apenas os registros salvos e não medem causalidade ou previsão clínica.")
     else:
-        print("Continue usando o sistema para gerarmos uma síntese sobre o seu perfil emocional.")
+        print("Registre novas sessões com categorias confirmadas para consultar as contagens do diário.")
 
     print("================================")
 
@@ -831,14 +830,17 @@ def coletar_feedback(ao_atualizar=None, anterior=None, editar=False):
         while True:
             resposta = input(
                 "Essas recomendações fizeram sentido para você?\n"
-                f"Sim ou não?{manter}\n> "
+                f"Sim, não ou 'pular' para responder depois.{manter}\n> "
             ).strip().lower()
             if editar and not resposta and type(ajudou) is bool:
                 break
+            if not editar and resposta == "pular":
+                print("Retorno adiado. Você pode registrar depois ao retomar a sessão.")
+                return None, "", None, ""
             if resposta in {"sim", "s", "não", "nao", "n"}:
                 ajudou = resposta in {"sim", "s"}
                 break
-            print("Por favor, responda 'sim' ou 'não'.")
+            print("Por favor, responda 'sim', 'não' ou 'pular'.")
         salvar_parcial()
 
     pergunta = "O que fez sentido nessas recomendações?" if ajudou else "O que não fez sentido nessas recomendações?"

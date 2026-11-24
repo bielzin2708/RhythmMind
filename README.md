@@ -24,12 +24,20 @@ Veja o [guia de configuração e teste do login Google](docs/login_google.md).
 
 ## Seu espaço na interface web
 
-Depois de entrar, a página **Seu espaço** apresenta as etapas pendentes e os
-registros recentes da própria conta. **Começar um relato** inicia uma sessão;
-**Sua sessão** permite voltar à etapa aberta. A navegação no topo também oferece
-**Meu diário** e **Minhas músicas**. A home reúne a saudação e o início do relato
-em um destaque, seguidos de continuidade, registros recentes e acessos rápidos.
-As áreas compartilham a identidade do acesso e se adaptam ao celular.
+Depois de entrar, a página **Início** destaca objetivos rápidos (**Relaxar**,
+**Focar** e **Ganhar energia**) em um toque, além de **Carregar 66 músicas iniciais**
+quando o catálogo ainda está vazio. Em **Hoje**, escrever um relato é opcional:
+a pessoa pode buscar até três faixas apenas pelo objetivo e pelas sensações atuais,
+ou escrever uma nota para revisar a leitura sugerida como pergunta editável
+(*Confirmar*, *Mudar* ou *Seguir sem categoria*).
+
+Por padrão, explorar objetivos, interpretar uma nota e ver sugestões **não grava
+nenhum relato no servidor** (`/api/explorar-interpretacao` e `/api/explorar-escuta`).
+Ao final, **Guardar no meu diário** (`/api/diario/sessoes`) persiste a sessão
+apenas quando solicitado — com opção de omitir o texto íntimo e salvar somente
+objetivo, categorias, escuta e retorno. Quem preferir pausar um relato longo ainda
+pode usar **Salvar rascunho para depois**. A navegação no topo reúne **Início**,
+**Hoje**, **Histórico** e **Catálogo**.
 
 **Sua conta** abre perfil, exportação, preferências visuais, informações sobre
 o projeto e saída. **Resumo dos meus registros** expande os indicadores de

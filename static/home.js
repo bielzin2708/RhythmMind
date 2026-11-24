@@ -113,7 +113,7 @@ export function catalogTotal(response) {
   throw new TypeError('Catálogo inválido.');
 }
 
-export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog }) {
+export function initHome({ api, onNew, onQuickObjective = () => {}, onStarterCatalog = null, onResume, onRecord, onHistory, onCatalog }) {
   let version = 0;
   let activeUser = false;
   const pendingList = $('#home-pending-list');
@@ -153,6 +153,7 @@ export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog 
     $('#profile-catalog').textContent = '—';
     $('#home-total-tracks').textContent = '—';
     $('#home-catalog-description').textContent = 'Organize as faixas disponíveis para suas próximas escutas.';
+    $('#home-starter-catalog').hidden = true;
     setCatalogLinkLabel('Explorar músicas');
   }
 
@@ -175,8 +176,9 @@ export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog 
     $('#home-total-tracks').textContent = total.toLocaleString('pt-BR');
     $('#profile-catalog').textContent = `${total.toLocaleString('pt-BR')} ${total === 1 ? 'faixa' : 'faixas'}`;
     $('#home-catalog-description').textContent = total === 0
-      ? 'Prepare seu catálogo para receber sugestões musicais. Você também pode escrever sem escolher uma faixa.'
+      ? 'Conta nova sem músicas ainda. Carregue a seleção inicial em um clique ou adicione suas faixas.'
       : 'Organize as faixas disponíveis para suas próximas escutas.';
+    $('#home-starter-catalog').hidden = total !== 0 || typeof onStarterCatalog !== 'function';
     setCatalogLinkLabel(total === 0 ? 'Adicionar músicas' : 'Explorar músicas');
   }
 
@@ -277,6 +279,16 @@ export function initHome({ api, onNew, onResume, onRecord, onHistory, onCatalog 
   }
 
   $('#home-new-session').addEventListener('click', () => { if (activeUser) onNew(); });
+  for (const [id, objective] of [
+    ['home-quick-relax', 'calmo'],
+    ['home-quick-focus', 'foco'],
+    ['home-quick-energy', 'disposto'],
+  ]) {
+    $(`#${id}`).addEventListener('click', () => { if (activeUser) onQuickObjective(objective); });
+  }
+  $('#home-starter-catalog').addEventListener('click', () => {
+    if (activeUser && typeof onStarterCatalog === 'function') void onStarterCatalog($('#home-starter-catalog'));
+  });
   $('#home-open-history').addEventListener('click', () => { if (activeUser) onHistory(); });
   $('#home-explore-history').addEventListener('click', () => { if (activeUser) onHistory(); });
   $('#home-open-catalog').addEventListener('click', () => { if (activeUser) onCatalog(); });

@@ -20,7 +20,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
+from fastapi import APIRouter, Body, Depends, FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
@@ -35,14 +35,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, field_validator, model_validator
 
 from core.analisador_texto import detectar_emocoes_no_texto, remover_acentos, separar_papeis_texto
-from core.recomendador import recomendar_musicas, explicar_recomendacoes, validar_limite_recomendacoes
+from core.interpretacao.contratos import CATEGORIAS, Categoria
+from core.recomendador import (
+    explicar_recomendacoes, musica_elegivel, recomendar_musicas, validar_limite_recomendacoes,
+)
 from core.escuta import preparar_escuta
 from core.caracterizacao import validar_caracterizacao
 from core.sessoes import (
     criar_sessao, salvar_nova_sessao, atualizar_sessao, recomendacoes_registradas,
     validar_metadados_sessao, ConflitoSessao,
 )
-from core.historico import filtrar_historico
+from core.historico import filtrar_historico, resumir_padroes_historico
 from core.titular import ErroTitular, corrigir_registro
 from core.feedback import resumir_avaliacoes, LIMITACAO_POR_FAIXA, INTERPRETACAO_RETORNOS
 from core.storage import (
@@ -277,13 +280,157 @@ class NovaMusicaRequest(BaseModel):
 # ============================================================
 # 1) DETECTAR EMOÇÕES NO TEXTO (passo intermediário do front-end)
 # ============================================================
+class DetectarEmocoesRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    texto: str = Field(max_length=4000)
+
+
+class ExplorarEscutaRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    emocoes_atuais: List[Categoria] = Field(default_factory=list, max_length=14)
+    estado_desejado: List[Categoria] = Field(default_factory=list, max_length=14)
+    texto_desejado: Optional[str] = Field(default=None, max_length=4000)
+    limite_recomendacoes: StrictInt = Field(default=3, ge=1, le=10)
+
+    @field_validator("emocoes_atuais", "estado_desejado")
+    @classmethod
+    def validar_sem_repeticao(cls, valores):
+        if len(valores) != len(set(valores)):
+            raise ValueError("Categorias não podem se repetir.")
+        return valores
+
+
+class GuardarSessaoDiarioRequest(MetadadosSessaoRequest):
+    texto_atual: Optional[str] = Field(default="", max_length=4000)
+    guardar_relato: StrictBool = True
+    emocoes_confirmadas: List[Categoria] = Field(default_factory=list, max_length=14)
+    estado_desejado_confirmado: List[Categoria] = Field(default_factory=list, max_length=14)
+    texto_desejado: str = Field(default="", max_length=4000)
+    limite_recomendacoes: StrictInt = Field(default=3, ge=1, le=10)
+    faixas_escuta: Optional[List[FaixaEscutaRequest]] = None
+    feedback_ajudou: Optional[StrictBool] = None
+    feedback_motivo: str = Field(default="", max_length=4000)
+    feedback_melhoria: str = Field(default="", max_length=4000)
+
+    @field_validator("emocoes_confirmadas", "estado_desejado_confirmado")
+    @classmethod
+    def validar_confirmadas_sem_repeticao(cls, valores):
+        if len(valores) != len(set(valores)):
+            raise ValueError("Categorias confirmadas não podem se repetir.")
+        return valores
+
+
 @router.post("/api/detectar-emocoes")
-def detectar_emocoes(texto: str):
-    """Usado pelo front-end para mostrar 'Acho que você está se sentindo: X, Y.
-    Correto?' antes de pedir confirmação, como na CLI. Intenções explícitas
-    são separadas para não serem apresentadas como estado atual."""
-    emocoes = detectar_emocoes_no_texto(separar_papeis_texto(texto)[0])
+def detectar_emocoes(
+    req: Optional[DetectarEmocoesRequest] = Body(default=None),
+    texto: Optional[str] = Query(default=None, max_length=4000, include_in_schema=False),
+):
+    """Recebe o relato no corpo JSON (evitando exposição em URLs/logs de acesso).
+    Intenções explícitas são separadas para não serem apresentadas como estado atual."""
+    if (req is None) == (texto is None):
+        raise HTTPException(
+            status_code=422,
+            detail="Informe o campo 'texto' no corpo JSON da requisição.",
+        )
+    conteudo = req.texto if req is not None else texto
+    emocoes = detectar_emocoes_no_texto(separar_papeis_texto(conteudo)[0])
     return {"emocoes_detectadas": emocoes}
+
+
+@router.post("/api/explorar-escuta")
+def explorar_escuta(req: ExplorarEscutaRequest):
+    """Sugere faixas a partir de objetivo e/ou estado atual, sem gravar nada no diário."""
+    desejos = list(req.estado_desejado)
+    if not desejos and req.texto_desejado and req.texto_desejado.strip():
+        desejos = [c for c in detectar_emocoes_no_texto(req.texto_desejado) if c in CATEGORIAS]
+    catalogo_pessoal = carregar_todas_musicas()
+    total_catalogo = len(catalogo_pessoal)
+    elegiveis_catalogo = sum(1 for m in catalogo_pessoal if musica_elegivel(m))
+    estado_catalogo = (
+        "vazio" if total_catalogo == 0
+        else "sem_classificacao" if elegiveis_catalogo == 0
+        else "pronto"
+    )
+    estrategia, explicacao, recomendacoes = recomendar_musicas(
+        req.emocoes_atuais, desejos, limite=req.limite_recomendacoes, musicas=catalogo_pessoal,
+    )
+    motivos = explicar_recomendacoes(req.emocoes_atuais, estrategia, recomendacoes)
+    return {
+        "persistido": False,
+        "emocoes_atuais": req.emocoes_atuais,
+        "estado_desejado": desejos,
+        "estrategia": estrategia,
+        "explicacao": explicacao,
+        "recomendacoes": recomendacoes,
+        "motivos_recomendacoes": motivos,
+        "limite_recomendacoes": req.limite_recomendacoes,
+        "catalogo": {
+            "estado": estado_catalogo,
+            "total": total_catalogo,
+            "elegiveis": elegiveis_catalogo,
+        },
+    }
+
+
+@router.post("/api/diario/sessoes", status_code=201)
+def guardar_sessao_no_diario(req: GuardarSessaoDiarioRequest):
+    """Persiste a sessão somente quando a pessoa escolhe explicitamente guardar no diário."""
+    desejos = list(req.estado_desejado_confirmado)
+    if not desejos and req.texto_desejado.strip():
+        desejos = [c for c in detectar_emocoes_no_texto(req.texto_desejado) if c in CATEGORIAS]
+    estrategia, explicacao, recomendacoes = recomendar_musicas(
+        req.emocoes_confirmadas, desejos, limite=req.limite_recomendacoes,
+    )
+    motivos = explicar_recomendacoes(req.emocoes_confirmadas, estrategia, recomendacoes)
+    escuta = None
+    if req.faixas_escuta is not None:
+        try:
+            escuta = preparar_escuta(
+                recomendacoes, [faixa.model_dump() for faixa in req.faixas_escuta],
+            )
+        except ValueError as erro:
+            raise HTTPException(status_code=422, detail=str(erro)) from erro
+    feedback = None
+    if req.feedback_ajudou is not None:
+        feedback = {
+            "ajudou": req.feedback_ajudou,
+            "motivo": req.feedback_motivo,
+            "melhoria": req.feedback_melhoria,
+        }
+    texto_salvo = (req.texto_atual or "") if req.guardar_relato else ""
+    registro = criar_sessao(
+        data_hora=datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+        texto_usuario=texto_salvo,
+        analise={"emocoes": list(req.emocoes_confirmadas), "estado_desejado": desejos},
+        estrategia=estrategia,
+        recomendacoes=recomendacoes,
+        escuta=escuta,
+        feedback=feedback,
+        finalidade=req.finalidade,
+        contexto=req.contexto,
+        limite_recomendacoes=req.limite_recomendacoes,
+        permitir_sem_relato=True,
+    )
+    registro["texto_desejado"] = req.texto_desejado
+    registro["explicacao"] = explicacao
+    registro["motivos_recomendacoes"] = motivos
+    registro["progresso"] = {
+        "emocoes_confirmadas": True,
+        "estado_desejado_informado": True,
+        "recomendacoes_geradas": True,
+    }
+    try:
+        salvar_nova_sessao(ARQ_HISTORICO, registro)
+    except OSError as erro:
+        raise HTTPException(status_code=503, detail={
+            "sessao_id": registro["sessao_id"], "relato_salvo": False,
+            "mensagem": "Falha ao guardar a sessão no diário.",
+        }) from erro
+    resposta = _resposta_estado(registro)
+    resposta["feedback"] = feedback
+    return resposta
 
 
 # ============================================================
@@ -606,50 +753,31 @@ def consultar_sessao(sessao_id: str):
 # ============================================================
 @router.get("/api/padroes")
 def ver_padroes():
-    from collections import Counter
-
     historico = carregar_json(ARQ_HISTORICO, {})
     avaliacoes = resumir_avaliacoes(historico)
     if not historico:
         return {
             "mensagem": "Sem registros suficientes para gerar um relatório de padrões.",
+            "total_sessoes": 0,
+            "periodo": None,
+            "combinacoes_observadas": [],
             "avaliacoes_sessoes": avaliacoes,
             "limitacao_resultados_por_faixa": LIMITACAO_POR_FAIXA,
             "interpretacao_retornos": INTERPRETACAO_RETORNOS,
         }
 
-    emocoes_count, desejos_count, estrategias_count = Counter(), Counter(), Counter()
-
-    for reg in historico.values():
-        analise = reg.get("analise", {})
-
-        for e in analise.get("emocoes", []):
-            emocoes_count[e] += 1
-        for d in analise.get("estado_desejado", []):
-            desejos_count[d] += 1
-
-        if reg.get("estrategia"):
-            estrategias_count[reg["estrategia"]] += 1
-
-    sintese = None
-    if emocoes_count and desejos_count and estrategias_count:
-        emocao_top = emocoes_count.most_common(1)[0][0]
-        desejo_top = desejos_count.most_common(1)[0][0]
-        estrategia_top = estrategias_count.most_common(1)[0][0]
-        sintese = (
-            f"De acordo com o teu diário, notas uma tendência para procurar apoio musical "
-            f"quando te sentes '{emocao_top}', com o objetivo de alcançar um estado de '{desejo_top}'. "
-            f"A estratégia mais sugerida nessas sessões é '{estrategia_top}'."
-        )
-
+    resumo = resumir_padroes_historico(historico)
     return {
-        "emocoes_frequentes": emocoes_count.most_common(3),
-        "desejos_frequentes": desejos_count.most_common(3),
-        "estrategias_frequentes": estrategias_count.most_common(2),
+        "total_sessoes": resumo["total_sessoes"],
+        "periodo": resumo["periodo"],
+        "emocoes_frequentes": resumo["emocoes_frequentes"],
+        "desejos_frequentes": resumo["desejos_frequentes"],
+        "estrategias_frequentes": resumo["estrategias_frequentes"],
+        "combinacoes_observadas": resumo["combinacoes_observadas"],
         "avaliacoes_sessoes": avaliacoes,
         "limitacao_resultados_por_faixa": LIMITACAO_POR_FAIXA,
         "interpretacao_retornos": INTERPRETACAO_RETORNOS,
-        "sintese_reflexiva": sintese,
+        "sintese_reflexiva": resumo["sintese_reflexiva"],
     }
 
 

@@ -34,8 +34,14 @@ def validar_metadados_sessao(**campos):
 
 def criar_sessao(*, data_hora, texto_usuario, analise=None, estrategia=None,
                  recomendacoes=None, escuta=None, feedback=None,
-                 finalidade=None, contexto=None, limite_recomendacoes=3):
-    if not isinstance(texto_usuario, str) or not texto_usuario.strip():
+                 finalidade=None, contexto=None, limite_recomendacoes=3,
+                 permitir_sem_relato=False):
+    if permitir_sem_relato:
+        if texto_usuario is None:
+            texto_usuario = ""
+        if not isinstance(texto_usuario, str) or len(texto_usuario) > 4000:
+            raise ValueError("O relato opcional deve ser um texto de até 4000 caracteres.")
+    elif not isinstance(texto_usuario, str) or not texto_usuario.strip():
         raise ValueError("Informe um relato não vazio.")
     return {
         "sessao_id": str(uuid4()),

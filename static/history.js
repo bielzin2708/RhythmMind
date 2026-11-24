@@ -176,6 +176,23 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     byId('history-active-filter-text').textContent = summary.join(' · ');
   }
 
+  function cardSummaryTitle(record) {
+    const purpose = typeof record.finalidade === 'string' ? record.finalidade.trim() : '';
+    if (purpose) return purpose;
+    const desires = Array.isArray(record.analise?.estado_desejado) ? record.analise.estado_desejado : [];
+    if (desires.length) return `Objetivo: ${desires.slice(0, 2).map(categoriaLabel).join(', ')}`;
+    const emotions = Array.isArray(record.analise?.emocoes) ? record.analise.emocoes : [];
+    if (emotions.length) return `Estado: ${emotions.slice(0, 2).map(categoriaLabel).join(', ')}`;
+    return 'Sessão no diário';
+  }
+
+  function hasPendingWork(record) {
+    if (!completed(record)) return true;
+    if (!Array.isArray(record.recomendacoes) || record.recomendacoes.length === 0) return false;
+    if (!record.escuta || !Array.isArray(record.escuta.faixas)) return true;
+    return record.escuta.faixas.some((track) => typeof track?.ouvida !== 'boolean');
+  }
+
   function renderList() {
     const list = byId('history-list');
     list.replaceChildren();
@@ -186,11 +203,14 @@ export function initHistory({ api, notify, onResume, onChanged }) {
       const card = textNode('article', 'history-card card');
       card.dataset.sessionId = id;
       const heading = textNode('div', 'history-card-heading');
-      const title = textNode('h3', '', historyRecordTitle(record));
+      const title = textNode('h3', '', cardSummaryTitle(record));
       const stamp = textNode('p', 'muted small', formatDate(record.data_hora));
       heading.append(title, textNode('span', 'badge', sessionState(record)));
       card.append(heading, stamp);
       if (record.contexto) card.append(textNode('p', 'muted', record.contexto));
+      if (typeof record.texto_usuario === 'string' && record.texto_usuario.trim()) {
+        card.append(textNode('p', 'small muted', 'Nota íntima guardada · abra o registro para revelar'));
+      }
       card.append(textNode('p', 'small', listeningText(record)), textNode('p', 'small', feedbackText(record)));
       const button = textNode('button', 'button button-secondary', 'Ver registro');
       button.type = 'button';
@@ -201,6 +221,12 @@ export function initHistory({ api, notify, onResume, onChanged }) {
         void openRecord(id);
       });
       card.append(button);
+      if (hasPendingWork(record)) {
+        const resumeBtn = textNode('button', 'button button-primary history-inline-resume', 'Retomar');
+        resumeBtn.type = 'button';
+        resumeBtn.addEventListener('click', () => onResume(id));
+        card.append(resumeBtn);
+      }
       if (selected?.id === id) card.classList.add('selected');
       list.append(card);
     }
@@ -210,8 +236,17 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     const target = byId('patterns-summary');
     target.replaceChildren();
     const counts = data.avaliacoes_sessoes || {};
-    totalRecords = Number(counts.sessoes_totais) || 0;
-    target.append(textNode('p', 'muted', 'Este resumo considera todas as suas sessões, mesmo quando o histórico está filtrado.'));
+    totalRecords = Number(data.total_sessoes ?? counts.sessoes_totais) || 0;
+    const period = data.periodo;
+    const periodLabel = period
+      ? (period.inicio === period.fim ? period.inicio : `${period.inicio} a ${period.fim}`)
+      : null;
+    target.append(textNode('p', 'muted', periodLabel
+      ? `Base: ${totalRecords} ${totalRecords === 1 ? 'sessão registrada' : 'sessões registradas'} · Período: ${periodLabel}.`
+      : 'Este resumo considera todas as suas sessões registradas, mesmo quando o histórico está filtrado.'));
+    if (data.sintese_reflexiva) {
+      target.append(textNode('p', 'patterns-synthesis', data.sintese_reflexiva));
+    }
     const grid = textNode('div', 'stats-grid');
     const items = [
       [counts.sessoes_totais, 'Sessões registradas'],
@@ -225,15 +260,28 @@ export function initHistory({ api, notify, onResume, onChanged }) {
       grid.append(tile);
     }
     target.append(grid);
+    if (Array.isArray(data.combinacoes_observadas) && data.combinacoes_observadas.length) {
+      target.append(textNode('h3', '', 'Combinações observadas na mesma sessão'));
+      const pairs = textNode('ul', 'plain-list');
+      const denom = totalRecords || 1;
+      for (const pair of data.combinacoes_observadas) {
+        pairs.append(textNode(
+          'li', '',
+          `${categoriaLabel(pair.emocao)} → ${categoriaLabel(pair.desejo)} · ${pair.contagem} de ${denom}`,
+        ));
+      }
+      target.append(pairs);
+    }
     for (const [key, title, formatter] of [
-      ['emocoes_frequentes', 'Categorias atuais mais confirmadas', categoriaLabel],
-      ['desejos_frequentes', 'Intenções mais confirmadas', categoriaLabel],
+      ['emocoes_frequentes', 'Estados atuais mais confirmados', categoriaLabel],
+      ['desejos_frequentes', 'Objetivos mais confirmados', categoriaLabel],
       ['estrategias_frequentes', 'Estratégias mais sugeridas', strategyLabel],
     ]) {
       if (!Array.isArray(data[key]) || !data[key].length) continue;
       target.append(textNode('h3', '', title));
       const values = textNode('ul', 'plain-list');
-      for (const [label, count] of data[key]) values.append(textNode('li', '', `${formatter(label)} · ${count} ${count === 1 ? 'registro' : 'registros'}`));
+      const denom = totalRecords || 1;
+      for (const [label, count] of data[key]) values.append(textNode('li', '', `${formatter(label)} · ${count} de ${denom}`));
       target.append(values);
     }
     if (data.mensagem) target.append(textNode('p', 'muted', data.mensagem));
@@ -281,7 +329,16 @@ export function initHistory({ api, notify, onResume, onChanged }) {
     const target = byId('history-detail-content');
     target.replaceChildren();
     byId('history-detail-title').textContent = `Registro de ${formatDate(record.data_hora)}`;
-    target.append(readSection('Seu relato original', record.texto_usuario, 'original-record'));
+    if (typeof record.texto_usuario === 'string' && record.texto_usuario.trim()) {
+      const noteDisclosure = textNode('details', 'record-section narrative-disclosure');
+      noteDisclosure.append(
+        textNode('summary', '', 'Revelar nota íntima guardada nesta sessão'),
+        textNode('p', 'preserve-lines original-record', record.texto_usuario),
+      );
+      target.append(noteDisclosure);
+    } else {
+      target.append(readSection('Nota em texto', 'Sessão guardada sem relato em texto.'));
+    }
     const metadata = textNode('section', 'record-section');
     metadata.append(textNode('h3', '', 'Finalidade e contexto registrados'));
     metadata.append(textNode('p', '', `Finalidade: ${present(record.finalidade)}`), textNode('p', '', `Contexto: ${present(record.contexto)}`));

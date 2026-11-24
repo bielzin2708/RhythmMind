@@ -8,8 +8,9 @@ from api.autenticacao import usuario_autenticado
 from core.interpretacao.llm import criar_interpretador_llm_do_ambiente
 from core.interpretacao.servico import (
     ErroInterpretacao, InterpretacaoRegistrada, MotoresInterpretacao,
-    PedidoInterpretacao, PedidoRevisao, ResultadoRevisao,
-    interpretar_sessao, obter_interpretacao, revisar_interpretacao,
+    PedidoInterpretacao, PedidoPreviaInterpretacao, PedidoRevisao,
+    PreviaInterpretacao, ResultadoRevisao,
+    interpretar_previa, interpretar_sessao, obter_interpretacao, revisar_interpretacao,
 )
 
 
@@ -26,6 +27,15 @@ def _executar(funcao, *args):
         return funcao(*args)
     except ErroInterpretacao as erro:
         raise HTTPException(status_code=erro.status, detail=str(erro)) from erro
+
+
+@router.post("/api/explorar-interpretacao", response_model=PreviaInterpretacao)
+def explorar_interpretacao(
+    pedido: PedidoPreviaInterpretacao,
+    motores: MotoresInterpretacao = Depends(obter_motores),
+):
+    """Interpreta um relato opcional em memória, sem persistir no diário."""
+    return _executar(interpretar_previa, pedido, motores)
 
 
 @router.post("/api/interpretacoes", response_model=InterpretacaoRegistrada)

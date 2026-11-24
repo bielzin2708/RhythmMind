@@ -148,36 +148,64 @@ function focusContent(target) {
   else target.scrollIntoView({ block: 'start', behavior: 'auto' });
 }
 
-function showView(next, { load = true, focus = true } = {}) {
+function showView(next, { load = true, focus = true, animate = true } = {}) {
   const names = ['home', 'session', 'history', 'catalog'];
   if (!user || !names.includes(next)) return;
   closeAccountMenu();
+  const changedView = activeView !== next;
   activeView = next;
   navigationVersion += 1;
-  for (const name of names) {
-    $(`#view-${name}`).hidden = name !== next;
-    const navigation = $(`#nav-${name}`);
-    navigation.classList.toggle('active', name === next);
-    if (name === next) navigation.setAttribute('aria-current', 'page');
-    else navigation.removeAttribute('aria-current');
-  }
   const headings = { home: 'home-heading', session: 'session-heading', history: 'history-heading', catalog: 'catalog-heading' };
-  const heading = $(`#${headings[next]}`);
-  document.title = `RhythmMind — ${heading.textContent}`;
-  if (load && next === 'home') void home.load();
-  if (load && next === 'history') void history.load();
-  if (load && next === 'catalog') void session.loadCatalog();
-  if (load && next === 'session') {
-    void session.loadDrafts();
-    void session.refreshCatalogGuidance();
+  const applyViewDOM = () => {
+    for (const name of names) {
+      $(`#view-${name}`).hidden = name !== next;
+      const navigation = $(`#nav-${name}`);
+      navigation.classList.toggle('active', name === next);
+      if (name === next) navigation.setAttribute('aria-current', 'page');
+      else navigation.removeAttribute('aria-current');
+    }
+    const heading = $(`#${headings[next]}`);
+    document.title = `RhythmMind — ${heading.textContent}`;
+  };
+  const triggerLoads = () => {
+    if (load && next === 'home') void home.load();
+    if (load && next === 'history') void history.load();
+    if (load && next === 'catalog') void session.loadCatalog();
+    if (load && next === 'session') {
+      void session.loadDrafts();
+      void session.refreshCatalogGuidance();
+    }
+  };
+  const routeFocus = () => {
+    if (focus) focusContent($(`#${headings[next]}`));
+  };
+  const canViewTransition = animate && changedView
+    && typeof document.startViewTransition === 'function'
+    && document.visibilityState !== 'hidden'
+    && ambientEnabled && !reducedMotion.matches;
+  if (canViewTransition) {
+    try {
+      const transition = document.startViewTransition(applyViewDOM);
+      triggerLoads();
+      transition.finished.finally(routeFocus);
+      return;
+    } catch { /* Executa atualização imediata se a transição falhar. */ }
   }
-  if (focus) focusContent(heading);
+  applyViewDOM();
+  triggerLoads();
+  routeFocus();
 }
 
 function startNewSession() {
   if (!user) return;
   showView('session', { load: false, focus: false });
   void session.newSession();
+}
+
+function launchQuickObjective(objective) {
+  if (!user) return;
+  showView('session', { load: false, focus: false });
+  void session.startWithObjective(objective);
 }
 
 async function resumeSession(id, kind) {
@@ -253,7 +281,9 @@ session = initSession({ api, notify, onChanged,
 history = initHistory({ api, notify, onChanged,
   onResume: id => resumeSession(id),
 });
-home = initHome({ api, onNew: startNewSession, onResume: resumeSession,
+home = initHome({ api, onNew: startNewSession, onQuickObjective: launchQuickObjective,
+  onStarterCatalog: trigger => session.importStarterCatalog(trigger),
+  onResume: resumeSession,
   onRecord: openDiaryRecord, onHistory: () => showView('history'),
   onCatalog: () => showView('catalog'),
 });

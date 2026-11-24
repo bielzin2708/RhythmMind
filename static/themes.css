@@ -168,9 +168,13 @@ html[data-theme="dark"] body.workspace-screen :is(.home-card, .home-pending-card
 }
 html[data-theme="dark"] body.workspace-screen .tag-option { color: var(--theme-text); background: var(--theme-subtle); border-color: var(--theme-control-line); }
 html[data-theme="dark"] body.workspace-screen .tag-option:has(input:checked) { color: var(--theme-ink); background: var(--theme-tint); border-color: var(--theme-accent); }
-html[data-theme="dark"] body.workspace-screen :is(.quick-chip, .feedback-choice-btn, .session-options-drawer, .reference-preview-drawer, .reference-count-badge, .live-counter) { color: var(--theme-text); background: var(--theme-subtle); border-color: var(--theme-line); }
-html[data-theme="dark"] body.workspace-screen :is(.quick-chip:hover:not(:disabled), .feedback-choice-btn:hover:not(:disabled)) { color: var(--theme-ink); background: var(--theme-raised); border-color: var(--theme-accent); }
-html[data-theme="dark"] body.workspace-screen :is(.quick-chip.active, .quick-chip[aria-pressed="true"], .feedback-choice-btn.active, .feedback-choice-btn[aria-pressed="true"]) { color: var(--theme-ink); background: var(--theme-tint); border-color: var(--theme-accent); }
+html[data-theme="dark"] body.workspace-screen :is(.quick-chip, .feedback-choice-btn, .objective-card, .home-objective-pill, .session-options-drawer, .reference-preview-drawer, .reference-count-badge, .live-counter, .session-visualizer, .music-reason, .diary-note-choice, .patterns-synthesis) { color: var(--theme-text); background: var(--theme-subtle); border-color: var(--theme-line); }
+html[data-theme="dark"] body.workspace-screen :is(.quick-chip:hover:not(:disabled), .feedback-choice-btn:hover:not(:disabled), .objective-card:hover:not(:disabled), .home-objective-pill:hover:not(:disabled)) { color: var(--theme-ink); background: var(--theme-raised); border-color: var(--theme-accent); }
+html[data-theme="dark"] body.workspace-screen :is(.quick-chip.active, .quick-chip[aria-pressed="true"], .feedback-choice-btn.active, .feedback-choice-btn[aria-pressed="true"], .objective-card.active, .objective-card[aria-pressed="true"]) { color: var(--theme-ink); background: var(--theme-tint); border-color: var(--theme-accent); }
+html[data-theme="dark"] body.workspace-screen .session-hero-banner { background: linear-gradient(125deg, #0e1d30 0%, #12253a 65%, #102d3e 100%); border-color: #3d5872; }
+html[data-theme="dark"] body.workspace-screen :is(.objective-card-body strong, .home-objective-text strong, .review-question-title) { color: var(--theme-ink); }
+html[data-theme="dark"] body.workspace-screen :is(.objective-card-icon, .home-objective-icon, .track-rank-badge) { color: var(--theme-accent-strong); background: var(--theme-tint); border-color: var(--theme-control-line); }
+html[data-theme="dark"] body.workspace-screen :is(.objective-card.active, .objective-card[aria-pressed="true"]) .objective-card-icon { color: var(--theme-action-ink); background: var(--theme-accent); border-color: var(--theme-accent); }
 html[data-theme="dark"] body.workspace-screen .live-counter.active { color: var(--theme-accent-strong); border-color: var(--theme-accent); background: var(--theme-tint); }
 html[data-theme="dark"] body.workspace-screen :is(.options-summary-pill, .music-duration-pill) { color: var(--theme-muted); background: var(--theme-raised); border-color: var(--theme-control-line); }
 html[data-theme="dark"] body.workspace-screen .reference-preview-drawer .music-card { background: var(--theme-surface); }
@@ -686,14 +690,18 @@ html[data-theme="light"] body.workspace-screen .reflection-panel { background: v
 html[data-theme="light"] body.workspace-screen .reflection-text { color: var(--theme-ink); }
 html[data-theme="light"] body.workspace-screen .tag-option { color: var(--theme-text); background: var(--theme-raised); border-color: var(--theme-control-line); }
 html[data-theme="light"] body.workspace-screen .tag-option:has(input:checked) { color: var(--theme-accent-strong); background: var(--theme-tint); border-color: var(--theme-accent); }
-html[data-theme="light"] body.workspace-screen :is(.quick-chip, .feedback-choice-btn, .live-counter) { color: var(--theme-text); background: var(--theme-raised); border-color: var(--theme-control-line); }
+html[data-theme="light"] body.workspace-screen :is(.quick-chip, .feedback-choice-btn, .objective-card, .home-objective-pill, .live-counter, .session-visualizer, .music-reason, .diary-note-choice, .patterns-synthesis) { color: var(--theme-text); background: var(--theme-raised); border-color: var(--theme-control-line); }
+html[data-theme="light"] body.workspace-screen .session-hero-banner { background: #d5ddd8; border-color: #9baaa7; }
+html[data-theme="light"] body.workspace-screen :is(.objective-card-body strong, .home-objective-text strong, .review-question-title) { color: var(--theme-ink); }
+html[data-theme="light"] body.workspace-screen :is(.objective-card-icon, .home-objective-icon, .track-rank-badge) { color: var(--theme-accent-strong); background: var(--theme-tint); border-color: var(--theme-control-line); }
+html[data-theme="light"] body.workspace-screen :is(.objective-card.active, .objective-card[aria-pressed="true"]) .objective-card-icon { color: var(--theme-raised); background: var(--theme-accent); border-color: var(--theme-accent); }
 html[data-theme="light"] body.workspace-screen :is(.session-options-drawer, .reference-preview-drawer) { color: var(--theme-text); background: var(--theme-subtle); border-color: var(--theme-line); }
 html[data-theme="light"] body.workspace-screen .reference-preview-drawer .music-card { background: var(--theme-surface); }
 html[data-theme="light"] body.workspace-screen .reference-count-badge { color: var(--theme-text); background: var(--theme-surface); border-color: var(--theme-line); }
 html[data-theme="light"] body.workspace-screen .feedback-choice-btn strong { color: var(--theme-ink); }
 html[data-theme="light"] body.workspace-screen .feedback-choice-btn span { color: var(--theme-muted); }
-html[data-theme="light"] body.workspace-screen :is(.quick-chip:hover:not(:disabled), .feedback-choice-btn:hover:not(:disabled)) { color: var(--theme-ink); background: var(--theme-tint); border-color: var(--theme-accent); }
-html[data-theme="light"] body.workspace-screen :is(.quick-chip.active, .quick-chip[aria-pressed="true"], .feedback-choice-btn.active, .feedback-choice-btn[aria-pressed="true"]) { color: var(--theme-accent-strong); background: var(--theme-tint); border-color: var(--theme-accent); }
+html[data-theme="light"] body.workspace-screen :is(.quick-chip:hover:not(:disabled), .feedback-choice-btn:hover:not(:disabled), .objective-card:hover:not(:disabled), .home-objective-pill:hover:not(:disabled)) { color: var(--theme-ink); background: var(--theme-tint); border-color: var(--theme-accent); }
+html[data-theme="light"] body.workspace-screen :is(.quick-chip.active, .quick-chip[aria-pressed="true"], .feedback-choice-btn.active, .feedback-choice-btn[aria-pressed="true"], .objective-card.active, .objective-card[aria-pressed="true"]) { color: var(--theme-accent-strong); background: var(--theme-tint); border-color: var(--theme-accent); }
 html[data-theme="light"] body.workspace-screen .feedback-choice-btn:is(.active, [aria-pressed="true"]) strong { color: var(--theme-accent-strong); }
 html[data-theme="light"] body.workspace-screen .feedback-choice-btn:is(.active, [aria-pressed="true"]) span { color: var(--theme-text); }
 html[data-theme="light"] body.workspace-screen .live-counter.active { color: var(--theme-accent-strong); border-color: var(--theme-accent); background: var(--theme-tint); }

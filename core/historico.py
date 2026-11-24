@@ -1,5 +1,6 @@
 """Filtros de consulta do histórico, sem alterar ou migrar registros salvos."""
 
+from collections import Counter
 from datetime import date, datetime
 import re
 import unicodedata
@@ -95,3 +96,95 @@ def filtrar_historico(historico, *, data_inicio=None, data_fim=None,
             continue
         filtrado[identificador] = registro
     return filtrado
+
+
+def resumir_padroes_historico(historico, rotulos=None):
+    """Resume contagens verificáveis com período, denominador e apenas pares observados."""
+    total_sessoes = len(historico)
+    emocoes_count = Counter()
+    desejos_count = Counter()
+    estrategias_count = Counter()
+    pares_count = Counter()
+    datas_validas = []
+
+    for reg in historico.values():
+        if not isinstance(reg, dict):
+            continue
+        data_reg = _data_do_registro(reg)
+        if data_reg is not None:
+            datas_validas.append(data_reg)
+        analise = reg.get("analise") or {}
+        emocoes = [e for e in (analise.get("emocoes") or []) if isinstance(e, str) and e]
+        desejos = [d for d in (analise.get("estado_desejado") or []) if isinstance(d, str) and d]
+        for emocao in emocoes:
+            emocoes_count[emocao] += 1
+        for desejo in desejos:
+            desejos_count[desejo] += 1
+        # Coocorrência real na mesma sessão (sem duplicar dentro do mesmo registro).
+        for emocao in dict.fromkeys(emocoes):
+            for desejo in dict.fromkeys(desejos):
+                pares_count[(emocao, desejo)] += 1
+        estrategia = reg.get("estrategia")
+        if isinstance(estrategia, str) and estrategia:
+            estrategias_count[estrategia] += 1
+
+    periodo = None
+    if datas_validas:
+        inicio = min(datas_validas).strftime("%d/%m/%Y")
+        fim = max(datas_validas).strftime("%d/%m/%Y")
+        periodo = {
+            "inicio": inicio,
+            "fim": fim,
+            "sessoes_com_data": len(datas_validas),
+        }
+
+    combinacoes = [
+        {"emocao": emocao, "desejo": desejo, "contagem": contagem}
+        for (emocao, desejo), contagem in pares_count.most_common(3)
+    ]
+
+    nome = (lambda chave: rotulos.get(chave, chave)) if isinstance(rotulos, dict) else (lambda chave: chave)
+    unidade = "sessão registrada" if total_sessoes == 1 else "sessões registradas"
+    trecho_periodo = (
+        f" Período considerado: {periodo['inicio']}"
+        + (f" a {periodo['fim']}." if periodo["inicio"] != periodo["fim"] else ".")
+        if periodo else ""
+    )
+
+    sintese = None
+    if combinacoes:
+        topo = combinacoes[0]
+        sintese = (
+            f"Em {topo['contagem']} de {total_sessoes} {unidade}, "
+            f"o estado '{nome(topo['emocao'])}' e o objetivo '{nome(topo['desejo'])}' "
+            f"foram registrados na mesma sessão.{trecho_periodo}"
+        )
+    elif emocoes_count:
+        emocao_top, cont_e = emocoes_count.most_common(1)[0]
+        if desejos_count:
+            desejo_top, cont_d = desejos_count.most_common(1)[0]
+            sintese = (
+                f"Em {total_sessoes} {unidade}, '{nome(emocao_top)}' apareceu em {cont_e} "
+                f"e o objetivo '{nome(desejo_top)}' em {cont_d}, em sessões distintas.{trecho_periodo}"
+            )
+        else:
+            sintese = (
+                f"Em {cont_e} de {total_sessoes} {unidade}, "
+                f"você confirmou o estado '{nome(emocao_top)}'.{trecho_periodo}"
+            )
+    elif desejos_count:
+        desejo_top, cont_d = desejos_count.most_common(1)[0]
+        sintese = (
+            f"Em {cont_d} de {total_sessoes} {unidade}, "
+            f"você escolheu o objetivo '{nome(desejo_top)}'.{trecho_periodo}"
+        )
+
+    return {
+        "total_sessoes": total_sessoes,
+        "periodo": periodo,
+        "emocoes_frequentes": emocoes_count.most_common(3),
+        "desejos_frequentes": desejos_count.most_common(3),
+        "estrategias_frequentes": estrategias_count.most_common(2),
+        "combinacoes_observadas": combinacoes,
+        "sintese_reflexiva": sintese,
+    }
