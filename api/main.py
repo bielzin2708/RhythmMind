@@ -88,7 +88,7 @@ async def erro_de_validacao_sem_segredos(request: Request, erro: RequestValidati
 # Libera o Next.js (rodando em outra porta, ex: localhost:3000) a chamar esta API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
