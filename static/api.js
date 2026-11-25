@@ -5,8 +5,8 @@ let unauthorized = () => {};
 const pending = new Set();
 
 export class ApiError extends Error {
-  constructor(status, detail) {
-    super(errorMessage(status, detail));
+  constructor(status, detail, path = '') {
+    super(errorMessage(status, detail, path));
     this.name = 'ApiError';
     this.status = status;
     this.detail = detail;
@@ -17,9 +17,10 @@ export class StaleRequestError extends Error {
   constructor() { super('Solicitação de um acesso anterior encerrada.'); this.name = 'StaleRequestError'; }
 }
 
-function errorMessage(status, detail) {
+function errorMessage(status, detail, path = '') {
   if (status === 401) return token ? 'Seu acesso terminou. Entre novamente para continuar.' : 'Confira o nome de usuário e a senha para entrar.';
   if (status === 403) return 'Este ambiente está disponível apenas no acesso local autorizado.';
+  if (status === 409 && path === '/api/auth/registrar') return 'Esse nome de usuário já está em uso. Escolha outro apelido ou use Entrar.';
   if (status === 409) return 'Este registro mudou desde sua última leitura. Abra a versão atual antes de continuar.';
   if (typeof detail === 'string') return detail;
   if (Array.isArray(detail)) return 'Confira os campos informados e seus limites antes de tentar novamente.';
@@ -62,7 +63,7 @@ export async function api(path, { method = 'GET', body, query } = {}) {
     const data = await response.json().catch(() => null);
     if (requestEpoch !== epoch) throw new StaleRequestError();
     if (!response.ok) {
-      const error = new ApiError(response.status, data?.detail);
+      const error = new ApiError(response.status, data?.detail, path);
       if (response.status === 401 && token) unauthorized();
       throw error;
     }

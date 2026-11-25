@@ -411,6 +411,7 @@ function switchToRegister(focusInput = true) {
   $('#auth-login-form').hidden = true;
   $('#auth-register-form').hidden = false;
   $('#auth-status').textContent = '';
+  notify('');
   syncAuthModeTabs(true);
   if (focusInput) $('#register-name').focus();
 }
@@ -420,6 +421,7 @@ function switchToLogin(focusInput = true) {
   $('#auth-register-form').hidden = true;
   $('#auth-login-form').hidden = false;
   $('#auth-status').textContent = '';
+  notify('');
   syncAuthModeTabs(false);
   if (focusInput) $('#login-name').focus();
 }
@@ -466,16 +468,21 @@ async function authenticate(form, register) {
   const fields = new FormData(form);
   const credentials = { nome_usuario: String(fields.get('nome_usuario')).trim(), senha: String(fields.get('senha')) };
   await withAccessBusy(async () => {
+    notify('');
     accessStatus(register ? 'Criando seu espaço…' : 'Conferindo seu acesso…');
+    let registeredNow = false;
     try {
-      if (register) await api('/api/auth/registrar', { method: 'POST', body: credentials });
+      if (register) {
+        await api('/api/auth/registrar', { method: 'POST', body: credentials });
+        registeredNow = true;
+      }
       const access = await api('/api/auth/entrar', { method: 'POST', body: credentials });
       await activateAccess(access, attempt);
     } catch (error) {
       if (!isStale(error) && attempt === accessEpoch) {
         $('#auth-status').textContent = error.message;
         $('#auth-status').setAttribute('role', 'alert');
-        if (register && error.status !== 409) notify('Se a conta já foi criada, use Entrar para continuar.', 'info');
+        if (registeredNow) notify('Sua conta foi criada! Use a aba Entrar para continuar.', 'info');
       }
     } finally {
       // Senhas não ficam no formulário depois de uma tentativa.
