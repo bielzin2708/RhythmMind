@@ -44,21 +44,26 @@ def resolver_porta(environ=None):
     return porta
 
 
+def ativar_producao(diretorio_dados=None):
+    """Inicializa o armazenamento temporario de uma instancia de producao."""
+    raiz = resolver_diretorio_dados(diretorio_dados)
+    os.environ["RHYTHMMIND_AMBIENTE"] = "producao"
+    app.state.modo_producao = True
+    app.state.diretorio_dados = str(raiz)
+    app.state.armazenamento_persistente = False
+    return raiz
+
+
 @contextmanager
 def ambiente_producao(diretorio_dados=None):
     """Ativa o modo de producao no app durante a execucao e restaura o estado ao sair."""
-    raiz = resolver_diretorio_dados(diretorio_dados)
     ambiente_anterior = os.environ.get("RHYTHMMIND_AMBIENTE", _AUSENTE)
     modo_anterior = getattr(app.state, "modo_producao", _AUSENTE)
     dados_anterior = getattr(app.state, "diretorio_dados", _AUSENTE)
     persistente_anterior = getattr(app.state, "armazenamento_persistente", _AUSENTE)
 
-    os.environ["RHYTHMMIND_AMBIENTE"] = "producao"
-    app.state.modo_producao = True
-    app.state.diretorio_dados = str(raiz)
-    app.state.armazenamento_persistente = False
     try:
-        yield raiz
+        yield ativar_producao(diretorio_dados)
     finally:
         if ambiente_anterior is _AUSENTE:
             os.environ.pop("RHYTHMMIND_AMBIENTE", None)
