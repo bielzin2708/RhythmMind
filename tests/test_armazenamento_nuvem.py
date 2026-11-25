@@ -1,9 +1,11 @@
 """Testes de sessão assinada e persistência multi-instância para Vercel serverless."""
 
+from concurrent.futures import ThreadPoolExecutor
 import json
 import os
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from threading import Barrier, Lock
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
@@ -19,11 +21,22 @@ from core.autenticacao import ContaExistente, ErroCredenciais, RepositorioAcesso
 class _FakeBlobStore:
     def __init__(self):
         self.objetos: dict[str, bytes] = {}
+        self.lock = Lock()
+
+    def head_blob(self, pathname):
+        url = f"https://fake-store.private.blob.vercel-storage.com/{pathname}"
+        if url not in self.objetos:
+            raise FileNotFoundError(pathname)
+        return SimpleNamespace(url=url)
 
     def put_blob(self, pathname, body, *, access, content_type=None, add_random_suffix=False, allow_overwrite=False, cache_control_max_age=None):
         assert access == "private"
         url = f"https://fake-store.private.blob.vercel-storage.com/{pathname}"
-        self.objetos[url] = bytes(body)
+        with self.lock:
+            if url in self.objetos and not allow_overwrite:
+                from vercel.blob.errors import BlobUnknownError
+                raise BlobUnknownError("Blob already exists.")
+            self.objetos[url] = bytes(body)
         return SimpleNamespace(url=url, pathname=pathname)
 
     def query_blobs(self, *, prefix=None, page_size=None, cursor=None):
@@ -123,6 +136,47 @@ class ArmazenamentoNuvemTests(unittest.TestCase):
                 with TestClient(app, base_url="https://rhythm-mind-nu.vercel.app", client=("203.0.113.10", 50000)) as cliente_a2:
                     negado = cliente_a2.get("/api/auth/eu", headers={"Authorization": f"Bearer {token}"})
                     self.assertEqual(negado.status_code, 401)
+
+    def test_google_concorrente_e_reinicio_usam_o_mesmo_perfil(self):
+        pasta = Path(self.enterContext(TemporaryDirectory()))
+        repos = [RepositorioAcesso(pasta / f"{i}.sqlite3") for i in range(3)]
+        issuer, subject = "https://accounts.google.com", "subject-ficticio"
+        barreira = Barrier(2)
+        gravar = self.blob_falso.put_blob
+
+        def gravar_ao_mesmo_tempo(*args, **kwargs):
+            barreira.wait(timeout=5)
+            return gravar(*args, **kwargs)
+
+        with patch.dict(os.environ, {
+            "RHYTHMMIND_AMBIENTE": "producao", "BLOB_READ_WRITE_TOKEN": "teste",
+            "RHYTHMMIND_TOKEN_SECRET": self.segredo,
+        }), patch.object(armazenamento_nuvem, "_cliente_blob", return_value=self.blob_falso):
+            with patch.object(self.blob_falso, "put_blob", side_effect=gravar_ao_mesmo_tempo):
+                with ThreadPoolExecutor(max_workers=2) as executor:
+                    perfis = list(executor.map(lambda repo: repo.entrar_google(issuer, subject), repos[:2]))
+            self.assertEqual(perfis[0], perfis[1])
+            self.assertEqual(len(self.blob_falso.objetos), 1)
+            token = repos[0].emitir_acesso(perfis[0]["usuario_id"])["token_acesso"]
+            self.assertEqual(repos[2].identificar(token), perfis[0])
+            self.assertEqual(repos[2].entrar_google("accounts.google.com", subject), perfis[0])
+            self.assertNotEqual(repos[2].entrar_google(issuer, "outra-pessoa"), perfis[0])
+
+    def test_google_preserva_perfil_legado_e_recusa_vinculo_local_conflitante(self):
+        pasta = Path(self.enterContext(TemporaryDirectory()))
+        repo_a, repo_b = [RepositorioAcesso(pasta / f"{i}.sqlite3") for i in range(2)]
+        issuer, subject = "https://accounts.google.com", "subject-legado"
+        with patch.dict(os.environ, {"RHYTHMMIND_AMBIENTE": "local"}):
+            anterior = repo_a.entrar_google(issuer, subject)
+            self.assertNotEqual(repo_b.entrar_google(issuer, subject), anterior)
+        with patch.dict(os.environ, {
+            "RHYTHMMIND_AMBIENTE": "producao", "BLOB_READ_WRITE_TOKEN": "teste",
+        }), patch.object(armazenamento_nuvem, "_cliente_blob", return_value=self.blob_falso):
+            self.assertEqual(repo_a.entrar_google(issuer, subject), anterior)
+            with self.assertRaises(ErroCredenciais):
+                repo_b.entrar_google(issuer, subject)
+            novo = RepositorioAcesso(pasta / "nova.sqlite3")
+            self.assertEqual(novo.entrar_google(issuer, subject), anterior)
 
     def test_token_assinado_adulterado_ou_com_outro_segredo_e_rejeitado(self):
         pasta = self.enterContext(TemporaryDirectory(prefix="rm-hmac-"))

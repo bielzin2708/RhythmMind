@@ -10,6 +10,7 @@ argon2-cffi==25.1.0
 
 # Verificacao oficial de identidade Google; troca OAuth somente no backend.
 google-auth[requests]==2.62.1
+cryptography==50.0.2
 
 # Armazenamento privado compartilhado entre instancias serverless na Vercel.
 vercel-blob==0.6.2

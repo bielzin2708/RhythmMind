@@ -151,6 +151,37 @@ def _gravar_versao_json_prefixo(prefixo: str, dados) -> None:
         raise OSError("Falha ao persistir dados no armazenamento em nuvem.") from erro
 
 
+def obter_ou_criar_perfil_google_blob(issuer: str, subject: str, candidato: dict) -> dict:
+    """Mantém um único perfil imutável por identidade Google, inclusive em criações simultâneas."""
+    from vercel.blob.errors import BlobError
+
+    chave = hashlib.sha256(f"{issuer}\0{subject}".encode("utf-8")).hexdigest()
+    caminho = f"rhythmmind/v1/identidades-google/{chave}.json"
+    blob = _cliente_blob()
+    try:
+        try:
+            referencia = blob.head_blob(caminho)
+        except FileNotFoundError:
+            corpo = json.dumps({"identidade": chave, **candidato}, separators=(",", ":")).encode("utf-8")
+            try:
+                blob.put_blob(caminho, corpo, access="private", content_type="application/json",
+                              add_random_suffix=False, allow_overwrite=False)
+                return candidato
+            except BlobError:
+                # O SDK também usa um erro genérico para certos conflitos ou falhas de transporte.
+                # Só aceitamos o resultado se houver um perfil confirmado no endereço canônico.
+                referencia = blob.head_blob(caminho)
+        dados = json.loads(blob.get_blob(referencia.url, access="private").body)
+        identificador = UUID(dados["usuario_id"])
+        if (dados["identidade"] != chave or str(identificador) != dados["usuario_id"]
+                or identificador.version != 4 or dados["nome_usuario"] != "google_" + identificador.hex
+                or not isinstance(dados["criado_em"], str) or not dados["criado_em"]):
+            raise ValueError("Perfil Google inválido.")
+        return {campo: dados[campo] for campo in ("usuario_id", "nome_usuario", "criado_em")}
+    except (BlobError, OSError, ValueError, TypeError, KeyError, AttributeError) as erro:
+        raise OSError("Falha ao confirmar a identidade Google no armazenamento em nuvem.") from erro
+
+
 def _prefixo_conta(nome_normalizado: str) -> str:
     resumo = hashlib.sha256(nome_normalizado.encode("utf-8")).hexdigest()
     return f"rhythmmind/v1/contas/{resumo}"

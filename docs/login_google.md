@@ -1,4 +1,4 @@
-# Login com Google no desenvolvimento local
+# Login com Google no RhythmMind
 
 O botão **Continuar com Google** usa OAuth 2.0 Authorization Code com PKCE
 e OpenID Connect. O Google confirma a identidade; o RhythmMind emite sua
@@ -8,6 +8,19 @@ A senha da conta Google é informada somente na página do Google.
 Sem credenciais OAuth configuradas no servidor, o botão fica desabilitado
 com a mensagem de indisponibilidade. Cadastro e entrada por senha continuam
 disponíveis, com senhas de 6 a 128 caracteres.
+
+## Ativar no site da Vercel
+
+1. No Google Auth Platform, abra o cliente do tipo **Aplicativo da Web** usado pelo RhythmMind. Em **URIs de redirecionamento autorizados**, adicione o endereço abaixo e salve. [Clientes OAuth do Google](https://console.cloud.google.com/auth/clients)
+
+   ```text
+   https://rhythm-mind-nu.vercel.app/api/auth/google/callback
+   ```
+
+2. No projeto RhythmMind da Vercel, abra **Settings → Environment Variables** e escolha **Production**. Defina `RHYTHMMIND_GOOGLE_CLIENT_ID` e `RHYTHMMIND_GOOGLE_CLIENT_SECRET` com as credenciais desse cliente. Use o tipo **Secret** para o segredo. Defina `RHYTHMMIND_GOOGLE_REDIRECT_URI` com o endereço completo cadastrado no Google.
+3. Publique novamente a versão de produção. A rota `/api/auth/google/config` deve retornar `"disponivel": true`. Abra o site no domínio cadastrado, clique em **Continuar com Google**, escolha sua conta e confira se o RhythmMind abre seu perfil.
+
+O login pede apenas identificação básica do Google e pode ser usado sem ativar faturamento no Google Cloud. O domínio de produção usa o armazenamento privado já conectado ao projeto e a chave de sessão `RHYTHMMIND_TOKEN_SECRET`. A conta Google mantém o mesmo perfil quando a Vercel atende uma nova entrada em outra instância.
 
 ## 1. Criar as credenciais do aplicativo
 
@@ -139,10 +152,6 @@ Os testes automatizados usam identidades fictícias e clientes simulados;
 não dependem de uma chave Google nem fazem login em uma conta real. A
 validação ponta a ponta com o Google exige credenciais válidas e uma conta
 de teste autorizada.
-
-Esta entrega prepara e testa o uso local. Não publica o aplicativo nem
-substitui a configuração HTTPS, revisão operacional e requisitos do Google
-necessários a uma futura implantação pública.
 
 Referências: [OpenID Connect do Google](https://developers.google.com/identity/openid-connect/openid-connect),
 [OAuth 2.0 para aplicações de servidor](https://developers.google.com/identity/protocols/oauth2/web-server),

@@ -19,6 +19,7 @@ from core.armazenamento_nuvem import (
     emitir_token_assinado,
     formato_token_assinado_valido,
     ler_conta_blob,
+    obter_ou_criar_perfil_google_blob,
     registrar_revogacao_blob,
     salvar_conta_blob,
     segredo_token_producao,
@@ -79,6 +80,26 @@ def _perfil(registro):
         "usuario_id": registro["usuario_id"],
         "nome_usuario": registro["nome_usuario"],
         "criado_em": registro["criado_em"],
+    }
+
+
+def _perfil_google_local(conexao, subject):
+    registro = conexao.execute("""
+        SELECT u.usuario_id, u.nome_usuario, u.criado_em, u.senha_hash
+        FROM identidades_google i JOIN usuarios u ON u.usuario_id = i.usuario_id
+        WHERE i.issuer = ? AND i.subject = ?
+    """, (_ISSUER_GOOGLE, subject)).fetchone()
+    if registro is not None and registro["senha_hash"] is not None:
+        raise ErroCredenciais()
+    return _perfil(registro) if registro is not None else None
+
+
+def _novo_perfil_google():
+    identificador = uuid4()
+    return {
+        "usuario_id": str(identificador),
+        "nome_usuario": "google_" + identificador.hex,
+        "criado_em": _data_utc(agora()),
     }
 
 
@@ -304,25 +325,30 @@ class RepositorioAcesso:
         if (not isinstance(subject, str) or not 1 <= len(subject) <= 255
                 or any(c.isspace() or ord(c) < 32 or ord(c) == 127 for c in subject)):
             raise ErroCredenciais()
+        remoto = None
+        if blob_ativo():
+            with self._conexao() as conexao:
+                anterior = _perfil_google_local(conexao, subject)
+            remoto = obter_ou_criar_perfil_google_blob(_ISSUER_GOOGLE, subject, anterior or _novo_perfil_google())
         with self._conexao() as conexao:
             conexao.execute("BEGIN IMMEDIATE")
-            registro = conexao.execute("""
-                SELECT u.usuario_id, u.nome_usuario, u.criado_em
-                FROM identidades_google i JOIN usuarios u ON u.usuario_id = i.usuario_id
-                WHERE i.issuer = ? AND i.subject = ?
-            """, (_ISSUER_GOOGLE, subject)).fetchone()
-            if registro is not None:
-                return _perfil(registro)
-            identificador = uuid4()
-            perfil = {
-                "usuario_id": str(identificador),
-                "nome_usuario": "google_" + identificador.hex,
-                "criado_em": _data_utc(agora()),
-            }
-            conexao.execute(
-                "INSERT INTO usuarios(usuario_id, nome_usuario, senha_hash, criado_em) VALUES (?, ?, NULL, ?)",
-                (perfil["usuario_id"], perfil["nome_usuario"], perfil["criado_em"]),
-            )
+            local = _perfil_google_local(conexao, subject)
+            if local is not None:
+                if remoto is not None and remoto != local:
+                    raise ErroCredenciais()
+                return local
+            perfil = remoto or _novo_perfil_google()
+            parametros = (perfil["usuario_id"], perfil["nome_usuario"], perfil["criado_em"])
+            # Uma sessão assinada pode ter restaurado o mesmo usuário antes do login por Google.
+            conexao.execute("""
+                INSERT INTO usuarios(usuario_id, nome_usuario, criado_em, senha_hash)
+                VALUES (?, ?, ?, NULL) ON CONFLICT(usuario_id) DO NOTHING
+            """, parametros)
+            if conexao.execute("""
+                SELECT 1 FROM usuarios WHERE usuario_id = ? AND nome_usuario = ?
+                    AND criado_em = ? AND senha_hash IS NULL
+            """, parametros).fetchone() is None:
+                raise ErroCredenciais()
             conexao.execute(
                 "INSERT INTO identidades_google(issuer, subject, usuario_id) VALUES (?, ?, ?)",
                 (_ISSUER_GOOGLE, subject, perfil["usuario_id"]),
