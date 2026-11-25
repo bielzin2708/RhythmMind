@@ -18,20 +18,20 @@ foram copiados layouts, imagens ou tokens oficiais de outros produtos.
 
 ## Papéis dos temas
 
-| Papel | Escuro | Claro |
+| Papel | Escuro (Oceano Noturno) | Claro (Névoa de Água e Sálvia) |
 | --- | --- | --- |
-| Canvas | `#0b1320` | `#e7e2d8` |
-| Cartões | `#121e2d` | `#eeeadf` |
-| Superfície interna | `#0e1825` | `#dedcd3` |
-| Superfície elevada | `#182638` | `#f1eee6` |
-| Título | `#e3eaf2` | `#263b48` |
-| Texto | `#cbd6e2` | `#384d58` |
-| Texto de apoio | `#a5b6c8` | `#536165` |
-| Ação e seleção | `#8bb9d6` | `#315e73` |
-| Hover e foco | `#b0cfdf` | `#274e60` |
-| Texto sobre ação | `#122231` | `#f1eee6` |
-| Divisores decorativos | `#2c4054` | `#c7c4b9` |
-| Contorno de controles | `#68819a` | `#7b827e` |
+| Canvas | `#08131c` | `#d7e8e6` |
+| Cartões | `#0f1f2c` | `#e2f0ee` |
+| Superfície interna | `#0b1822` | `#cadfdb` |
+| Superfície elevada | `#152a3a` | `#eaf5f3` |
+| Título | `#e6f2f5` | `#0f2930` |
+| Texto | `#c6dce2` | `#1c3a43` |
+| Texto de apoio | `#8fb0bc` | `#365660` |
+| Ação e seleção | `#4cc9c0` | `#135d66` |
+| Hover e foco | `#72dcd4` | `#0b464e` |
+| Texto sobre ação | `#051b20` | `#f0faf8` |
+| Divisores decorativos | `#1e3646` | `#acc6c4` |
+| Contorno de controles | `#4d7888` | `#507680` |
 
 No escuro, o azul aparece nas superfícies, na marca, nas ações e na onda, com
 baixa saturação e sem halos. No claro, a luminância das grandes superfícies é

@@ -265,6 +265,7 @@ function clearIdentity() {
   setAccessAppearance(true);
   $('#auth-login-form').hidden = false;
   $('#auth-register-form').hidden = true;
+  syncAuthModeTabs(false);
   $('#auth-login-form').reset();
   $('#auth-register-form').reset();
   clearPasswords();
@@ -392,20 +393,41 @@ $('#workspace-export').addEventListener('click', () => {
   });
 });
 
-$('#show-register').addEventListener('click', () => {
+function syncAuthModeTabs(registerMode) {
+  const loginTab = $('#auth-tab-login');
+  const registerTab = $('#auth-tab-register');
+  if (loginTab) {
+    loginTab.classList.toggle('active', !registerMode);
+    loginTab.setAttribute('aria-pressed', String(!registerMode));
+  }
+  if (registerTab) {
+    registerTab.classList.toggle('active', registerMode);
+    registerTab.setAttribute('aria-pressed', String(registerMode));
+  }
+}
+
+function switchToRegister(focusInput = true) {
   clearPasswords();
   $('#auth-login-form').hidden = true;
   $('#auth-register-form').hidden = false;
   $('#auth-status').textContent = '';
-  $('#register-name').focus();
-});
-$('#show-login').addEventListener('click', () => {
+  syncAuthModeTabs(true);
+  if (focusInput) $('#register-name').focus();
+}
+
+function switchToLogin(focusInput = true) {
   clearPasswords();
   $('#auth-register-form').hidden = true;
   $('#auth-login-form').hidden = false;
   $('#auth-status').textContent = '';
-  $('#login-name').focus();
-});
+  syncAuthModeTabs(false);
+  if (focusInput) $('#login-name').focus();
+}
+
+$('#show-register').addEventListener('click', () => switchToRegister(true));
+$('#show-login').addEventListener('click', () => switchToLogin(true));
+$('#auth-tab-register')?.addEventListener('click', () => switchToRegister(true));
+$('#auth-tab-login')?.addEventListener('click', () => switchToLogin(true));
 
 function applyAccountIdentity() {
   if (!user) return;
@@ -432,6 +454,7 @@ async function activateAccess(access, attempt) {
   session.reset();
   history.reset();
   home.setUser(profile);
+  $('#home-summary').open = true;
   applyAccountIdentity();
   showView('home');
   notify('');

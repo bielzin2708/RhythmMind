@@ -5,18 +5,18 @@
 
   const PALETTES = {
     dark: {
-      neutral: ['#38bdf8', '#22d3ee', '#818cf8'],
-      calm: ['#22d3ee', '#38bdf8', '#2dd4bf'],
-      focus: ['#818cf8', '#60a5fa', '#c084fc'],
-      energy: ['#34d399', '#22d3ee', '#fbbf24'],
-      reflect: ['#c084fc', '#f472b6', '#818cf8'],
+      neutral: ['#38bdf8', '#4cc9c0', '#5ec2a6'],
+      calm: ['#38bdf8', '#4cc9c0', '#67d5b5'],
+      focus: ['#60a5fa', '#7c9cf8', '#4cc9c0'],
+      energy: ['#4cc9c0', '#5ec2a6', '#84dcc6'],
+      reflect: ['#7c9cf8', '#5bb8d4', '#6bc4b8'],
     },
     light: {
-      neutral: ['#0284c7', '#0d9488', '#4f46e5'],
-      calm: ['#0891b2', '#0284c7', '#0d9488'],
-      focus: ['#4f46e5', '#2563eb', '#7c3aed'],
-      energy: ['#059669', '#0891b2', '#d97706'],
-      reflect: ['#7c3aed', '#db2777', '#4f46e5'],
+      neutral: ['#135d66', '#1e7874', '#2a8576'],
+      calm: ['#0f6270', '#1b7a78', '#2d8a7b'],
+      focus: ['#255c7a', '#1b6d7a', '#2c7a7b'],
+      energy: ['#166963', '#1f7d6e', '#2e8b70'],
+      reflect: ['#2b5f75', '#1d7278', '#357e77'],
     },
   };
 
