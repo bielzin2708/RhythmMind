@@ -13,6 +13,7 @@ import uvicorn
 
 from api.google_auth import configurar_logs_acesso_google
 from api.main import app
+from core.armazenamento_nuvem import blob_ativo
 from core.google_oidc import ConfiguracaoGoogleInvalida, carregar_config_google
 
 
@@ -45,12 +46,12 @@ def resolver_porta(environ=None):
 
 
 def ativar_producao(diretorio_dados=None):
-    """Inicializa o armazenamento temporario de uma instancia de producao."""
+    """Inicializa o armazenamento de uma instancia de producao."""
     raiz = resolver_diretorio_dados(diretorio_dados)
     os.environ["RHYTHMMIND_AMBIENTE"] = "producao"
     app.state.modo_producao = True
     app.state.diretorio_dados = str(raiz)
-    app.state.armazenamento_persistente = False
+    app.state.armazenamento_persistente = blob_ativo()
     return raiz
 
 

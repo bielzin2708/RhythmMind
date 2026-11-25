@@ -1,12 +1,20 @@
 import json
 import os
+from pathlib import Path
 import tempfile
 from threading import RLock
 
+from core.armazenamento_nuvem import (
+    blob_ativo,
+    ler_arquivo_pessoal_blob,
+    salvar_arquivo_pessoal_blob,
+)
 from core.caracterizacao import preparar_musica
-from core.contexto import resolver_caminho
+from core.contexto import resolver_caminho, usuario_atual
 
 LOCK_MUSICAS = RLock()
+_RAIZ_PROJETO = Path(__file__).resolve().parents[1]
+_NOMES_PESSOAIS = frozenset({"historico.json", "musicas_usuario.json"})
 
 # Definição das constantes
 ARQ_MUSICAS = 'data/musicas_usuario.json'
@@ -14,28 +22,57 @@ ARQ_HISTORICO = 'data/historico.json'
 ARQ_DICIONARIO = 'data/dicionario_emocional.json'  # <-- estava faltando (causa do seu erro original)
 LOCK_MUSICAS = RLock()
 
+
+def _padrao_json(caminho, default):
+    if default is not None:
+        return default
+    return [] if "musicas" in str(caminho) else {}
+
+
+def _resolver_leitura_estatica(caminho: str) -> str:
+    if os.path.exists(caminho) or os.path.isabs(caminho):
+        return caminho
+    candidato = _RAIZ_PROJETO / caminho
+    return str(candidato) if candidato.exists() else caminho
+
+
 def carregar_json(caminho, default=None, *, estrito=False):
     """Lê um arquivo JSON e retorna seu conteúdo.
     'default' permite chamadas como carregar_json(ARQ_HISTORICO, {})."""
-    caminho = resolver_caminho(os.fspath(caminho))
-    if not os.path.exists(caminho):
-        if default is not None:
-            return default
-        return [] if "musicas" in caminho else {}
+    original = os.fspath(caminho)
+    nome = Path(original).name.casefold()
+    uid = usuario_atual()
+    caminho_resolvido = resolver_caminho(original)
 
-    with open(caminho, 'r', encoding='utf-8') as f:
+    if uid is not None and nome in _NOMES_PESSOAIS and blob_ativo():
+        remoto = ler_arquivo_pessoal_blob(uid, nome, default=None)
+        if remoto is not None:
+            return remoto
+        return _padrao_json(caminho_resolvido, default)
+
+    if uid is None:
+        caminho_resolvido = _resolver_leitura_estatica(caminho_resolvido)
+    elif nome not in _NOMES_PESSOAIS:
+        caminho_resolvido = _resolver_leitura_estatica(caminho_resolvido)
+
+    if not os.path.exists(caminho_resolvido):
+        return _padrao_json(caminho_resolvido, default)
+
+    with open(caminho_resolvido, 'r', encoding='utf-8') as f:
         try:
             return json.load(f)
         except json.JSONDecodeError:
             if estrito:
                 raise
-            if default is not None:
-                return default
-            return [] if "musicas" in caminho else {}
+            return _padrao_json(caminho_resolvido, default)
+
 
 def salvar_json(caminho, dados):
     """Conclui a escrita em temporário antes de substituir o arquivo anterior."""
-    caminho = resolver_caminho(os.fspath(caminho))
+    original = os.fspath(caminho)
+    nome = Path(original).name.casefold()
+    uid = usuario_atual()
+    caminho = resolver_caminho(original)
     pasta = os.path.dirname(os.path.abspath(caminho))
     os.makedirs(pasta, exist_ok=True)
     temporario = None
@@ -52,6 +89,8 @@ def salvar_json(caminho, dados):
     finally:
         if temporario is not None and os.path.exists(temporario):
             os.unlink(temporario)
+    if uid is not None and nome in _NOMES_PESSOAIS and blob_ativo():
+        salvar_arquivo_pessoal_blob(uid, nome, dados)
 
 def carregar_todas_musicas():
     """Carrega a lista de músicas do usuário."""

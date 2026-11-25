@@ -14,6 +14,18 @@ from uuid import uuid4
 from pwdlib import PasswordHash
 from pwdlib.exceptions import UnknownHashError
 
+from core.armazenamento_nuvem import (
+    blob_ativo,
+    emitir_token_assinado,
+    formato_token_assinado_valido,
+    ler_conta_blob,
+    registrar_revogacao_blob,
+    salvar_conta_blob,
+    segredo_token_producao,
+    token_revogado_blob,
+    verificar_token_assinado,
+)
+
 
 TTL_ACESSO_SEGUNDOS = 3600
 TTL_FLUXO_GOOGLE_SEGUNDOS = 600
@@ -75,7 +87,9 @@ def _data_utc(instante):
 
 
 def _hash_token(token):
-    if not isinstance(token, str) or not _TOKEN.fullmatch(token):
+    if not isinstance(token, str) or not (
+        _TOKEN.fullmatch(token) or formato_token_assinado_valido(token)
+    ):
         raise ErroCredenciais()
     return hashlib.sha256(token.encode("ascii")).hexdigest()
 
@@ -174,6 +188,9 @@ class RepositorioAcesso:
     def cadastrar(self, nome_usuario, senha):
         nome = normalizar_nome(nome_usuario)
         validar_senha(senha)
+        usar_blob = blob_ativo()
+        if usar_blob and ler_conta_blob(nome) is not None:
+            raise ContaExistente()
         perfil = {
             "usuario_id": str(uuid4()),
             "nome_usuario": nome,
@@ -188,6 +205,8 @@ class RepositorioAcesso:
                 )
         except sqlite3.IntegrityError as erro:
             raise ContaExistente() from erro
+        if usar_blob:
+            salvar_conta_blob(nome, {**perfil, "senha_hash": senha_hash})
         return perfil
 
     def entrar(self, nome_usuario, senha):
@@ -197,11 +216,26 @@ class RepositorioAcesso:
         except ValueError as erro:
             raise ErroCredenciais() from erro
 
+        usar_blob = blob_ativo()
         with self._conexao() as conexao:
             registro = conexao.execute(
                 "SELECT usuario_id, nome_usuario, senha_hash, criado_em FROM usuarios WHERE nome_usuario = ?",
                 (nome,),
             ).fetchone()
+        if (registro is None or registro["senha_hash"] is None) and usar_blob:
+            remoto = ler_conta_blob(nome)
+            if remoto is not None:
+                with self._conexao() as conexao:
+                    conexao.execute(
+                        """INSERT INTO usuarios(usuario_id, nome_usuario, senha_hash, criado_em)
+                           VALUES (?, ?, ?, ?)
+                           ON CONFLICT(usuario_id) DO UPDATE SET senha_hash = excluded.senha_hash""",
+                        (remoto["usuario_id"], remoto["nome_usuario"], remoto.get("senha_hash"), remoto["criado_em"]),
+                    )
+                    registro = conexao.execute(
+                        "SELECT usuario_id, nome_usuario, senha_hash, criado_em FROM usuarios WHERE nome_usuario = ?",
+                        (nome,),
+                    ).fetchone()
         tem_senha = registro is not None and registro["senha_hash"] is not None
         senha_hash = registro["senha_hash"] if tem_senha else _hash_sem_conta()
         try:
@@ -217,14 +251,36 @@ class RepositorioAcesso:
                     "UPDATE usuarios SET senha_hash = ? WHERE usuario_id = ? AND senha_hash = ?",
                     (hash_atualizado, registro["usuario_id"], registro["senha_hash"]),
                 )
+                if usar_blob:
+                    salvar_conta_blob(nome, {
+                        "usuario_id": registro["usuario_id"],
+                        "nome_usuario": registro["nome_usuario"],
+                        "senha_hash": hash_atualizado,
+                        "criado_em": registro["criado_em"],
+                    })
             return self._emitir_acesso(conexao, registro["usuario_id"])
 
     def _emitir_acesso(self, conexao, usuario_id):
-        if conexao.execute("SELECT 1 FROM usuarios WHERE usuario_id = ?", (usuario_id,)).fetchone() is None:
+        usuario = conexao.execute(
+            "SELECT usuario_id, nome_usuario, criado_em FROM usuarios WHERE usuario_id = ?",
+            (usuario_id,),
+        ).fetchone()
+        if usuario is None:
             raise ErroCredenciais()
-        token = secrets.token_urlsafe(32)
         instante = agora()
         expira_em = instante + self.ttl_segundos
+        segredo = segredo_token_producao()
+        if segredo is not None:
+            token = emitir_token_assinado(
+                usuario_id=usuario["usuario_id"],
+                nome_usuario=usuario["nome_usuario"],
+                criado_em=usuario["criado_em"],
+                emitido_em=instante,
+                expira_em=expira_em,
+                segredo=segredo,
+            )
+        else:
+            token = secrets.token_urlsafe(32)
         conexao.execute(
             "INSERT INTO acessos(token_hash, usuario_id, criado_em, expira_em) VALUES (?, ?, ?, ?)",
             (_hash_token(token), usuario_id, instante, expira_em),
@@ -332,6 +388,8 @@ class RepositorioAcesso:
 
     def identificar(self, token):
         token_hash = _hash_token(token)
+        instante = agora()
+        usar_blob = blob_ativo()
         with self._conexao() as conexao:
             registro = conexao.execute(
                 """SELECT u.usuario_id, u.nome_usuario, u.criado_em,
@@ -340,18 +398,75 @@ class RepositorioAcesso:
                    WHERE a.token_hash = ?""",
                 (token_hash,),
             ).fetchone()
-        if registro is None or registro["revogado_em"] is not None or registro["expira_em"] <= agora():
+        if registro is not None:
+            if registro["revogado_em"] is not None or registro["expira_em"] <= instante:
+                raise ErroCredenciais()
+            if usar_blob and formato_token_assinado_valido(token) and token_revogado_blob(token_hash):
+                with self._conexao() as conexao:
+                    conexao.execute(
+                        "UPDATE acessos SET revogado_em = ? WHERE token_hash = ? AND revogado_em IS NULL",
+                        (instante, token_hash),
+                    )
+                raise ErroCredenciais()
+            return _perfil(registro)
+
+        segredo = segredo_token_producao()
+        verificado = (
+            verificar_token_assinado(token, segredo=segredo, instante_atual=instante)
+            if segredo is not None
+            else None
+        )
+        if verificado is None:
             raise ErroCredenciais()
-        return _perfil(registro)
+        if usar_blob and token_revogado_blob(token_hash):
+            raise ErroCredenciais()
+        with self._conexao() as conexao:
+            conexao.execute(
+                "INSERT OR IGNORE INTO usuarios(usuario_id, nome_usuario, senha_hash, criado_em) VALUES (?, ?, NULL, ?)",
+                (verificado["usuario_id"], verificado["nome_usuario"], verificado["criado_em"]),
+            )
+            conexao.execute(
+                "INSERT OR IGNORE INTO acessos(token_hash, usuario_id, criado_em, expira_em) VALUES (?, ?, ?, ?)",
+                (token_hash, verificado["usuario_id"], verificado["criado_em_ts"], verificado["expira_em"]),
+            )
+        return _perfil(verificado)
 
     def sair(self, token):
         token_hash = _hash_token(token)
         instante = agora()
+        usar_blob = blob_ativo()
         with self._conexao() as conexao:
-            resultado = conexao.execute(
-                """UPDATE acessos SET revogado_em = ?
-                   WHERE token_hash = ? AND revogado_em IS NULL AND expira_em > ?""",
-                (instante, token_hash, instante),
+            linha = conexao.execute(
+                "SELECT expira_em, revogado_em FROM acessos WHERE token_hash = ?",
+                (token_hash,),
+            ).fetchone()
+            if linha is not None:
+                if linha["revogado_em"] is not None or linha["expira_em"] <= instante:
+                    raise ErroCredenciais()
+                conexao.execute(
+                    "UPDATE acessos SET revogado_em = ? WHERE token_hash = ?",
+                    (instante, token_hash),
+                )
+                if usar_blob and formato_token_assinado_valido(token):
+                    registrar_revogacao_blob(token_hash, instante, float(linha["expira_em"]))
+                return
+
+        segredo = segredo_token_producao()
+        verificado = (
+            verificar_token_assinado(token, segredo=segredo, instante_atual=instante)
+            if segredo is not None
+            else None
+        )
+        if verificado is None or (usar_blob and token_revogado_blob(token_hash)):
+            raise ErroCredenciais()
+        with self._conexao() as conexao:
+            conexao.execute(
+                "INSERT OR IGNORE INTO usuarios(usuario_id, nome_usuario, senha_hash, criado_em) VALUES (?, ?, NULL, ?)",
+                (verificado["usuario_id"], verificado["nome_usuario"], verificado["criado_em"]),
             )
-            if resultado.rowcount != 1:
-                raise ErroCredenciais()
+            conexao.execute(
+                "INSERT OR IGNORE INTO acessos(token_hash, usuario_id, criado_em, expira_em, revogado_em) VALUES (?, ?, ?, ?, ?)",
+                (token_hash, verificado["usuario_id"], verificado["criado_em_ts"], verificado["expira_em"], instante),
+            )
+        if usar_blob:
+            registrar_revogacao_blob(token_hash, instante, verificado["expira_em"])
